@@ -1,7 +1,7 @@
 package org.workswap.core.services;
 
 import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.workswap.core.datasource.main.model.User;
+import org.workswap.core.datasource.central.model.User;
 
 import java.util.List;
 

@@ -3,8 +3,8 @@ package org.workswap.core.services.components;
 import java.util.Locale;
 import java.util.Map;
 
-import org.workswap.core.datasource.main.model.Listing;
-import org.workswap.core.datasource.main.model.User;
+import org.workswap.core.datasource.central.model.Listing;
+import org.workswap.core.datasource.central.model.User;
 
 public interface StatService {
     int getTotalViews(User user);

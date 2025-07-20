@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
-import org.workswap.core.datasource.main.model.User;
+import org.workswap.core.datasource.central.model.User;
 
 import jakarta.persistence.*;
 import lombok.Data;

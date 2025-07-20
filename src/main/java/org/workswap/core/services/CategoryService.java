@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
-import org.workswap.core.datasource.main.model.DTOs.CategoryDTO;
-import org.workswap.core.datasource.main.model.ModelsSettings.SearchParamType;
-import org.workswap.core.datasource.main.model.listingModels.Category;
+import org.workswap.core.datasource.central.model.DTOs.CategoryDTO;
+import org.workswap.core.datasource.central.model.ModelsSettings.SearchParamType;
+import org.workswap.core.datasource.central.model.listingModels.Category;
 
 public interface CategoryService {
 

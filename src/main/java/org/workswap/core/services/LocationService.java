@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
-import org.workswap.core.datasource.main.model.DTOs.LocationDTO;
-import org.workswap.core.datasource.main.model.listingModels.Location;
-import org.workswap.core.datasource.main.repository.LocationRepository;
+import org.workswap.core.datasource.central.model.DTOs.LocationDTO;
+import org.workswap.core.datasource.central.model.listingModels.Location;
+import org.workswap.core.datasource.central.repository.LocationRepository;
 
 import lombok.RequiredArgsConstructor;
 

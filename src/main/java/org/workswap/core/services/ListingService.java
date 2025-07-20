@@ -5,11 +5,11 @@ import java.util.Locale;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.workswap.core.datasource.main.model.Listing;
-import org.workswap.core.datasource.main.model.User;
-import org.workswap.core.datasource.main.model.DTOs.ListingDTO;
-import org.workswap.core.datasource.main.model.listingModels.Category;
-import org.workswap.core.datasource.main.model.listingModels.Location;
+import org.workswap.core.datasource.central.model.Listing;
+import org.workswap.core.datasource.central.model.User;
+import org.workswap.core.datasource.central.model.DTOs.ListingDTO;
+import org.workswap.core.datasource.central.model.listingModels.Category;
+import org.workswap.core.datasource.central.model.listingModels.Location;
 
 public interface ListingService {
 

@@ -27,7 +27,7 @@ import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.util.unit.DataSize;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.workswap.core.datasource.main.model.User;
+import org.workswap.core.datasource.central.model.User;
 import org.workswap.core.exceptions.UserNotRegisteredException;
 import org.workswap.core.services.UserService;
 

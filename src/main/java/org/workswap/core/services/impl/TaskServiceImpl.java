@@ -1,14 +1,16 @@
 package org.workswap.core.services.impl;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
-import org.workswap.core.datasource.main.model.ModelsSettings.SearchParamType;
 import org.workswap.core.datasource.admin.model.Task;
 import org.workswap.core.datasource.admin.repository.TaskRepository;
+import org.workswap.core.datasource.central.model.ModelsSettings.SearchParamType;
 import org.workswap.core.services.TaksService;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
+@Profile("Backoffice")
 @RequiredArgsConstructor
 public class TaskServiceImpl implements TaksService {
 

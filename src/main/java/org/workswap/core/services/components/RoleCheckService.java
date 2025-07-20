@@ -3,8 +3,8 @@ package org.workswap.core.services.components;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
-import org.workswap.core.datasource.main.model.User;
-import org.workswap.core.datasource.main.model.User.Role;
+import org.workswap.core.datasource.central.model.User;
+import org.workswap.core.datasource.central.model.User.Role;
 import org.workswap.core.services.UserService;
 
 import lombok.RequiredArgsConstructor;

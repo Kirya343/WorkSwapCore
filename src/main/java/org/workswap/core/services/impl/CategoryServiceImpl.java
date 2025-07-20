@@ -18,10 +18,10 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.workswap.config.LocalisationConfig.LanguageUtils;
-import org.workswap.core.datasource.main.model.DTOs.CategoryDTO;
-import org.workswap.core.datasource.main.model.ModelsSettings.SearchParamType;
-import org.workswap.core.datasource.main.model.listingModels.Category;
-import org.workswap.core.datasource.main.repository.CategoryRepository;
+import org.workswap.core.datasource.central.model.DTOs.CategoryDTO;
+import org.workswap.core.datasource.central.model.ModelsSettings.SearchParamType;
+import org.workswap.core.datasource.central.model.listingModels.Category;
+import org.workswap.core.datasource.central.repository.CategoryRepository;
 import org.workswap.core.services.CategoryService;
 
 import jakarta.persistence.EntityNotFoundException;

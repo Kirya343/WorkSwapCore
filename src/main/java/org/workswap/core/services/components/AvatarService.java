@@ -1,7 +1,7 @@
 package org.workswap.core.services.components;
 
 import org.springframework.stereotype.Service;
-import org.workswap.core.datasource.main.model.User;
+import org.workswap.core.datasource.central.model.User;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

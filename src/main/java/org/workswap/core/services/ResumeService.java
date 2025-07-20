@@ -3,8 +3,8 @@ package org.workswap.core.services;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
-import org.workswap.core.datasource.main.model.Resume;
-import org.workswap.core.datasource.main.model.User;
+import org.workswap.core.datasource.central.model.Resume;
+import org.workswap.core.datasource.central.model.User;
 
 public interface ResumeService {
     // Определяем методы для работы с резюме

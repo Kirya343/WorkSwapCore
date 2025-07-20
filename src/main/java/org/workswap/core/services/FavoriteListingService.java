@@ -2,9 +2,9 @@ package org.workswap.core.services;
 
 import java.util.List;
 
-import org.workswap.core.datasource.main.model.FavoriteListing;
-import org.workswap.core.datasource.main.model.Listing;
-import org.workswap.core.datasource.main.model.User;
+import org.workswap.core.datasource.central.model.FavoriteListing;
+import org.workswap.core.datasource.central.model.Listing;
+import org.workswap.core.datasource.central.model.User;
 
 public interface FavoriteListingService {
 

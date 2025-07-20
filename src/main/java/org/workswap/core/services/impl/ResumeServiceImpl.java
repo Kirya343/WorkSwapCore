@@ -3,9 +3,9 @@ package org.workswap.core.services.impl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.workswap.core.datasource.main.model.Resume;
-import org.workswap.core.datasource.main.model.User;
-import org.workswap.core.datasource.main.repository.ResumeRepository;
+import org.workswap.core.datasource.central.model.Resume;
+import org.workswap.core.datasource.central.model.User;
+import org.workswap.core.datasource.central.repository.ResumeRepository;
 import org.workswap.core.services.ResumeService;
 
 import lombok.RequiredArgsConstructor;

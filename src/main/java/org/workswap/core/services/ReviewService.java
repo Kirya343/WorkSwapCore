@@ -2,10 +2,10 @@ package org.workswap.core.services;
 
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
-import org.workswap.core.datasource.main.model.Listing;
-import org.workswap.core.datasource.main.model.Review;
-import org.workswap.core.datasource.main.model.User;
-import org.workswap.core.datasource.main.repository.ReviewRepository;
+import org.workswap.core.datasource.central.model.Listing;
+import org.workswap.core.datasource.central.model.Review;
+import org.workswap.core.datasource.central.model.User;
+import org.workswap.core.datasource.central.repository.ReviewRepository;
 
 import lombok.RequiredArgsConstructor;
 

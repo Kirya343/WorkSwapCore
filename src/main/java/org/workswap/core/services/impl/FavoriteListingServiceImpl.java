@@ -2,10 +2,10 @@ package org.workswap.core.services.impl;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.workswap.core.datasource.main.model.FavoriteListing;
-import org.workswap.core.datasource.main.model.Listing;
-import org.workswap.core.datasource.main.model.User;
-import org.workswap.core.datasource.main.repository.FavoriteListingRepository;
+import org.workswap.core.datasource.central.model.FavoriteListing;
+import org.workswap.core.datasource.central.model.Listing;
+import org.workswap.core.datasource.central.model.User;
+import org.workswap.core.datasource.central.repository.FavoriteListingRepository;
 import org.workswap.core.services.FavoriteListingService;
 
 import lombok.RequiredArgsConstructor;

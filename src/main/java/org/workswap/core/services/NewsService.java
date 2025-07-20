@@ -7,8 +7,8 @@ import java.util.Locale;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
-import org.workswap.core.datasource.main.model.News;
-import org.workswap.core.datasource.main.model.ModelsSettings.SearchParamType;
+import org.workswap.core.datasource.central.model.News;
+import org.workswap.core.datasource.central.model.ModelsSettings.SearchParamType;
 
 public interface NewsService {
     List<News> findAll();

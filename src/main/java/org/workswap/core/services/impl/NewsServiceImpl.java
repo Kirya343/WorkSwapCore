@@ -13,10 +13,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.workswap.config.LocalisationConfig.LanguageUtils;
-import org.workswap.core.datasource.main.model.News;
-import org.workswap.core.datasource.main.model.NewsTranslation;
-import org.workswap.core.datasource.main.model.ModelsSettings.SearchParamType;
-import org.workswap.core.datasource.main.repository.NewsRepository;
+import org.workswap.core.datasource.central.model.News;
+import org.workswap.core.datasource.central.model.NewsTranslation;
+import org.workswap.core.datasource.central.model.ModelsSettings.SearchParamType;
+import org.workswap.core.datasource.central.repository.NewsRepository;
 import org.workswap.core.services.NewsService;
 import org.workswap.core.services.StorageService;
 
