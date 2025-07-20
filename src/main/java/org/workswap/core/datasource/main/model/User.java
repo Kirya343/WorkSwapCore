@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.workswap.core.datasource.admin.model.Task;
 import org.workswap.core.datasource.main.model.chat.Conversation;
 import org.workswap.core.datasource.main.model.listingModels.Location;
 
@@ -83,6 +84,17 @@ public class User {
 
     @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL)
     private List<Review> reviews;
+
+    @Transient
+    private List<Task> tasks;
+
+    public List<Task> getTasks() {
+        return tasks;
+    }
+
+    public void setTasks(List<Task> tasks) {
+        this.tasks = tasks;
+    }
 
     // соц сети
 
