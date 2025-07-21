@@ -21,13 +21,11 @@ public class Task {
     public Task(String name,
                 String description,
                 LocalDateTime deadline,
-                Status status,
                 TaskType taskType,
                 Long authorId) {
         this.name = name;
         this.description = description;
         this.deadline = deadline;
-        this.status = status;
         this.taskType = taskType;
         this.authorId = authorId;
     }
@@ -51,7 +49,7 @@ public class Task {
 
     @Setter
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private Status status = Status.NEW;
 
     @Setter
     @Enumerated(EnumType.STRING)
