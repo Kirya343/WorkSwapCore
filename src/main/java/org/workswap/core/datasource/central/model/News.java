@@ -19,18 +19,15 @@ import lombok.Setter;
 @Table(name = "news")
 public class News {
     
-    public News(List<String> communities,
-                String imageUrl,
-                User author) {
-        this.communities = communities;
+    public News(User author) {
         this.author = author;
-        this.imageUrl = imageUrl;
     }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Setter
     @OneToMany(mappedBy = "news", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @MapKey(name = "language") // ключ — это язык (например, "ru")
     private Map<String, NewsTranslation> translations = new HashMap<>();
@@ -43,6 +40,7 @@ public class News {
     @Setter
     private String imageUrl;
 
+    @Setter
     @ManyToOne
     @JoinColumn(name = "author_id")
     private User author;
@@ -50,6 +48,7 @@ public class News {
     @CreationTimestamp
     private LocalDateTime publishDate;
 
+    @Setter
     private boolean published = true;
 
     @Setter

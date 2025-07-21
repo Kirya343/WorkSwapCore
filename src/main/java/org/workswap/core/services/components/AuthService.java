@@ -24,7 +24,7 @@ public class AuthService {
             roleCheckService.checkRoles(model, oauth2User);
 
             model.addAttribute("isAuthenticated", true);
-            /* model.addAttribute("avatarPath", avatarPath); */
+            
             System.out.println("Пользователь прошёл авторизацию: " + user.getName());
             model.addAttribute("user", user);
             model.addAttribute("rating", averageRating);

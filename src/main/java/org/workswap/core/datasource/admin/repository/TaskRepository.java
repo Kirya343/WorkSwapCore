@@ -9,7 +9,7 @@ import org.workswap.core.datasource.admin.model.Task;
 import org.workswap.core.datasource.admin.model.enums.Status;
 
 @Repository
-@Profile("Backoffice")
+@Profile("backoffice")
 public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findByStatus(Status status);
     Task findByName(String name);

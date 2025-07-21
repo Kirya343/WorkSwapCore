@@ -24,8 +24,9 @@ import jakarta.persistence.EntityManagerFactory;
     entityManagerFactoryRef = "adminEntityManagerFactory",
     transactionManagerRef = "adminTransactionManager"
 )
-@Profile("Backoffice")
+@Profile("backoffice")
 public class AdminDataSourceConfig {
+
     @Bean
     @ConfigurationProperties("spring.admin-datasource")
     public DataSource adminDataSource() {
@@ -38,7 +39,7 @@ public class AdminDataSourceConfig {
     ) {
         return builder
                 .dataSource(adminDataSource())
-                .packages("org.workswap.core.datasource.admin.model") // Пакет с @Entity статистики
+                .packages("org.workswap.core.datasource.admin.model") // Пакет с @Entity
                 .persistenceUnit("admin")
                 .build();
     }
