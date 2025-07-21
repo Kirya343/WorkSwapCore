@@ -3,13 +3,32 @@ package org.workswap.core.datasource.central.model;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.workswap.core.datasource.central.model.enums.Importance;
+import org.workswap.core.datasource.central.model.enums.NotificationType;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Data
+@NoArgsConstructor
+@Getter
 public class Notification {
+
+    public Notification(User recipient,
+                        String title,
+                        String content,
+                        String link,
+                        NotificationType type,
+                        Importance importance) {
+        this.recipient = recipient;
+        this.title = title;
+        this.content = content;
+        this.link = link;
+        this.type = type;
+        this.importance = importance;
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,6 +38,7 @@ public class Notification {
     @JoinColumn(name ="recipient_id")
     private User recipient;
 
+    @Setter
     private boolean isRead = false;
     
     private String title;
@@ -28,29 +48,8 @@ public class Notification {
 
     private String link;
 
-    public enum NotificationType{
-        SYSTEM("Системное"),
-        CHAT("Чат");
-
-        private final String displayName;
-
-        NotificationType(String displayName) {
-            this.displayName = displayName;
-        }
-
-        public String getDisplayName() {
-            return displayName;
-        }
-    }
-
     @Enumerated(EnumType.STRING)
     private NotificationType type;
-
-    public enum Importance {
-        INFO,
-        WARNING,
-        ERROR
-    }
 
     @Enumerated(EnumType.STRING)
     private Importance importance;

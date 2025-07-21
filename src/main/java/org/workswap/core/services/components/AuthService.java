@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 public class AuthService {
 
     private final UserService userService;
-    /* private final AvatarService avatarService; */
     private final StatService statService;
     private final RoleCheckService roleCheckService;
 

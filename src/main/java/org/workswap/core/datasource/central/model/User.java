@@ -4,10 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.workswap.core.datasource.admin.model.Task;
 import org.workswap.core.datasource.central.model.chat.Conversation;
+import org.workswap.core.datasource.central.model.enums.Role;
 import org.workswap.core.datasource.central.model.listingModels.Location;
 
 import java.time.LocalDateTime;
@@ -17,12 +20,26 @@ import java.util.List;
 import java.util.Set;
 
 @Getter
-@Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @JsonIgnoreProperties({"listings"})
+@NoArgsConstructor
 @Entity
 @Table(name = "users")
 public class User {
+
+    public User(String name,
+                String email,
+                String sub,
+                String avatarUrl,
+                Role role,
+                boolean termsAccepted) {
+        this.name = name;
+        this.email = email;
+        this.sub = sub;
+        this.avatarUrl = avatarUrl;
+        this.role = role;
+        this.termsAccepted = termsAccepted;
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,24 +49,30 @@ public class User {
     @Column(nullable = false, unique = true)
     private String sub; // Уникальный идентификатор от Google
 
+    @Setter
     @Column(nullable = false, unique = true)
     private String name;
 
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Setter
     private String bio;
 
-    private String picture;
+    @Setter
     private String avatarUrl;
 
+    @Setter
     private boolean phoneVisible = true;  // Скрывать или отображать телефон
+    @Setter
     private boolean emailVisible = true;  // Скрывать или отображать email
 
+    @Setter
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_languages", joinColumns = @JoinColumn(name = "user_id"))
     private List<String> languages = new ArrayList<>();
 
+    @Setter
     @ManyToOne
     @JoinColumn(name = "location_id")
     private Location location;
@@ -60,66 +83,47 @@ public class User {
     @ManyToMany(mappedBy = "participants")
     private Set<Conversation> conversations = new HashSet<>();
 
+    @Setter
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    private boolean locked;
-    private boolean enabled;
+    @Setter
+    private boolean locked = false;
 
+    @Setter
+    private boolean enabled = true;
+
+    @Setter
     private String avatarType; // "uploaded", "google", "default"
 
+    @Setter
     private Double averageRating = 0.0; // Средний рейтинг пользователя
+
+    @Setter
     private String phone;
 
+    @Setter
     private Integer completedJobs;
 
     @CreationTimestamp
-    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Setter
     private boolean termsAccepted = false; // Приняты ли условия использования
 
+    @Setter
     @Column(nullable = false)
     private LocalDateTime termsAcceptanceDate;
 
     @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL)
     private List<Review> reviews;
 
+    @Setter
     @Transient
     private List<Task> tasks;
 
-    public List<Task> getTasks() {
-        return tasks;
-    }
-
-    public void setTasks(List<Task> tasks) {
-        this.tasks = tasks;
-    }
-
     // соц сети
 
+    @Setter
     private boolean telegramConnected = false; // Подключен ли Telegram
-
-    // Енумы 
-    
-    public enum Role {
-        USER(1),
-        PREMIUM(2),
-        BUSINESS(3),
-        ADMIN(4);
-
-        private final int level;
-
-        Role(int level) {
-            this.level = level;
-        }
-
-        public int getLevel() {
-            return level;
-        }
-
-        public boolean isAtLeast(Role other) {
-            return this.level >= other.level;
-        }
-    }
 }

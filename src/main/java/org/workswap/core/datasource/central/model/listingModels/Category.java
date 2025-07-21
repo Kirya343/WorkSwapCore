@@ -15,12 +15,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import lombok.Data;
-import lombok.ToString;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
 @Entity
+@NoArgsConstructor
 public class Category {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,20 +33,18 @@ public class Category {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
-    @ToString.Exclude
     private Category parent;
 
+    @Setter
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Category> children = new ArrayList<>();
 
+    @Setter
     @Column(nullable = false)
     private boolean leaf = false; // Является ли конечной категорией
-    @ToString.Exclude
+
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
     private List<Listing> listings = new ArrayList<>();
-
-    // Конструкторы
-    public Category() {}
 
     public Category(String name, Category parent) {
         this.name = name;

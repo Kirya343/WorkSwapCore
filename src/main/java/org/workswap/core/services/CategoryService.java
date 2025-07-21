@@ -5,18 +5,16 @@ import java.util.List;
 import java.util.Locale;
 
 import org.workswap.core.datasource.central.model.DTOs.CategoryDTO;
-import org.workswap.core.datasource.central.model.ModelsSettings.SearchParamType;
 import org.workswap.core.datasource.central.model.listingModels.Category;
 
 public interface CategoryService {
 
-    Category findCategory(String param, SearchParamType paramType);
+    Category findCategory(String param);
 
     Category createCategory(CategoryDTO dto, List<String> translations) throws IOException;
     List<Category> getCategoryTree();
     Category getCategoryById(Long id);
     void deleteCategory(Long id);
-    Category updateCategory(Long id, CategoryDTO dto);
     List<Category> getLeafCategories();
     List<Category> getChildCategories(Long parentId);
     List<Category> getRootCategories();

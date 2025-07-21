@@ -8,12 +8,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.workswap.core.datasource.central.model.User;
-import org.workswap.core.datasource.central.model.ModelsSettings.SearchParamType;
-import org.workswap.core.datasource.central.model.User.Role;
+import org.workswap.core.datasource.central.model.enums.Role;
+import org.workswap.core.datasource.central.model.enums.SearchModelParamType;
 import org.workswap.core.datasource.central.repository.UserRepository;
 import org.workswap.core.services.UserService;
+import org.workswap.core.services.components.ServiceUtils;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -21,8 +21,9 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final ServiceUtils serviceUtils;
  
-    private User findUserFromRepostirory(String param, SearchParamType paramType) {
+    private User findUserFromRepostirory(String param, SearchModelParamType paramType) {
         switch (paramType) {
             case ID:
                 return userRepository.findById(Long.parseLong(param)).orElse(null);
@@ -39,28 +40,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findUser(String param) {
-        SearchParamType paramType = detectParamType(param);
+        SearchModelParamType paramType = serviceUtils.detectParamType(param);
         return findUserFromRepostirory(param, paramType);
-    }
-
-    private SearchParamType detectParamType(String param) {
-        if (param == null || param.isBlank()) {
-            throw new IllegalArgumentException("Search parameter cannot be null or empty");
-        }
-
-        if (param.length() >= 15 && param.matches("^[a-zA-Z0-9._-]+$")) {
-            return SearchParamType.SUB;
-        }
-
-        if (param.matches("^\\d+$")) {
-            return SearchParamType.ID;
-        }
-
-        if (param.contains("@")) {
-            return SearchParamType.EMAIL;
-        }
-
-        return SearchParamType.NAME;
     }
 
     @Override
@@ -81,16 +62,12 @@ public class UserServiceImpl implements UserService {
         }
 
         // Создаем нового пользователя
-        User newUser = new User(); 
-        newUser.setEmail(oauth2User.getAttribute("email")); // Устанавливаем email пользователя
-        newUser.setSub(oauth2User.getAttribute("sub")); // Устанавливаем sub для идентификации пользователя в OAuth2
-        newUser.setEnabled(true); // Устанавливаем пользователя как активного
-        newUser.setRole(Role.USER); // Устанавливаем роль по умолчанию
-        newUser.setTermsAccepted(true); // Устанавливаем значение по умолчанию
-        newUser.setTermsAcceptanceDate(LocalDateTime.now()); // Устанавливаем значение по умолчанию
-        newUser.setName(oauth2User.getAttribute("name")); // Устанавливаем имя пользователя
-        newUser.setAvatarUrl(oauth2User.getAttribute("picture")); // Устанавливаем URL аватара
-        newUser.setAvatarType("google"); // Устанавливаем тип аватара
+        User newUser = new User(oauth2User.getAttribute("name"),
+                                oauth2User.getAttribute("email"),
+                                oauth2User.getAttribute("sub"),
+                                oauth2User.getAttribute("picture"),
+                                Role.USER,
+                                true);
 
         // Сохраняем нового пользователя
         newUser = userRepository.save(newUser);

@@ -3,11 +3,24 @@ package org.workswap.core.datasource.central.model.listingModels;
 import org.workswap.core.datasource.central.model.Listing;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-@Data
+@Getter
 @Entity
+@NoArgsConstructor
 public class ListingTranslation {
+
+    public ListingTranslation(String language,
+                              String title,
+                              String description,
+                              Listing listing) {
+        this.language = language;
+        this.title = title;
+        this.description = description;
+        this.listing = listing;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

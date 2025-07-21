@@ -19,10 +19,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.workswap.config.LocalisationConfig.LanguageUtils;
 import org.workswap.core.datasource.central.model.DTOs.CategoryDTO;
-import org.workswap.core.datasource.central.model.ModelsSettings.SearchParamType;
+import org.workswap.core.datasource.central.model.enums.SearchModelParamType;
 import org.workswap.core.datasource.central.model.listingModels.Category;
 import org.workswap.core.datasource.central.repository.CategoryRepository;
 import org.workswap.core.services.CategoryService;
+import org.workswap.core.services.components.ServiceUtils;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -33,15 +34,21 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final MessageSource messageSource;
+    private final ServiceUtils serviceUtils;
 
-    @Override 
-    public Category findCategory(String param, SearchParamType paramType) {
+    private Category findCategoryFromRepostirory(String param, SearchModelParamType paramType) {
         switch (paramType) {
             case ID:
                 return categoryRepository.findById(Long.parseLong(param)).orElse(null);
             default:
                 throw new IllegalArgumentException("Unknown param type: " + paramType);
         }
+    }
+
+    @Override
+    public Category findCategory(String param) {
+        SearchModelParamType paramType = serviceUtils.detectParamType(param);
+        return findCategoryFromRepostirory(param, paramType);
     }
 
     @Override
@@ -54,7 +61,7 @@ public class CategoryServiceImpl implements CategoryService {
         Category parent = null;
         if (dto.getParentId() != null) {
                         
-            if (findCategory(dto.getParentId().toString(), SearchParamType.ID).isLeaf()) {
+            if (findCategory(dto.getParentId().toString()).isLeaf()) {
                 throw new IllegalStateException("Cannot add subcategory to a leaf category");
             }
         }
@@ -97,8 +104,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional(readOnly = true)
     public Category getCategoryById(Long id) {
-        return categoryRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Category not found with id: " + id));
+        return findCategory(id.toString());
     }
 
     @Override
@@ -123,22 +129,6 @@ public class CategoryServiceImpl implements CategoryService {
         }
 
         categoryRepository.delete(category);
-    }
-
-    @Override
-    @Transactional
-    public Category updateCategory(Long id, CategoryDTO dto) {
-        Category category = getCategoryById(id);
-        
-        if (!category.getName().equals(dto.getName())) {
-            if (categoryRepository.existsByName(dto.getName())) {
-                throw new IllegalArgumentException("Category with name '" + dto.getName() + "' already exists");
-            }
-            category.setName(dto.getName());
-        }
-        
-        category.setLeaf(dto.isLeaf());
-        return categoryRepository.save(category);
     }
 
     @Override

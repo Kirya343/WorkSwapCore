@@ -1,7 +1,6 @@
 package org.workswap.core.services.impl;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -15,10 +14,11 @@ import org.springframework.web.multipart.MultipartFile;
 import org.workswap.config.LocalisationConfig.LanguageUtils;
 import org.workswap.core.datasource.central.model.News;
 import org.workswap.core.datasource.central.model.NewsTranslation;
-import org.workswap.core.datasource.central.model.ModelsSettings.SearchParamType;
+import org.workswap.core.datasource.central.model.enums.SearchModelParamType;
 import org.workswap.core.datasource.central.repository.NewsRepository;
 import org.workswap.core.services.NewsService;
 import org.workswap.core.services.StorageService;
+import org.workswap.core.services.components.ServiceUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,15 +28,21 @@ public class NewsServiceImpl implements NewsService {
     private static final int DEFAULT_PAGE_SIZE = 5;
     private final NewsRepository newsRepository;
     private final StorageService storageService;
+    private final ServiceUtils serviceUtils;
 
-    @Override 
-    public News findNews(String param, SearchParamType paramType) {
+    private News findNewsFromRepostirory(String param, SearchModelParamType paramType) {
         switch (paramType) {
             case ID:
                 return newsRepository.findById(Long.parseLong(param)).orElse(null);
             default:
                 throw new IllegalArgumentException("Unknown param type: " + paramType);
         }
+    }
+
+    @Override
+    public News findNews(String param) {
+        SearchModelParamType paramType = serviceUtils.detectParamType(param);
+        return findNewsFromRepostirory(param, paramType);
     }
 
     // Основные CRUD операции
@@ -52,9 +58,6 @@ public class NewsServiceImpl implements NewsService {
 
     @Override
     public News save(News news) {
-        if (news.getPublishDate() == null) {
-            news.setPublishDate(LocalDateTime.now());
-        }
         return newsRepository.save(news);
     }
 
