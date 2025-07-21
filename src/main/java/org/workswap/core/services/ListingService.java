@@ -13,7 +13,7 @@ import org.workswap.core.datasource.central.model.listingModels.Location;
 
 public interface ListingService {
 
-    Listing findListing(String param, String paramType);
+    Listing findListing(String param);
 
     Page<Listing> findByCategory(String category, Pageable pageable);
     List<Listing> getListingsByUser(User user); // добавили метод

@@ -12,6 +12,7 @@ import org.workswap.core.datasource.central.model.enums.Role;
 import org.workswap.core.datasource.central.model.enums.SearchModelParamType;
 import org.workswap.core.datasource.central.repository.UserRepository;
 import org.workswap.core.services.UserService;
+import org.workswap.core.services.components.ServiceUtils;
 
 import java.util.List;
 
@@ -20,6 +21,7 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final ServiceUtils serviceUtils;
  
     private User findUserFromRepostirory(String param, SearchModelParamType paramType) {
         switch (paramType) {
@@ -38,28 +40,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findUser(String param) {
-        SearchModelParamType paramType = detectParamType(param);
+        SearchModelParamType paramType = serviceUtils.detectParamType(param);
         return findUserFromRepostirory(param, paramType);
-    }
-
-    private SearchModelParamType detectParamType(String param) {
-        if (param == null || param.isBlank()) {
-            throw new IllegalArgumentException("Search parameter cannot be null or empty");
-        }
-
-        if (param.length() >= 15 && param.matches("^[a-zA-Z0-9._-]+$")) {
-            return SearchModelParamType.SUB;
-        }
-
-        if (param.matches("^\\d+$")) {
-            return SearchModelParamType.ID;
-        }
-
-        if (param.contains("@")) {
-            return SearchModelParamType.EMAIL;
-        }
-
-        return SearchModelParamType.NAME;
     }
 
     @Override

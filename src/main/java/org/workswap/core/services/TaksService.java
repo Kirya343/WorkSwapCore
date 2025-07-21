@@ -4,7 +4,7 @@ import org.workswap.core.datasource.admin.model.Task;
 
 public interface TaksService {
 
-    Task findTask(String param, String paramType);
+    Task findTask(String param);
 
     void createTask();
     void deleteTask();

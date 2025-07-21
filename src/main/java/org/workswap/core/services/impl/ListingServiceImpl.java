@@ -34,6 +34,7 @@ import org.workswap.core.services.CategoryService;
 import org.workswap.core.services.FavoriteListingService;
 import org.workswap.core.services.ListingService;
 import org.workswap.core.services.LocationService;
+import org.workswap.core.services.components.ServiceUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -46,17 +47,23 @@ public class ListingServiceImpl implements ListingService {
     private final FavoriteListingService favoriteListingService;
     private final CategoryService categoryService;
     private final LocationService locationService;
+    private final ServiceUtils serviceUtils;
+
     private static final Logger logger = LoggerFactory.getLogger(ListingService.class);
     
-    @Override 
-    public Listing findListing(String param, String paramType) {
-        SearchModelParamType searchParamType = SearchModelParamType.valueOf(paramType);
-        switch (searchParamType) {
+    private Listing findListingFromRepostirory(String param, SearchModelParamType paramType) {
+        switch (paramType) {
             case ID:
                 return listingRepository.findById(Long.parseLong(param)).orElse(null);
             default:
                 throw new IllegalArgumentException("Unknown param type: " + paramType);
         }
+    }
+
+    @Override
+    public Listing findListing(String param) {
+        SearchModelParamType paramType = serviceUtils.detectParamType(param);
+        return findListingFromRepostirory(param, paramType);
     }
 
     @Override
@@ -141,8 +148,7 @@ public class ListingServiceImpl implements ListingService {
 
     @Override
     public void deleteListing(Long id) {
-        Listing listing = listingRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Объявление не найдено"));
+        Listing listing = findListing(id.toString());
 
         // Обнуляем связь listing у всех Conversation
         List<Conversation> conversations = conversationRepository.findAllByListing(listing);

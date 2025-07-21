@@ -105,6 +105,7 @@ public class User {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @Setter
     private boolean termsAccepted = false; // Приняты ли условия использования
 
     @Setter

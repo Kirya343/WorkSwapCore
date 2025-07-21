@@ -8,7 +8,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 import org.workswap.core.datasource.central.model.News;
-import org.workswap.core.datasource.central.model.enums.SearchModelParamType;
 
 public interface NewsService {
     List<News> findAll();
@@ -18,7 +17,7 @@ public interface NewsService {
     void deleteById(Long id);
     News getNewsById(Long id);
 
-    News findNews(String param, SearchModelParamType paramType);
+    News findNews(String param);
 
     // Метод для сохранения с обработкой изображения
     News save(News news, MultipartFile imageFile, boolean removeImage) throws IOException;

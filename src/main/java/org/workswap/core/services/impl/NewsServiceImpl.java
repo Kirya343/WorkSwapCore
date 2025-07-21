@@ -18,6 +18,7 @@ import org.workswap.core.datasource.central.model.enums.SearchModelParamType;
 import org.workswap.core.datasource.central.repository.NewsRepository;
 import org.workswap.core.services.NewsService;
 import org.workswap.core.services.StorageService;
+import org.workswap.core.services.components.ServiceUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,15 +28,21 @@ public class NewsServiceImpl implements NewsService {
     private static final int DEFAULT_PAGE_SIZE = 5;
     private final NewsRepository newsRepository;
     private final StorageService storageService;
+    private final ServiceUtils serviceUtils;
 
-    @Override 
-    public News findNews(String param, SearchModelParamType paramType) {
+    private News findNewsFromRepostirory(String param, SearchModelParamType paramType) {
         switch (paramType) {
             case ID:
                 return newsRepository.findById(Long.parseLong(param)).orElse(null);
             default:
                 throw new IllegalArgumentException("Unknown param type: " + paramType);
         }
+    }
+
+    @Override
+    public News findNews(String param) {
+        SearchModelParamType paramType = serviceUtils.detectParamType(param);
+        return findNewsFromRepostirory(param, paramType);
     }
 
     // Основные CRUD операции

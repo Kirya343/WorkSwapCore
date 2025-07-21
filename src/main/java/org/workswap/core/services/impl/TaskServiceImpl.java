@@ -6,6 +6,7 @@ import org.workswap.core.datasource.admin.model.Task;
 import org.workswap.core.datasource.admin.repository.TaskRepository;
 import org.workswap.core.datasource.central.model.enums.SearchModelParamType;
 import org.workswap.core.services.TaksService;
+import org.workswap.core.services.components.ServiceUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -15,18 +16,23 @@ import lombok.RequiredArgsConstructor;
 public class TaskServiceImpl implements TaksService {
 
     private final TaskRepository taskRepository;
-    
-    @Override 
-    public Task findTask(String param, String paramType) {
-        SearchModelParamType searchParamType = SearchModelParamType.valueOf(paramType);
-        switch (searchParamType) {
+    private final ServiceUtils serviceUtils;
+
+    private Task findTaskFromRepostirory(String param, SearchModelParamType paramType) {
+        switch (paramType) {
             case ID:
                 return taskRepository.findById(Long.parseLong(param)).orElse(null);
             case NAME:
-                return taskRepository.findByName(param);
+                return taskRepository.findByName(param); // если есть такой метод
             default:
                 throw new IllegalArgumentException("Unknown param type: " + paramType);
         }
+    }
+
+    @Override
+    public Task findTask(String param) {
+        SearchModelParamType paramType = serviceUtils.detectParamType(param);
+        return findTaskFromRepostirory(param, paramType);
     }
 
     @Override
