@@ -1,4 +1,4 @@
-package org.workswap.config;
+package org.workswap.config.localisation;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
@@ -19,10 +19,7 @@ public class LocalisationConfig implements WebMvcConfigurer {
     @Bean
     public MessageSource messageSource() {
         ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
-        messageSource.setBasenames(
-            "classpath:lang/messages",     // старое местоположение
-            "file:dinamic-lang/categories/categories"      // новое местоположение
-        );
+        messageSource.setBasenames("file:lang/");
         messageSource.setDefaultEncoding("UTF-8");
         messageSource.setCacheSeconds(300); // обновление кэша каждый час
         return messageSource;
