@@ -23,7 +23,6 @@ public class Report {
                   ReportReason reason,
                   boolean anonymous) {
         this.author = author;
-        this.reportedUser = reportedUser;
         this.reportedObjectId = reportedObjectId;
         this.reportedObjectType = reportedObjectType;
         this.content = content;
