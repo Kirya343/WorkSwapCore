@@ -11,7 +11,7 @@ import org.workswap.core.services.components.ServiceUtils;
 import lombok.RequiredArgsConstructor;
 
 @Service
-@Profile("Backoffice")
+@Profile("backoffice")
 @RequiredArgsConstructor
 public class TaskServiceImpl implements TaksService {
 
