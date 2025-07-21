@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.workswap.config.LocalisationConfig.LanguageUtils;
 import org.workswap.core.datasource.central.model.DTOs.CategoryDTO;
-import org.workswap.core.datasource.central.model.ModelsSettings.SearchParamType;
+import org.workswap.core.datasource.central.model.enums.SearchModelParamType;
 import org.workswap.core.datasource.central.model.listingModels.Category;
 import org.workswap.core.datasource.central.repository.CategoryRepository;
 import org.workswap.core.services.CategoryService;
@@ -35,7 +35,7 @@ public class CategoryServiceImpl implements CategoryService {
     private final MessageSource messageSource;
 
     @Override 
-    public Category findCategory(String param, SearchParamType paramType) {
+    public Category findCategory(String param, SearchModelParamType paramType) {
         switch (paramType) {
             case ID:
                 return categoryRepository.findById(Long.parseLong(param)).orElse(null);
@@ -54,7 +54,7 @@ public class CategoryServiceImpl implements CategoryService {
         Category parent = null;
         if (dto.getParentId() != null) {
                         
-            if (findCategory(dto.getParentId().toString(), SearchParamType.ID).isLeaf()) {
+            if (findCategory(dto.getParentId().toString(), SearchModelParamType.ID).isLeaf()) {
                 throw new IllegalStateException("Cannot add subcategory to a leaf category");
             }
         }
@@ -123,22 +123,6 @@ public class CategoryServiceImpl implements CategoryService {
         }
 
         categoryRepository.delete(category);
-    }
-
-    @Override
-    @Transactional
-    public Category updateCategory(Long id, CategoryDTO dto) {
-        Category category = getCategoryById(id);
-        
-        if (!category.getName().equals(dto.getName())) {
-            if (categoryRepository.existsByName(dto.getName())) {
-                throw new IllegalArgumentException("Category with name '" + dto.getName() + "' already exists");
-            }
-            category.setName(dto.getName());
-        }
-        
-        category.setLeaf(dto.isLeaf());
-        return categoryRepository.save(category);
     }
 
     @Override

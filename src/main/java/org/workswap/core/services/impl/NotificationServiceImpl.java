@@ -7,8 +7,8 @@ import org.workswap.core.datasource.central.model.Notification;
 import org.workswap.core.datasource.central.model.User;
 import org.workswap.core.datasource.central.model.DTOs.FullNotificationDTO;
 import org.workswap.core.datasource.central.model.DTOs.NotificationDTO;
-import org.workswap.core.datasource.central.model.Notification.Importance;
-import org.workswap.core.datasource.central.model.Notification.NotificationType;
+import org.workswap.core.datasource.central.model.enums.Importance;
+import org.workswap.core.datasource.central.model.enums.NotificationType;
 import org.workswap.core.datasource.central.repository.NotificationRepository;
 import org.workswap.core.services.NewsService;
 import org.workswap.core.services.NotificationService;
@@ -44,13 +44,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         User user = userService.findUser(userParam);
 
-        Notification notification = new Notification();
-        notification.setRecipient(user);
-        notification.setTitle(dto.getTitle());
-        notification.setContent(dto.getMessage());
-        notification.setLink(dto.getLink());
-        notification.setType(NotificationType.CHAT);
-        notification.setImportance(Importance.INFO);
+        Notification notification = new Notification(user, dto.getTitle(), dto.getMessage(), dto.getLink(), NotificationType.CHAT, Importance.INFO);
         notificationRepository.save(notification);
 
         // Отправляем в телеграмм

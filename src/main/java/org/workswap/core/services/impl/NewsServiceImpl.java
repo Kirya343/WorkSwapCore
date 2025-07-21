@@ -1,7 +1,6 @@
 package org.workswap.core.services.impl;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -15,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.workswap.config.LocalisationConfig.LanguageUtils;
 import org.workswap.core.datasource.central.model.News;
 import org.workswap.core.datasource.central.model.NewsTranslation;
-import org.workswap.core.datasource.central.model.ModelsSettings.SearchParamType;
+import org.workswap.core.datasource.central.model.enums.SearchModelParamType;
 import org.workswap.core.datasource.central.repository.NewsRepository;
 import org.workswap.core.services.NewsService;
 import org.workswap.core.services.StorageService;
@@ -30,7 +29,7 @@ public class NewsServiceImpl implements NewsService {
     private final StorageService storageService;
 
     @Override 
-    public News findNews(String param, SearchParamType paramType) {
+    public News findNews(String param, SearchModelParamType paramType) {
         switch (paramType) {
             case ID:
                 return newsRepository.findById(Long.parseLong(param)).orElse(null);
@@ -52,9 +51,6 @@ public class NewsServiceImpl implements NewsService {
 
     @Override
     public News save(News news) {
-        if (news.getPublishDate() == null) {
-            news.setPublishDate(LocalDateTime.now());
-        }
         return newsRepository.save(news);
     }
 

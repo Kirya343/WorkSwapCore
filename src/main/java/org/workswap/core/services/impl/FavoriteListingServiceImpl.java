@@ -25,9 +25,7 @@ public class FavoriteListingServiceImpl implements FavoriteListingService {
         if (favoriteListingRepository.existsByUserAndListing(user, listing)) {
             favoriteListingRepository.deleteByUserAndListing(user, listing);
         } else {
-            FavoriteListing favoritelisting = new FavoriteListing();
-            favoritelisting.setUser(user);
-            favoritelisting.setListing(listing);
+            FavoriteListing favoritelisting = new FavoriteListing(user, listing);
             favoriteListingRepository.save(favoritelisting);
         }
     }

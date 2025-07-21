@@ -4,11 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 @Entity
 public class Location {
+
+    public Location(String name,
+                    boolean city,
+                    Location country) {
+        this.name = name;
+        this.city = city;
+        this.country = country;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -16,7 +25,7 @@ public class Location {
     @Column(nullable = false, unique = true)
     private String name;
 
-    private boolean city;
+    private boolean city = false;
 
     @ManyToOne
     @JoinColumn(name = "country_id")

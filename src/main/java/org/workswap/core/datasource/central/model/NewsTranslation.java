@@ -1,16 +1,23 @@
 package org.workswap.core.datasource.central.model;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import lombok.Data;
+import jakarta.persistence.*;
+import lombok.Getter;
 
-@Data
+@Getter
 @Entity
 public class NewsTranslation {
+
+    public NewsTranslation(String language,
+                           String title,
+                           String shortDescription,
+                           String description,
+                           News news) {
+        this.language = language;
+        this.title = title;
+        this.shortDescription = shortDescription;
+        this.description = description;
+        this.news = news;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

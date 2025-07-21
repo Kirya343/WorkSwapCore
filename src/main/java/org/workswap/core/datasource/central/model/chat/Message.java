@@ -6,12 +6,22 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.CreationTimestamp;
 import org.workswap.core.datasource.central.model.User;
 
-@Setter
 @Getter
 @Entity
 public class Message {
+
+    public Message(Conversation conversation,
+                   User sender,
+                   User receiver,
+                   String text) {
+        this.conversation = conversation;
+        this.sender = sender;
+        this.receiver = receiver;
+        this.text = text;
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,8 +42,10 @@ public class Message {
     @Column(columnDefinition = "TEXT")
     private String text;
 
-    private LocalDateTime sentAt = LocalDateTime.now();
+    @CreationTimestamp
+    private LocalDateTime sentAt;
 
+    @Setter
     @Column(name = "is_read")
     private boolean read = false;
 

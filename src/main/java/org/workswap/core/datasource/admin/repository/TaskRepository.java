@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.workswap.core.datasource.admin.model.Task;
-import org.workswap.core.datasource.admin.model.Task.Status;
+import org.workswap.core.datasource.admin.model.enums.Status;
 
 @Repository
 @Profile("Backoffice")

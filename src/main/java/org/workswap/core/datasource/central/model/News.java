@@ -9,13 +9,22 @@ import java.util.Map;
 import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
 @Entity
 @Table(name = "news")
 public class News {
-    // Геттеры и сеттеры
+    
+    public News(List<String> communities,
+                String imageUrl,
+                User author) {
+        this.communities = communities;
+        this.author = author;
+        this.imageUrl = imageUrl;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,7 +38,7 @@ public class News {
     @Column(name = "language")
     private List<String> communities = new ArrayList<>();
 
-    @Column
+    @Setter
     private String imageUrl;
 
     @ManyToOne
@@ -37,18 +46,19 @@ public class News {
     private User author;
 
     @CreationTimestamp
-    @Column(nullable = false, updatable = false)
     private LocalDateTime publishDate;
 
-    @Column(nullable = false)
-    private boolean published;
+    private boolean published = true;
 
+    @Setter
     @Transient
     private String localizedTitle;
 
+    @Setter
     @Transient
     private String localizedExcerpt;
 
+    @Setter
     @Transient
     private String localizedContent;
 }

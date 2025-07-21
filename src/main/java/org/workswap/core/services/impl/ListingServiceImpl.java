@@ -23,8 +23,8 @@ import org.workswap.core.datasource.central.model.FavoriteListing;
 import org.workswap.core.datasource.central.model.Listing;
 import org.workswap.core.datasource.central.model.User;
 import org.workswap.core.datasource.central.model.DTOs.ListingDTO;
-import org.workswap.core.datasource.central.model.ModelsSettings.SearchParamType;
 import org.workswap.core.datasource.central.model.chat.Conversation;
+import org.workswap.core.datasource.central.model.enums.SearchModelParamType;
 import org.workswap.core.datasource.central.model.listingModels.Category;
 import org.workswap.core.datasource.central.model.listingModels.ListingTranslation;
 import org.workswap.core.datasource.central.model.listingModels.Location;
@@ -50,7 +50,7 @@ public class ListingServiceImpl implements ListingService {
     
     @Override 
     public Listing findListing(String param, String paramType) {
-        SearchParamType searchParamType = SearchParamType.valueOf(paramType);
+        SearchModelParamType searchParamType = SearchModelParamType.valueOf(paramType);
         switch (searchParamType) {
             case ID:
                 return listingRepository.findById(Long.parseLong(param)).orElse(null);
@@ -383,7 +383,7 @@ public class ListingServiceImpl implements ListingService {
         ListingDTO dto = new ListingDTO();
         dto.setId(listing.getId());
         dto.setPrice(listing.getPrice());
-        dto.setPriceType(listing.getPriceType());
+        dto.setPriceType(listing.getPriceType().getDisplayName());
         dto.setCategory(listing.getCategory().getName());
         dto.setLocation(listing.getLocation().getName());
         dto.setRating(listing.getAverageRating());

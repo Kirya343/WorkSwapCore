@@ -2,14 +2,21 @@ package org.workswap.core.datasource.central.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Setter
+import org.hibernate.annotations.CreationTimestamp;
+
 @Getter
 @Entity
 public class FavoriteListing {
+
+    public FavoriteListing(User user,
+                           Listing listing) {
+        this.user = user;
+        this.listing = listing;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,5 +27,6 @@ public class FavoriteListing {
     @ManyToOne
     private Listing listing;
 
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @CreationTimestamp
+    private LocalDateTime createdAt;
 }

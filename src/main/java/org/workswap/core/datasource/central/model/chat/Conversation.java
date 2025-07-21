@@ -13,10 +13,15 @@ import java.util.Set;
 import org.workswap.core.datasource.central.model.Listing;
 import org.workswap.core.datasource.central.model.User;
 
-@Setter
 @Getter
 @Entity
 public class Conversation {
+
+    public Conversation(Set<User> participants,
+                        Listing listing) {
+        this.participants = participants;
+        this.listing = listing;
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,10 +37,12 @@ public class Conversation {
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @Setter
     @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Message> messages = new ArrayList<>();
 
     @ManyToOne
+    @Setter
     @JoinColumn(name = "listing_id")
     private Listing listing;
 

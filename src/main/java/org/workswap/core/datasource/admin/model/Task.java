@@ -6,14 +6,32 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.workswap.core.datasource.admin.model.enums.Status;
+import org.workswap.core.datasource.admin.model.enums.TaskType;
 import org.workswap.core.datasource.central.model.User;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
 @Entity
 public class Task {
+
+    public Task(String name,
+                String description,
+                LocalDateTime deadline,
+                Status status,
+                TaskType taskType,
+                Long authorId) {
+        this.name = name;
+        this.description = description;
+        this.deadline = deadline;
+        this.status = status;
+        this.taskType = taskType;
+        this.authorId = authorId;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,57 +46,26 @@ public class Task {
 
     private LocalDateTime deadline;
 
+    @Setter
     private LocalDateTime completed;
 
-    public enum Status {
-        NEW("Новая"),
-        IN_PROGRESS("В процессе"),
-        COMPLETED("Завершена"),
-        CANCELED("Отменена");
-
-        private final String displayName;
-
-        Status(String displayName) {
-            this.displayName = displayName;
-        }
-
-        public String getDisplayName() {
-            return displayName;
-        }
-    }
-
-    public enum TaskType {
-        DEVELOPMENT("Разработка"),
-        CONTENT_UPDATE("Дополнение контента"),
-        MODERATION("Модерация"),
-        DESIGN("Дизайн"),
-        TESTING("Тестирование"),
-        MAINTENANCE("Обслуживание"),
-        SUPPORT("Поддержка");
-
-        private final String displayName;
-
-        TaskType(String displayName) {
-            this.displayName = displayName;
-        }
-
-        public String getDisplayName() {
-            return displayName;
-        }
-    }
-
+    @Setter
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    @Setter
     @Enumerated(EnumType.STRING)
     private TaskType taskType;
 
+    @Setter
     @Transient
     private User executor;
 
+    @Setter
     @Transient
     private User author;
 
+    @Setter
     private Long executorId;
 
     private Long authorId;

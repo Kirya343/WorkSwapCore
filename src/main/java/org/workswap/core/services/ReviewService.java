@@ -9,7 +9,6 @@ import org.workswap.core.datasource.central.repository.ReviewRepository;
 
 import lombok.RequiredArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -76,14 +75,7 @@ public class ReviewService {
         }
 
         // Создаем новый отзыв
-        Review review = new Review();
-        
-        review.setListing(listing);
-        review.setText(text);
-        review.setRating(rating);
-        review.setCreatedAt(LocalDateTime.now());
-        review.setProfile(profile);
-        review.setAuthor(user);
+        Review review = new Review(text, rating, user, listing, profile);
 
         saveReview(review);
     }

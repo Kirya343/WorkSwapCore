@@ -18,7 +18,6 @@ import org.workswap.core.services.ListingService;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -63,9 +62,7 @@ public class ChatService {
         }
 
         // Создаём новый
-        Conversation conversation = new Conversation();
-        conversation.setParticipants(participants);
-        conversation.setListing(listing);
+        Conversation conversation = new Conversation(participants, listing);
         return conversationRepository.save(conversation);
     }
 
@@ -124,30 +121,12 @@ public class ChatService {
 
     @Transactional
     public Message sendMessage(Conversation conversation, User sender, String text) {
-        // Проверка и инициализация списка сообщений, если он пуст или еще не загружен
-        if (conversation.getMessages() == null) {
-            conversation.setMessages(new ArrayList<>());  // Инициализация списка сообщений, если он пуст
-        } else {
-            // Явная инициализация коллекции сообщений, если она использует ленивую загрузку
-            conversation.getMessages().size();
-        }
 
         // Создание нового сообщения
-        Message message = new Message();
-        message.setConversation(conversation);
-        message.setSender(sender);
-        message.setReceiver(conversation.getInterlocutor(sender));
-        message.setText(text);
-        message.setSentAt(LocalDateTime.now());
-
-        // Добавление сообщения в список сообщений беседы
-        conversation.getMessages().add(message);
+        Message message = new Message(conversation, sender, conversation.getInterlocutor(sender), text);
 
         // Сохраняем сообщение
         messageRepository.save(message);
-
-        // Сохраняем изменения в беседе (если коллекция сообщений была обновлена)
-        conversationRepository.save(conversation);
 
         return message;
     }
@@ -155,6 +134,7 @@ public class ChatService {
     public Conversation getConversationById(Long conversationId) {
         return conversationRepository.findById(conversationId).orElse(null);
     }
+
     @Transactional
     public void markMessagesAsRead(Long conversationId, User reader) {
         messageRepository.markMessagesAsRead(conversationId, reader.getId());
