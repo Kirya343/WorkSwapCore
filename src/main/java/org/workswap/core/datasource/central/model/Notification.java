@@ -8,9 +8,11 @@ import org.workswap.core.datasource.central.model.enums.NotificationType;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
+@NoArgsConstructor
 @Getter
 public class Notification {
 

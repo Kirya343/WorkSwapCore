@@ -9,14 +9,15 @@ import org.workswap.core.datasource.central.model.enums.ReportStatus;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
+@NoArgsConstructor
 @Entity
 public class Report {
 
     public Report(User author,
-                  User reportedUser,
                   Long reportedObjectId,
                   ObjectType reportedObjectType,
                   String content,

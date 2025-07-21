@@ -2,6 +2,7 @@ package org.workswap.core.datasource.central.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
@@ -14,30 +15,14 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 @Getter
 @Entity
+@NoArgsConstructor
 @Table(uniqueConstraints = {
         @UniqueConstraint(columnNames = {"user_id"})
 })
 public class Resume {
 
-    public Resume(User user,
-                  String profession,
-                  Double experience,
-                  String education,
-                  String skills,
-                  String about,
-                  String contacts,
-                  String filePath,
-                  boolean published,
-                  Map<String, String> languages) {
+    public Resume(User user) {
         this.user = user;
-        this.profession = profession;
-        this.education = education;
-        this.skills = skills;
-        this.about = about;
-        this.contacts = contacts;
-        this.filePath = filePath;
-        this.published = published;
-        this.languages = languages;
     }
 
     @Id

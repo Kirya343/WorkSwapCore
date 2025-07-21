@@ -2,6 +2,7 @@ package org.workswap.core.datasource.central.model.chat;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
@@ -15,6 +16,7 @@ import org.workswap.core.datasource.central.model.User;
 
 @Getter
 @Entity
+@NoArgsConstructor
 public class Conversation {
 
     public Conversation(Set<User> participants,

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -21,6 +22,7 @@ import java.util.Set;
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @JsonIgnoreProperties({"listings"})
+@NoArgsConstructor
 @Entity
 @Table(name = "users")
 public class User {
@@ -65,6 +67,7 @@ public class User {
     @Setter
     private boolean emailVisible = true;  // Скрывать или отображать email
 
+    @Setter
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_languages", joinColumns = @JoinColumn(name = "user_id"))
     private List<String> languages = new ArrayList<>();

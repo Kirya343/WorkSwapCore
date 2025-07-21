@@ -1,7 +1,9 @@
 package org.workswap.core.services.components;
 
+import org.springframework.stereotype.Component;
 import org.workswap.core.datasource.central.model.enums.SearchModelParamType;
 
+@Component
 public class ServiceUtils {
     public SearchModelParamType detectParamType(String param) {
         if (param == null || param.isBlank()) {

@@ -41,3 +41,4 @@ uploads_old/
 uploads/
 config/database.yml
 config/oauth.yml
+target/*

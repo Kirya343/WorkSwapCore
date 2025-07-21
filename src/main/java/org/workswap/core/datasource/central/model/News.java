@@ -10,10 +10,12 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Entity
+@NoArgsConstructor
 @Table(name = "news")
 public class News {
     

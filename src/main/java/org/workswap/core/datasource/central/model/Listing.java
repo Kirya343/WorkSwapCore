@@ -16,10 +16,12 @@ import org.workswap.core.datasource.central.model.listingModels.Location;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Entity
+@NoArgsConstructor
 public class Listing {
 
     public Listing(double price,

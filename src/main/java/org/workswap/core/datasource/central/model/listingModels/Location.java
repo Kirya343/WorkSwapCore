@@ -5,9 +5,11 @@ import java.util.List;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
+@NoArgsConstructor
 public class Location {
 
     public Location(String name,

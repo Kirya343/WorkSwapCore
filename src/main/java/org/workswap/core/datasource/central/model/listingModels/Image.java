@@ -4,8 +4,10 @@ import org.workswap.core.datasource.central.model.Listing;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 @Entity
 public class Image {
 

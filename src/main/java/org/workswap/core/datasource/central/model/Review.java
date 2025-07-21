@@ -2,12 +2,14 @@ package org.workswap.core.datasource.central.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
 @Getter
+@NoArgsConstructor
 @Entity
 public class Review {
 
