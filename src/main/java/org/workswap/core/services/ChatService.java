@@ -1,4 +1,4 @@
-package org.workswap.core.services.chat;
+package org.workswap.core.services;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,6 @@ import org.workswap.core.datasource.central.model.chat.Conversation;
 import org.workswap.core.datasource.central.model.chat.Message;
 import org.workswap.core.datasource.central.repository.ConversationRepository;
 import org.workswap.core.datasource.central.repository.MessageRepository;
-import org.workswap.core.services.ListingService;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -34,7 +33,6 @@ public class ChatService {
     private final ConversationRepository conversationRepository;
     private final MessageRepository messageRepository;
     private final SimpMessagingTemplate messagingTemplate;
-    private final ListingService listingService;
 
     public Conversation getOrCreateConversation(Set<User> participants, Listing listing) {
         if (participants.size() != 2) {
@@ -155,7 +153,6 @@ public class ChatService {
         dto.setInterlocutorName(interlocutor.getName());
         dto.setInterlocutorAvatar(interlocutor.getAvatarUrl());
         dto.setUnreadCount(getUnreadMessageCount(conversation, currentUser));
-        dto.setListing(listingService.convertToDTO(conversation.getListing(), locale));
 
         logger.info("Обработка последнего сообщения");
         // Обработка последнего сообщения
