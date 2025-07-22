@@ -12,11 +12,7 @@ public interface UserService {
     List<User> getRecentUsers(int count);
 
     // Поиск пользователя по пораметрам
-    /* User findById(Long id);
-    User findByEmail(String email);
-    User findBySub(String sub); */
     User findUserFromOAuth2(OAuth2User oauth2User);
-
     User findUser(String param);
 
     // Регистрирация пользователя из OAuth2

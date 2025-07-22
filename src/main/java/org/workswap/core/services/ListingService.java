@@ -13,43 +13,62 @@ import org.workswap.core.datasource.central.model.listingModels.Location;
 
 public interface ListingService {
 
+    //
+    // Получение единичного объявления
+    //
+    
+    // Универсальный метод поиска
     Listing findListing(String param);
 
-    Page<Listing> findByCategory(String category, Pageable pageable);
-    List<Listing> getListingsByUser(User user); // добавили метод
-
-    // Методы получения объявлений
-    List<Listing> findByUserEmail(String email);
-    List<Listing> getAllActiveListings(); // Предполагая, что у вас есть поле `active`
-    List<Listing> getAllListings();// в сущности
-    List<Listing> getActiveListingsByUser(User user);
-    Page<Listing> findActiveByCategory(String category, Pageable pageable);
-    Listing getListingById(Long id);
     Listing getListingByIdWithAuthorAndReviews(Long id);
 
+    //
+    // Получение списка объявлений(неограниченый) (List)
+    //
+
+    // Получение по юзеру
+    List<Listing> findListingsByUser(User user);
+    List<Listing> findActiveListingsByUser(User user);
+
+    // Все объявления
+    List<Listing> getAllActiveListings();
+    List<Listing> getAllListings();
+
+    // Последние объявления
+    List<Listing> getRecentListings(int count);
+
+    // Для сортировки объявлений
     List<Listing> findByCategory(Category category);
     List<Listing> findByLocation(Location location);
-
     List<Listing> findActiveByCommunity(String community);
-    List<Listing> getRecentListings(int count);
-    Page<Listing> getListingsSorted(Category category, String sortBy, Pageable pageable, Location location, String searchQuery, boolean hasReviews, List<String> languages);
-
-    // Методы для работы с похожими объявлениями
-    List<Listing> findSimilarListings(Category category, Long excludeId, Locale locale);
-
-    // Методы для работы с объявлениями
-    void deleteListing(Long id);
-    void save(Listing listing);
-    Listing saveAndReturn(Listing listing);
-    void localizeListing(Listing listing, Locale locale);
-
     List<Listing> searchListings(String searchQuery);
 
-    // Метод для локализации объявлений пользователя в аккаунте
+    // Методы для локализации объявлений пользователя в аккаунте
     List<Listing> localizeAccountListings(User user, Locale locale);
     List<Listing> localizeActiveAccountListings(User user, Locale locale);
     List<Listing> localizeFavoriteListings(User user, Locale locale);
     List<Listing> localizeCatalogListings(List<Listing> listings, Locale locale);
+
+    List<Listing> findSortedListings(Category category, Location location, String searchQuery, boolean hasReviews, List<String> languages);
+
+    //
+    // Получение списка объявлений(ограниченый) (Page)
+    //
+
+    Page<Listing> findListingsByCategory(String category, Pageable pageable);
+    Page<Listing> findActiveListingsByCategory(String category, Pageable pageable);
+    Page<Listing> findPageOfSortedListings(Category category, String sortBy, Pageable pageable, Location location, String searchQuery, boolean hasReviews, List<String> languages);
+
+    //
+    // Методы обработки объявлений
+    //
+
+    void deleteListing(Long id);
+    void save(Listing listing);
+    void localizeListing(Listing listing, Locale locale);
+
+    // Методы с возвратом
+    Listing saveAndReturn(Listing listing);
 
     // Конвертация в дто для чата
     ListingDTO convertToDTO(Listing listing, Locale locale);
