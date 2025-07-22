@@ -235,7 +235,7 @@ public class StatServiceImpl implements StatService {
 
     @Override
     public double calculateAverageRatingForUser(User user) {
-        List<Listing> listings = listingService.getListingsByUser(user);  // Получаем все объявления пользователя
+        List<Listing> listings = listingService.findListingsByUser(user);  // Получаем все объявления пользователя
 
         List<Review> listingReviews = listings.stream()
             .flatMap(listing -> reviewService.getReviewsByListingId(listing.getId()).stream())

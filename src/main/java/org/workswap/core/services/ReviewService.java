@@ -55,7 +55,7 @@ public class ReviewService {
         if (profileId != null) {
             profile = userService.findUser(profileId.toString());
         } else if (listingId != null) {
-            listing = listingService.getListingById(listingId);
+            listing = listingService.findListing(listingId.toString());
             profile = listing.getAuthor();
         } else {
             return;
