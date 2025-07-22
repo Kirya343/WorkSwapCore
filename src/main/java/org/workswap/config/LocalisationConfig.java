@@ -10,21 +10,39 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Configuration
 public class LocalisationConfig implements WebMvcConfigurer {
 
     @Bean
-    public MessageSource messageSource() {
+    public MessageSource messageSource() throws IOException {
         ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
-        messageSource.setBasenames(
-            "classpath:lang/messages",     // старое местоположение
-            "file:dinamic-lang/categories/categories"      // новое местоположение
-        );
+        Path langPath = Path.of("lang");
+        List<String> baseNames = new ArrayList<>();
+
+        // рекурсивный поиск всех *_xx.properties файлов
+        try (Stream<Path> paths = Files.walk(langPath)) {
+            paths
+                .filter(Files::isRegularFile)
+                .filter(p -> p.getFileName().toString().matches(".+_[a-z]{2}\\.properties"))
+                .forEach(p -> {
+                    String fullPath = p.toAbsolutePath().toString().replace("\\", "/");
+                    String withoutExtension = fullPath.replaceAll("_[a-z]{2}\\.properties$", "");
+                    System.out.print("file:" + withoutExtension);
+                    baseNames.add("file:" + withoutExtension);
+                });
+        }
+
+        messageSource.setBasenames(baseNames.toArray(String[]::new));
         messageSource.setDefaultEncoding("UTF-8");
-        messageSource.setCacheSeconds(300); // обновление кэша каждый час
+        messageSource.setCacheSeconds(30);
         return messageSource;
     }
 
