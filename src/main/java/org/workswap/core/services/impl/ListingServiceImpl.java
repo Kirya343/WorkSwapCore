@@ -18,7 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
-import org.workswap.config.LocalisationConfig.LanguageUtils;
+import org.workswap.config.localisation.LocalisationConfig.LanguageUtils;
 import org.workswap.core.datasource.central.model.FavoriteListing;
 import org.workswap.core.datasource.central.model.Listing;
 import org.workswap.core.datasource.central.model.User;
