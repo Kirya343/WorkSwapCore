@@ -14,7 +14,7 @@ import java.util.TreeMap;
 
 import org.springframework.stereotype.Service;
 import org.workswap.config.LocalisationConfig.LanguageUtils;
-import org.workswap.core.datasource.admin.model.objects.TranslationEntry;
+import org.workswap.datasource.admin.model.objects.TranslationEntry;
 
 @Service
 public class LocalizationService {

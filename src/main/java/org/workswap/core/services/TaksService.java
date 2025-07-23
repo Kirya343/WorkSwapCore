@@ -1,6 +1,6 @@
 package org.workswap.core.services;
 
-import org.workswap.core.datasource.admin.model.Task;
+import org.workswap.datasource.admin.model.Task;
 
 public interface TaksService {
 

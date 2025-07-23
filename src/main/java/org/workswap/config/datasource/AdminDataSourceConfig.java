@@ -20,7 +20,7 @@ import jakarta.persistence.EntityManagerFactory;
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
-    basePackages = "org.workswap.core.datasource.admin.repository",
+    basePackages = "org.workswap.datasource.admin.repository",
     entityManagerFactoryRef = "adminEntityManagerFactory",
     transactionManagerRef = "adminTransactionManager"
 )
@@ -39,7 +39,7 @@ public class AdminDataSourceConfig {
     ) {
         return builder
                 .dataSource(adminDataSource())
-                .packages("org.workswap.core.datasource.admin.model") // Пакет с @Entity
+                .packages("org.workswap.datasource.admin.model") // Пакет с @Entity
                 .persistenceUnit("admin")
                 .build();
     }

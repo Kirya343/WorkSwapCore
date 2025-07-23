@@ -19,7 +19,7 @@ import jakarta.persistence.EntityManagerFactory;
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
-    basePackages = "org.workswap.core.datasource.stats.repository",
+    basePackages = "org.workswap.datasource.stats.repository",
     entityManagerFactoryRef = "statsEntityManagerFactory",
     transactionManagerRef = "statsTransactionManager"
 )
@@ -36,7 +36,7 @@ public class StatsDataSourceConfig {
     ) {
         return builder
                 .dataSource(statsDataSource())
-                .packages("org.workswap.core.datasource.stats.model") // Пакет с @Entity статистики
+                .packages("org.workswap.datasource.stats.model") // Пакет с @Entity статистики
                 .persistenceUnit("stats")
                 .build();
     }

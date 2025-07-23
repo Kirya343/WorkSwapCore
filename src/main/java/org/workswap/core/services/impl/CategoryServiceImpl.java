@@ -18,10 +18,10 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.workswap.config.LocalisationConfig.LanguageUtils;
-import org.workswap.core.datasource.central.model.DTOs.CategoryDTO;
-import org.workswap.core.datasource.central.model.enums.SearchModelParamType;
-import org.workswap.core.datasource.central.model.listingModels.Category;
-import org.workswap.core.datasource.central.repository.CategoryRepository;
+import org.workswap.datasource.central.model.DTOs.CategoryDTO;
+import org.workswap.datasource.central.model.enums.SearchModelParamType;
+import org.workswap.datasource.central.model.listingModels.Category;
+import org.workswap.datasource.central.repository.CategoryRepository;
 import org.workswap.core.services.CategoryService;
 import org.workswap.core.services.components.ServiceUtils;
 
