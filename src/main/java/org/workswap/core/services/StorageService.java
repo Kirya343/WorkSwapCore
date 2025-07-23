@@ -8,16 +8,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Set;
 import java.util.UUID;
-
-import javax.imageio.ImageIO;
 
 @Service
 public class StorageService {
     private final Path rootLocation = Paths.get("uploads").toAbsolutePath().normalize();
-    private final long maxFileSize = 20 * 1024 * 1024; // 5MB
+    private final long maxFileSize = 20 * 1024 * 1024; // 20MB
 
     public StorageService() {
         try {
@@ -58,7 +55,7 @@ public class StorageService {
         public Set<String> getAllowedExtensions() { return allowedExtensions; }
     }
 
-        public String storeFile(MultipartFile file, FileType fileType, Long entityId) throws IOException {
+    public String storeFile(MultipartFile file, FileType fileType, Long entityId) throws IOException {
         if (file.isEmpty()) {
             throw new RuntimeException("Failed to store empty file");
         }
@@ -136,53 +133,12 @@ public class StorageService {
         Files.deleteIfExists(filePath);
     }
 
-    public void convertAllImagesToWebp() throws IOException {
-        System.out.println("ImageIO writer formats: " + Arrays.toString(ImageIO.getWriterFormatNames()));
-        System.out.println("ImageIO reader formats: " + Arrays.toString(ImageIO.getReaderFormatNames()));
-        Path oldRoot = this.rootLocation;
-        Path newRoot = Paths.get("uploads_new").toAbsolutePath().normalize();
-        Files.createDirectories(newRoot);
-
-        for (FileType fileType : FileType.values()) {
-            if (fileType.getWidth() == null) continue;
-
-            Path oldDir = oldRoot.resolve(fileType.getDirectory());
-            Path newDir = newRoot.resolve(fileType.getDirectory());
-
-            if (!Files.exists(oldDir)) continue;
-            Files.createDirectories(newDir);
-
-            Files.walk(oldDir)
-                .filter(path -> !Files.isDirectory(path))
-                .filter(path -> {
-                    String ext = getExtension(path.getFileName().toString());
-                    return fileType.getAllowedExtensions().contains(ext.toLowerCase());
-                })
-                .forEach(path -> {
-                    try {
-                        String baseName = getBaseName(path.getFileName().toString());
-                        Path output = newDir.resolve(baseName + ".webp");
-
-                        Thumbnails.of(path.toFile())
-                            .size(fileType.getWidth(), fileType.getHeight())
-                            .outputQuality(fileType.getQuality())
-                            .outputFormat("webp")  // формат должен поддерживаться ImageIO
-                            .toFile(output.toFile());
-
-                        System.out.println("✔ Converted: " + path + " → " + output);
-                    } catch (IOException e) {
-                        System.err.println("✖ Failed to convert: " + path + " (" + e.getMessage() + ")");
-                    }
-                });
-        }
-    }
-
-    private String getExtension(String filename) {
+    public String getExtension(String filename) {
         int lastDot = filename.lastIndexOf(".");
         return lastDot != -1 ? filename.substring(lastDot).toLowerCase() : "";
     }
 
-    private String getBaseName(String filename) {
+    public String getBaseName(String filename) {
         int lastDot = filename.lastIndexOf(".");
         return lastDot != -1 ? filename.substring(0, lastDot) : filename;
     }

@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
-    basePackages = "org.workswap.core.datasource.central.repository", // Пакет основной БД
+    basePackages = "org.workswap.datasource.central.repository", // Пакет основной БД
     entityManagerFactoryRef = "centralEntityManagerFactory",
     transactionManagerRef = "centralTransactionManager"
 )
@@ -40,7 +40,7 @@ public class СentralDataSourceConfig {
     ) {
         return builder
                 .dataSource(centralDataSource())
-                .packages("org.workswap.core.datasource.central.model") // Пакет с @Entity
+                .packages("org.workswap.datasource.central.model") // Пакет с @Entity
                 .persistenceUnit("central")
                 .build();
     }

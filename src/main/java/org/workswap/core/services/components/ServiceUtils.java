@@ -1,7 +1,7 @@
 package org.workswap.core.services.components;
 
 import org.springframework.stereotype.Component;
-import org.workswap.core.datasource.central.model.enums.SearchModelParamType;
+import org.workswap.datasource.central.model.enums.SearchModelParamType;
 
 @Component
 public class ServiceUtils {
