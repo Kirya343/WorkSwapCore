@@ -24,7 +24,4 @@ public interface CategoryService {
 
     //метод получения всех дочерних категорий
     List<Category> getAllDescendants(Category parent);
-
-    // Метод для записи переводов категорий
-    void addCategoryTranslation(String categoryName, String lang, String translation) throws IOException;
 }
