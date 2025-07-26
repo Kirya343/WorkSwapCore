@@ -24,7 +24,7 @@ import java.util.Set;
 public class LangFileScheduler {
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String baseUrl = "http://localhost:8082/api/lang";
+    private final String baseUrl = "https://dash.workswap.org/api/lang";
     private final Path destinationBasePath = Path.of("lang");
 
     @Value("${localization.api.key}")
