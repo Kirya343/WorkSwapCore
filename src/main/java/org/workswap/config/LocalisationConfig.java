@@ -35,7 +35,6 @@ public class LocalisationConfig implements WebMvcConfigurer {
                 .forEach(p -> {
                     String fullPath = p.toAbsolutePath().toString().replace("\\", "/");
                     String withoutExtension = fullPath.replaceAll("_[a-z]{2}\\.properties$", "");
-                    System.out.print("file:" + withoutExtension);
                     baseNames.add("file:" + withoutExtension);
                 });
         }
