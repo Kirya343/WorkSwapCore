@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
 import org.workswap.config.LocalisationConfig.LanguageUtils;
-import org.workswap.datasource.central.model.FavoriteListing;
+import org.workswap.datasource.central.model.listingModels.FavoriteListing;
 import org.workswap.datasource.central.model.Listing;
 import org.workswap.datasource.central.model.User;
 import org.workswap.datasource.central.model.DTOs.ListingDTO;

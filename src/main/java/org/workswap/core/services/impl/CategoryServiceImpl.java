@@ -178,7 +178,7 @@ public class CategoryServiceImpl implements CategoryService {
         for (Category child : children) {
             descendants.add(child);
             descendants.addAll(getAllDescendants(child));
-            System.out.println("Дочерняя категория найдена: " + child.getName());
+            /* System.out.println("Дочерняя категория найдена: " + child.getName()); */
         }
         return descendants;
     }
