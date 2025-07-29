@@ -136,7 +136,7 @@ public class StatServiceImpl implements StatService {
 
     @Override
     @Transactional
-    //@Scheduled(cron = "0 0 3 * * *") // Запуск каждый день в 3:00 ночи
+    @Scheduled(cron = "0 0 3 * * *")
     public void cleanUpDuplicateSnapshots() {
         List<StatSnapshot> allSnapshots = statsRepository.findAll(Sort.by("listingId", "intervalType", "time"));
 
