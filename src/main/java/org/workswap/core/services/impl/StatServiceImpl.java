@@ -164,7 +164,7 @@ public class StatServiceImpl implements StatService {
         System.out.println("Удалено " + toDelete.size() + " дубликатов статистики.");
     }
 
-
+    @Transactional
     private void saveStat(IntervalType intervalType) {
         Duration checkWindow;
 
@@ -190,7 +190,7 @@ public class StatServiceImpl implements StatService {
             stat.setViews(listing.getViews());
             stat.setRating(listing.getAverageRating());
             stat.setListingId(listing.getId());
-            stat.setFavorites(listing.getFavoredByUsers().size());
+            stat.setFavorites(listingRepository.countFavoritesByListingId(listing.getId()));
             stat.setIntervalType(intervalType);
             statsRepository.save(stat);
         }

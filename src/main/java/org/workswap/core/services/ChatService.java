@@ -47,18 +47,24 @@ public class ChatService {
 
         // Сначала ищем чат с привязкой к объявлению
         if (listing != null) {
-            Optional<Conversation> existing = conversationParticipantRepository.findBetweenUsersAndListing(user1, user2, listing);
+            System.out.println("Объявление есть");
+            Optional<Conversation> existing = conversationParticipantRepository.findConversationBetweenUsers(user1, user2, listing);
             if (existing.isPresent()) {
+                System.out.println("Объявление: " + listing.getId());
+                System.out.println("Нашли чат с объявлением");
+                return existing.get();
+            }
+        } else {
+            // Ищем общий чат без привязки к объявлению
+            System.out.println("Объявления нет");
+            Optional<Conversation> existing = conversationParticipantRepository.findConversationBetweenUsers(user1, user2, null);
+            if (existing.isPresent()) {
+                System.out.println("Нашли чат без объявления");
                 return existing.get();
             }
         }
 
-        // Ищем общий чат без привязки к объявлению
-        Optional<Conversation> existing = conversationParticipantRepository.findBetweenUsersWithNoListing(user1, user2);
-        if (existing.isPresent() && listing == null) {
-            return existing.get();
-        }
-
+        System.out.println("Чатов нет, создём новый");
         // Создаём новый
         Conversation conversation = new Conversation(participants, listing);
         return conversationRepository.save(conversation);
@@ -174,5 +180,10 @@ public class ChatService {
         logger.info("Конвертация закончена");
 
         return dto;
+    }
+
+    public void setPermanentConversation(Conversation converstion) {
+        converstion.setTemporary(false);
+        conversationRepository.save(converstion);
     }
 }
