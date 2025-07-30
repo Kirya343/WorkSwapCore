@@ -1,9 +1,9 @@
 package org.workswap.core.services;
 
-import org.workswap.core.datasource.central.model.News;
-import org.workswap.core.datasource.central.model.Notification;
-import org.workswap.core.datasource.central.model.DTOs.FullNotificationDTO;
-import org.workswap.core.datasource.central.model.DTOs.NotificationDTO;
+import org.workswap.datasource.central.model.News;
+import org.workswap.datasource.central.model.Notification;
+import org.workswap.datasource.central.model.DTOs.FullNotificationDTO;
+import org.workswap.datasource.central.model.DTOs.NotificationDTO;
 
 public interface NotificationService {
 

@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
-import org.workswap.core.datasource.central.model.DTOs.CategoryDTO;
-import org.workswap.core.datasource.central.model.listingModels.Category;
+import org.workswap.datasource.central.model.DTOs.CategoryDTO;
+import org.workswap.datasource.central.model.listingModels.Category;
 
 public interface CategoryService {
 
@@ -24,7 +24,4 @@ public interface CategoryService {
 
     //метод получения всех дочерних категорий
     List<Category> getAllDescendants(Category parent);
-
-    // Метод для записи переводов категорий
-    void addCategoryTranslation(String categoryName, String lang, String translation) throws IOException;
 }

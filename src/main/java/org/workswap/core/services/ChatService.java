@@ -1,4 +1,4 @@
-package org.workswap.core.services.chat;
+package org.workswap.core.services;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -7,14 +7,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
-import org.workswap.core.datasource.central.model.Listing;
-import org.workswap.core.datasource.central.model.User;
-import org.workswap.core.datasource.central.model.DTOs.ConversationDTO;
-import org.workswap.core.datasource.central.model.chat.Conversation;
-import org.workswap.core.datasource.central.model.chat.Message;
-import org.workswap.core.datasource.central.repository.ConversationRepository;
-import org.workswap.core.datasource.central.repository.MessageRepository;
-import org.workswap.core.services.ListingService;
+import org.workswap.datasource.central.model.Listing;
+import org.workswap.datasource.central.model.User;
+import org.workswap.datasource.central.model.DTOs.ConversationDTO;
+import org.workswap.datasource.central.model.chat.Conversation;
+import org.workswap.datasource.central.model.chat.Message;
+import org.workswap.datasource.central.repository.ConversationParticipantRepository;
+import org.workswap.datasource.central.repository.ConversationRepository;
+import org.workswap.datasource.central.repository.MessageRepository;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -32,9 +32,9 @@ public class ChatService {
     private static final Logger logger = LoggerFactory.getLogger(ChatService.class);
 
     private final ConversationRepository conversationRepository;
+    private final ConversationParticipantRepository conversationParticipantRepository;
     private final MessageRepository messageRepository;
     private final SimpMessagingTemplate messagingTemplate;
-    private final ListingService listingService;
 
     public Conversation getOrCreateConversation(Set<User> participants, Listing listing) {
         if (participants.size() != 2) {
@@ -47,16 +47,14 @@ public class ChatService {
 
         // Сначала ищем чат с привязкой к объявлению
         if (listing != null) {
-            Optional<Conversation> existing = conversationRepository
-                    .findBetweenUsersAndListing(user1, user2, listing);
+            Optional<Conversation> existing = conversationParticipantRepository.findBetweenUsersAndListing(user1, user2, listing);
             if (existing.isPresent()) {
                 return existing.get();
             }
         }
 
         // Ищем общий чат без привязки к объявлению
-        Optional<Conversation> existing = conversationRepository
-                .findBetweenUsers(user1, user2);
+        Optional<Conversation> existing = conversationParticipantRepository.findBetweenUsersWithNoListing(user1, user2);
         if (existing.isPresent() && listing == null) {
             return existing.get();
         }
@@ -66,7 +64,6 @@ public class ChatService {
         return conversationRepository.save(conversation);
     }
 
-
     public List<Conversation> getUserConversations(User user) {
         List<Conversation> conversations = conversationRepository.findAllByParticipant(user);
         // Добавить логирование для проверки
@@ -74,6 +71,7 @@ public class ChatService {
         return conversations;
     }
 
+    @Transactional
     public List<ConversationDTO> getConversationsDTOForUser(User user, Locale locale) {
         List<Conversation> conversations = conversationRepository.findAllByParticipant(user);
         logger.info("Conversations for DTO found: " + conversations.size());
@@ -107,7 +105,7 @@ public class ChatService {
     }
 
     public boolean conversationExists(User user1, User user2) {
-        return conversationRepository.existsBetweenUsers(user1, user2);
+        return conversationParticipantRepository.existsBetweenUsers(user1, user2);
     }
 
     public long getUnreadMessageCount(Conversation conversation, User user) {
@@ -146,16 +144,11 @@ public class ChatService {
 
     public ConversationDTO convertToDTO(Conversation conversation, User currentUser, Locale locale) {
         logger.info("Конвертация в дто начата разговора: " + conversation.getId());
-        User interlocutor = conversation.getInterlocutor(currentUser);
-        
-        logger.info("Юзер найден, конвертируем");
 
         ConversationDTO dto = new ConversationDTO();
         dto.setId(conversation.getId());
-        dto.setInterlocutorName(interlocutor.getName());
-        dto.setInterlocutorAvatar(interlocutor.getAvatarUrl());
         dto.setUnreadCount(getUnreadMessageCount(conversation, currentUser));
-        dto.setListing(listingService.convertToDTO(conversation.getListing(), locale));
+        dto.setTemporary(conversation.isTemporary());
 
         logger.info("Обработка последнего сообщения");
         // Обработка последнего сообщения

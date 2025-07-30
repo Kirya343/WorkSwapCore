@@ -2,10 +2,10 @@ package org.workswap.core.services;
 
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
-import org.workswap.core.datasource.central.model.Listing;
-import org.workswap.core.datasource.central.model.Review;
-import org.workswap.core.datasource.central.model.User;
-import org.workswap.core.datasource.central.repository.ReviewRepository;
+import org.workswap.datasource.central.model.Listing;
+import org.workswap.datasource.central.model.Review;
+import org.workswap.datasource.central.model.User;
+import org.workswap.datasource.central.repository.ReviewRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -55,7 +55,7 @@ public class ReviewService {
         if (profileId != null) {
             profile = userService.findUser(profileId.toString());
         } else if (listingId != null) {
-            listing = listingService.getListingById(listingId);
+            listing = listingService.findListing(listingId.toString());
             profile = listing.getAuthor();
         } else {
             return;

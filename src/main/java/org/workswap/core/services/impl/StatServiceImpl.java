@@ -13,16 +13,16 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.workswap.core.datasource.central.model.Listing;
-import org.workswap.core.datasource.central.model.Review;
-import org.workswap.core.datasource.central.model.User;
-import org.workswap.core.datasource.central.repository.ListingRepository;
-import org.workswap.core.datasource.central.repository.ResumeRepository;
-import org.workswap.core.datasource.central.repository.ReviewRepository;
-import org.workswap.core.datasource.central.repository.UserRepository;
-import org.workswap.core.datasource.stats.model.StatSnapshot;
-import org.workswap.core.datasource.stats.model.StatSnapshot.IntervalType;
-import org.workswap.core.datasource.stats.repository.StatsRepository;
+import org.workswap.datasource.central.model.Listing;
+import org.workswap.datasource.central.model.Review;
+import org.workswap.datasource.central.model.User;
+import org.workswap.datasource.central.repository.ListingRepository;
+import org.workswap.datasource.central.repository.ResumeRepository;
+import org.workswap.datasource.central.repository.ReviewRepository;
+import org.workswap.datasource.central.repository.UserRepository;
+import org.workswap.datasource.stats.model.StatSnapshot;
+import org.workswap.datasource.stats.model.StatSnapshot.IntervalType;
+import org.workswap.datasource.stats.repository.StatsRepository;
 import org.workswap.core.services.ListingService;
 import org.workswap.core.services.ReviewService;
 import org.workswap.core.services.UserService;
@@ -136,7 +136,7 @@ public class StatServiceImpl implements StatService {
 
     @Override
     @Transactional
-    //@Scheduled(cron = "0 0 3 * * *") // Запуск каждый день в 3:00 ночи
+    @Scheduled(cron = "0 0 3 * * *")
     public void cleanUpDuplicateSnapshots() {
         List<StatSnapshot> allSnapshots = statsRepository.findAll(Sort.by("listingId", "intervalType", "time"));
 
@@ -190,7 +190,7 @@ public class StatServiceImpl implements StatService {
             stat.setViews(listing.getViews());
             stat.setRating(listing.getAverageRating());
             stat.setListingId(listing.getId());
-            stat.setFavorites(listing.getFavorites().size());
+            stat.setFavorites(listing.getFavoredByUsers().size());
             stat.setIntervalType(intervalType);
             statsRepository.save(stat);
         }
@@ -235,7 +235,7 @@ public class StatServiceImpl implements StatService {
 
     @Override
     public double calculateAverageRatingForUser(User user) {
-        List<Listing> listings = listingService.getListingsByUser(user);  // Получаем все объявления пользователя
+        List<Listing> listings = listingService.findListingsByUser(user);  // Получаем все объявления пользователя
 
         List<Review> listingReviews = listings.stream()
             .flatMap(listing -> reviewService.getReviewsByListingId(listing.getId()).stream())

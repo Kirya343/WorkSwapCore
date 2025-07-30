@@ -7,10 +7,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
-import org.workswap.core.datasource.central.model.User;
-import org.workswap.core.datasource.central.model.enums.Role;
-import org.workswap.core.datasource.central.model.enums.SearchModelParamType;
-import org.workswap.core.datasource.central.repository.UserRepository;
+import org.workswap.datasource.central.model.User;
+import org.workswap.datasource.central.model.enums.Role;
+import org.workswap.datasource.central.model.enums.SearchModelParamType;
+import org.workswap.datasource.central.repository.UserRepository;
 import org.workswap.core.services.UserService;
 import org.workswap.core.services.components.ServiceUtils;
 

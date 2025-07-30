@@ -1,28 +1,20 @@
 package org.workswap.core.services.impl;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Properties;
 
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.workswap.config.localisation.LocalisationConfig.LanguageUtils;
-import org.workswap.core.datasource.central.model.DTOs.CategoryDTO;
-import org.workswap.core.datasource.central.model.enums.SearchModelParamType;
-import org.workswap.core.datasource.central.model.listingModels.Category;
-import org.workswap.core.datasource.central.repository.CategoryRepository;
+import org.workswap.datasource.central.model.DTOs.CategoryDTO;
+import org.workswap.datasource.central.model.enums.SearchModelParamType;
+import org.workswap.datasource.central.model.listingModels.Category;
+import org.workswap.datasource.central.repository.CategoryRepository;
 import org.workswap.core.services.CategoryService;
+import org.workswap.core.services.LocalizationService;
 import org.workswap.core.services.components.ServiceUtils;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -35,6 +27,7 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final MessageSource messageSource;
     private final ServiceUtils serviceUtils;
+    private final LocalizationService localizationService;
 
     private Category findCategoryFromRepostirory(String param, SearchModelParamType paramType) {
         switch (paramType) {
@@ -76,7 +69,7 @@ public class CategoryServiceImpl implements CategoryService {
                 if (parts.length == 2) {
                     String text = parts[0];   // "перевод"
                     String lang = parts[1];   // "ru"
-                    addCategoryTranslation(category.getName(), lang, text);
+                    localizationService.createTranslation("localization/categories/categories", "category." + category.getName(), lang, text);
                 } else {
                     // Обработка ошибки: неверный формат
                     throw new IllegalArgumentException("Неверный формат строки. Ожидалось: текст.язык");
@@ -120,12 +113,10 @@ public class CategoryServiceImpl implements CategoryService {
             throw new IllegalStateException("Cannot delete category with associated listings");
         }
 
-        for (String lang : LanguageUtils.SUPPORTED_LANGUAGES) {
-            try {
-                removeCategoryTranslation(category.getName(), lang);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        try {
+            localizationService.removeTranslation("localization", "category." + category.getName());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         categoryRepository.delete(category);
@@ -180,73 +171,6 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public void addCategoryTranslation(String categoryName, String lang, String translation) throws IOException {
-        String key = "category." + categoryName;
-        String lineToAdd = key + "=" + translation;
-
-        // Формируем путь к файлу локализации
-        String filename = "dinamic-lang/categories/categories_" + lang + ".properties";
-        File file = new File(filename);
-
-        // Убедимся, что файл существует
-        if (!file.exists()) {
-            file.getParentFile().mkdirs(); // Создаём папки, если нужно
-            file.createNewFile();          // Создаём сам файл
-        }
-
-        // Загружаем все свойства из файла
-        Properties props = new Properties();
-        try (InputStreamReader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
-            props.load(reader);
-        }
-
-        // Проверяем, есть ли уже такой ключ
-        if (props.containsKey(key)) {
-            return; // Ничего не делаем — перевод уже есть
-        }
-
-        // Добавляем новую строку в конец файла
-        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
-                new FileOutputStream(file, true), StandardCharsets.UTF_8))) {
-            writer.newLine();
-            writer.write(lineToAdd);
-        }
-    }
-
-    public void removeCategoryTranslation(String categoryName, String lang) throws IOException {
-        String key = "category." + categoryName;
-
-        // Формируем путь к файлу локализации
-        String filename = "dinamic-lang/categories/categories_" + lang + ".properties";
-        File file = new File(filename);
-
-        if (!file.exists()) {
-            return; // Файл не существует — нечего удалять
-        }
-
-        // Загружаем свойства
-        Properties props = new Properties();
-        try (InputStreamReader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
-            props.load(reader);
-        }
-
-        // Удаляем ключ, если он есть
-        if (!props.containsKey(key)) {
-            return; // Ничего не делаем — ключа нет
-        }
-
-        props.remove(key);
-
-        // Перезаписываем файл без удалённого ключа
-        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
-                new FileOutputStream(file, false), StandardCharsets.UTF_8))) {
-            props.store(writer, null); // Сохраняем обновлённые свойства
-        }
-
-        System.out.println("Успешно удалён перевод(" + lang + "): " + key);
-    }
-
-    @Override
     public List<Category> getAllDescendants(Category parent) {
         List<Category> descendants = new ArrayList<>();
         descendants.add(parent);
@@ -254,7 +178,7 @@ public class CategoryServiceImpl implements CategoryService {
         for (Category child : children) {
             descendants.add(child);
             descendants.addAll(getAllDescendants(child));
-            System.out.println("Дочерняя категория найдена: " + child.getName());
+            /* System.out.println("Дочерняя категория найдена: " + child.getName()); */
         }
         return descendants;
     }
