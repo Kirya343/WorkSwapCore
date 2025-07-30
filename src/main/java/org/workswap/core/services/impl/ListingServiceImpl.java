@@ -1,6 +1,7 @@
 package org.workswap.core.services.impl;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -14,7 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -159,38 +159,38 @@ public class ListingServiceImpl implements ListingService {
     @Override
     public Page<Listing> findPageOfSortedListings(Category category, String sortBy, Pageable pageable, Location location, String searchQuery, boolean hasReviews, List<String> languages) {
 
-        Sort sort;
-        
-        List<Listing> sortedListings = findSortedListings(category, location, searchQuery, hasReviews, languages);
+        List<Listing> filteredListings = findSortedListings(category, location, searchQuery, hasReviews, languages);
         logger.info("[GetListingsSorted] Языки для поиска: " + languages);
 
+        // Выбор компаратора для сортировки
+        Comparator<Listing> comparator;
         switch (sortBy) {
             case "price":
-                sort = Sort.by(Sort.Direction.ASC, "price");
+                comparator = Comparator.comparing(Listing::getPrice, Comparator.nullsLast(Comparator.naturalOrder()));
                 break;
             case "rating":
-                sort = Sort.by(Sort.Direction.DESC, "rating");
+                comparator = Comparator.comparing(Listing::getAverageRating, Comparator.nullsLast(Comparator.reverseOrder()));
                 break;
             case "popularity":
-                sort = Sort.by(Sort.Direction.DESC, "views");
+                comparator = Comparator.comparing(Listing::getViews, Comparator.nullsLast(Comparator.reverseOrder()));
                 break;
             case "date":
             default:
-                sort = Sort.by(Sort.Direction.DESC, "createdAt");
+                comparator = Comparator.comparing(Listing::getCreatedAt, Comparator.nullsLast(Comparator.reverseOrder()));
                 break;
         }
 
-        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+        // Применяем сортировку
+        filteredListings.sort(comparator);
 
-        // Возвращаем постранично вручную
-        int start = (int) sortedPageable.getOffset();
-        int end = Math.min(start + sortedPageable.getPageSize(), sortedListings.size());
+        // Пагинация
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), filteredListings.size());
 
-        List<Listing> pageContent = (start <= end) ? sortedListings.subList(start, end) : List.of();
-        Page<Listing> sortedPageOfListings = new PageImpl<>(pageContent, sortedPageable, sortedListings.size());
-        logger.info("Отфильтрованные объявления: " + sortedPageOfListings.getNumberOfElements());
+        List<Listing> pageContent = (start <= end) ? filteredListings.subList(start, end) : List.of();
+        logger.info("Отфильтрованные и отсортированные объявления: " + pageContent.size());
 
-        return sortedPageOfListings;
+        return new PageImpl<>(pageContent, pageable, filteredListings.size());
     }
 
     @Override
