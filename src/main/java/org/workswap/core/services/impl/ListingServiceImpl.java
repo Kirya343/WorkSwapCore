@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
 import org.workswap.config.LocalisationConfig.LanguageUtils;
-import org.workswap.datasource.central.model.listingModels.FavoriteListing;
 import org.workswap.datasource.central.model.Listing;
 import org.workswap.datasource.central.model.User;
 import org.workswap.datasource.central.model.DTOs.ListingDTO;
@@ -30,8 +29,8 @@ import org.workswap.datasource.central.model.listingModels.ListingTranslation;
 import org.workswap.datasource.central.model.listingModels.Location;
 import org.workswap.datasource.central.repository.ConversationRepository;
 import org.workswap.datasource.central.repository.ListingRepository;
+import org.workswap.datasource.central.repository.UserRepository;
 import org.workswap.core.services.CategoryService;
-import org.workswap.core.services.FavoriteListingService;
 import org.workswap.core.services.ListingService;
 import org.workswap.core.services.LocationService;
 import org.workswap.core.services.components.ServiceUtils;
@@ -44,9 +43,9 @@ public class ListingServiceImpl implements ListingService {
 
     private final ListingRepository listingRepository;
     private final ConversationRepository conversationRepository;
-    private final FavoriteListingService favoriteListingService;
     private final CategoryService categoryService;
     private final LocationService locationService;
+    private final UserRepository userRepository;
     private final ServiceUtils serviceUtils;
 
     private static final Logger logger = LoggerFactory.getLogger(ListingService.class);
@@ -291,16 +290,13 @@ public class ListingServiceImpl implements ListingService {
 
     @Override
     public List<Listing> localizeFavoriteListings(User user, Locale locale) {
-        List<FavoriteListing> favoriteListings = favoriteListingService.findByUser(user);
-        List<Listing> listings = favoriteListings.stream()
-                .map(FavoriteListing::getListing)
-                .collect(Collectors.toList());
+        List<Listing> favorites = new ArrayList<>(user.getFavoriteListings());
 
-        for (Listing listing : listings) {
+        for (Listing listing : favorites) {
             localizeListing(listing, locale);
         }
 
-        return listings;
+        return favorites;
     }
 
     @Override
@@ -372,5 +368,34 @@ public class ListingServiceImpl implements ListingService {
         dto.setLocalizedDescription(listing.getLocalizedDescription());
 
         return dto;
+    }
+
+    @Override
+    @Transactional
+    public void toggleFavorite(User user, Listing listing) {
+        Set<Listing> favorites = user.getFavoriteListings();
+        if (favorites.contains(listing)) {
+            favorites.remove(listing);
+        } else {
+            favorites.add(listing);
+        }
+        userRepository.save(user); // чтобы изменения сохранились в базе
+    }
+
+    @Override
+    public void addListingToFavorite(User user, Listing listing) {
+        user.getFavoriteListings().add(listing);
+        userRepository.save(user);
+    }
+
+    @Override
+    public void removeListingFromFavorite(User user, Listing listing) {
+        user.getFavoriteListings().remove(listing);
+        userRepository.save(user);
+    }
+
+    @Override
+    public boolean isFavorite(User user, Listing listing) {
+        return user.getFavoriteListings().contains(listing);
     }
 }

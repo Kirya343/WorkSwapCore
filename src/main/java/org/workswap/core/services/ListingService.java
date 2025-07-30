@@ -67,6 +67,11 @@ public interface ListingService {
     void save(Listing listing);
     void localizeListing(Listing listing, Locale locale);
 
+    void toggleFavorite(User user, Listing listing);
+    void addListingToFavorite(User user, Listing listing);
+    void removeListingFromFavorite(User user, Listing listing);
+    boolean isFavorite(User user, Listing listing);
+
     // Методы с возвратом
     Listing saveAndReturn(Listing listing);
 

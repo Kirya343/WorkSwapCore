@@ -190,7 +190,7 @@ public class StatServiceImpl implements StatService {
             stat.setViews(listing.getViews());
             stat.setRating(listing.getAverageRating());
             stat.setListingId(listing.getId());
-            stat.setFavorites(listing.getFavorites().size());
+            stat.setFavorites(listing.getFavoredByUsers().size());
             stat.setIntervalType(intervalType);
             statsRepository.save(stat);
         }
