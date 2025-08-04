@@ -143,7 +143,7 @@ public class StatServiceImpl implements StatService {
     public void cleanUpDuplicateSnapshots() {
         List<StatSnapshot> allSnapshots = statsRepository.findAll(Sort.by("listingId", "intervalType", "time"));
 
-        System.out.println("Найдено снапшотов: " + allSnapshots.size());
+        logger.debug("Найдено снапшотов: {}", allSnapshots.size());
 
         Map<String, StatSnapshot> seenSnapshots = new HashMap<>();
         List<StatSnapshot> toDelete = new ArrayList<>();
@@ -164,7 +164,7 @@ public class StatServiceImpl implements StatService {
         }
 
         statsRepository.deleteAll(toDelete);
-        System.out.println("Удалено " + toDelete.size() + " дубликатов статистики.");
+        logger.debug("Удалено {} дубликатов статистики.", toDelete.size());
     }
 
     @Transactional

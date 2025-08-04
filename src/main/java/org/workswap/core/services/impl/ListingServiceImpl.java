@@ -151,7 +151,7 @@ public class ListingServiceImpl implements ListingService {
     public List<Listing> findByCategory(Category category) {
         List<Category> categories = categoryService.getAllDescendants(category);
         List<Listing> listings = listingRepository.findByCategories(categories);
-        logger.info("Найдены объявления: " + listings.size());
+        logger.debug("Найдены объявления: " + listings.size());
         return listings;
     }
 
@@ -159,14 +159,14 @@ public class ListingServiceImpl implements ListingService {
     public List<Listing> findByLocation(Location location) {
         List<Location> locations = locationService.getAllDescendants(location);
         List<Listing> listings = listingRepository.findByLocations(locations);
-        logger.info("Найдены объявления: " + listings.size());
+        logger.debug("Найдены объявления: " + listings.size());
         return listings;
     }
 
     @Override
     public List<Listing> findActiveByCommunity(String community) {
         List<Listing> listings = listingRepository.findByCommunityAndActiveTrue(community.toLowerCase());
-        logger.info("Найдены активные объявления: " + listings.size());
+        logger.debug("Найдены активные объявления: " + listings.size());
         return listings;
     }
 
@@ -174,7 +174,7 @@ public class ListingServiceImpl implements ListingService {
     public Page<Listing> findPageOfSortedListings(Category category, String sortBy, Pageable pageable, Location location, String searchQuery, boolean hasReviews, List<String> languages) {
 
         List<Listing> filteredListings = findSortedListings(category, location, searchQuery, hasReviews, languages);
-        logger.info("[GetListingsSorted] Языки для поиска: " + languages);
+        logger.debug("[GetListingsSorted] Языки для поиска: " + languages);
 
         // Выбор компаратора для сортировки
         Comparator<Listing> comparator;
@@ -202,7 +202,7 @@ public class ListingServiceImpl implements ListingService {
         int end = Math.min(start + pageable.getPageSize(), filteredListings.size());
 
         List<Listing> pageContent = (start <= end) ? filteredListings.subList(start, end) : List.of();
-        logger.info("Отфильтрованные и отсортированные объявления: " + pageContent.size());
+        logger.debug("Отфильтрованные и отсортированные объявления: " + pageContent.size());
 
         return new PageImpl<>(pageContent, pageable, filteredListings.size());
     }
@@ -214,7 +214,7 @@ public class ListingServiceImpl implements ListingService {
         Set<Long> addedIds = new HashSet<>(); // для отслеживания уже добавленных объявлений
 
         for (String lang : languages) {
-            logger.info("Поиск без категории по языку: " + lang);
+            logger.debug("Поиск без категории по языку: " + lang);
             List<Listing> found = findActiveByCommunity(lang);
             for (Listing listing : found) {
                 if (addedIds.add(listing.getId())) { // добавляется только если ID ещё не было
@@ -223,7 +223,7 @@ public class ListingServiceImpl implements ListingService {
             }
         }
 
-        logger.info("Объявления по языку: " + listingsByLanguages.size());
+        logger.debug("Объявления по языку: " + listingsByLanguages.size());
 
         // Фильтруем по категории
 
@@ -233,7 +233,7 @@ public class ListingServiceImpl implements ListingService {
             filteredByCategory.retainAll(categoryResults); // оставляем только те, которые есть и там, и там
         }
 
-        logger.info("Объявления прошли фильтр категории: " + listingsByLanguages.size());
+        logger.debug("Объявления прошли фильтр категории: " + listingsByLanguages.size());
 
         // Фильтруем по локации
 
@@ -243,7 +243,7 @@ public class ListingServiceImpl implements ListingService {
             filteredByLocation.retainAll(locationResults); // оставляем только те, которые есть и там, и там
         }
 
-        logger.info("Объявления прошли фильтр локации: " + listingsByLanguages.size());
+        logger.debug("Объявления прошли фильтр локации: " + listingsByLanguages.size());
 
         // Фильтруем по поиску
 
@@ -253,7 +253,7 @@ public class ListingServiceImpl implements ListingService {
             filteredBySearch.retainAll(searchResults); // оставляем только те, которые есть и там, и там
         }
 
-        logger.info("Объявления прошли фильтр поиска: " + listingsByLanguages.size());
+        logger.debug("Объявления прошли фильтр поиска: " + listingsByLanguages.size());
 
         // Фильтруем по наличию отзывов
 
@@ -265,7 +265,7 @@ public class ListingServiceImpl implements ListingService {
 
         List<Listing> sortedListings = filteredBySearch;
 
-        logger.info("Объявления прошли фильтр наличия отзывов: " + listingsByLanguages.size());
+        logger.debug("Объявления прошли фильтр наличия отзывов: " + listingsByLanguages.size());
 
         return sortedListings;
     }
@@ -280,20 +280,20 @@ public class ListingServiceImpl implements ListingService {
     @Override
     public List<Listing> localizeAccountListings(User user, Locale locale) {
         List<Listing> listings = findListingsByUser(user);
-        logger.info("Got locale: " + locale);
+        logger.debug("Got locale: " + locale);
 
         for (Listing listing : listings) {
             localizeListing(listing, locale);
         }
 
-        logger.info("Объявлений: " + listings.size());
+        logger.debug("Объявлений: " + listings.size());
         return listings;
     }
 
     @Override
     public List<Listing> localizeActiveAccountListings(User user, Locale locale) {
         List<Listing> listings = findActiveListingsByUser(user);
-        logger.info("Got locale: " + locale);
+        logger.debug("Got locale: " + locale);
 
         for (Listing listing : listings) {
             localizeListing(listing, locale);

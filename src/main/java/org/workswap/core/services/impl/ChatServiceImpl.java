@@ -49,24 +49,24 @@ public class ChatServiceImpl implements ChatService {
 
         // Сначала ищем чат с привязкой к объявлению
         if (listing != null) {
-            System.out.println("Объявление есть");
+            logger.debug("Объявление есть");
             Optional<Chat> existing = chatParticipantRepository.findChatBetweenUsers(user1, user2, listing);
             if (existing.isPresent()) {
-                System.out.println("Объявление: " + listing.getId());
-                System.out.println("Нашли чат с объявлением");
+                logger.debug("Объявление: {}", listing.getId());
+                logger.debug("Нашли чат с объявлением");
                 return existing.get();
             }
         } else {
             // Ищем общий чат без привязки к объявлению
-            System.out.println("Объявления нет");
+            logger.debug("Объявления нет");
             Optional<Chat> existing = chatParticipantRepository.findChatBetweenUsers(user1, user2, null);
             if (existing.isPresent()) {
-                System.out.println("Нашли чат без объявления");
+                logger.debug("Нашли чат без объявления");
                 return existing.get();
             }
         }
 
-        System.out.println("Чатов нет, создём новый");
+        logger.debug("Чатов нет, создём новый");
         // Создаём новый
         Chat chat = new Chat(participants, listing);
         return chatRepository.save(chat);
@@ -76,7 +76,7 @@ public class ChatServiceImpl implements ChatService {
     public List<Chat> getUserChats(User user) {
         List<Chat> chats = chatRepository.findAllByParticipant(user);
         // Добавить логирование для проверки
-        logger.info("Chats found: " + chats.size());
+        logger.debug("Chats found: " + chats.size());
         return chats;
     }
 
@@ -84,7 +84,7 @@ public class ChatServiceImpl implements ChatService {
     @Transactional
     public List<ChatDTO> getChatsDTOForUser(User user, Locale locale) {
         List<Chat> chats = chatRepository.findAllByParticipant(user);
-        logger.info("Chats for DTO found: " + chats.size());
+        logger.debug("Chats for DTO found: " + chats.size());
         return chats.parallelStream()
                 .sorted((c1, c2) -> {
                     LocalDateTime date1 = c1.getLastMessage() != null ? c1.getLastMessage().getSentAt() : c1.getCreatedAt();
@@ -157,14 +157,14 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public ChatDTO convertToDTO(Chat chat, User currentUser, Locale locale) {
-        logger.info("Конвертация в дто начата разговора: " + chat.getId());
+        logger.debug("Конвертация в дто начата разговора: " + chat.getId());
 
         ChatDTO dto = new ChatDTO();
         dto.setId(chat.getId());
         dto.setUnreadCount(getUnreadMessageCount(chat, currentUser));
         dto.setTemporary(chat.isTemporary());
 
-        logger.info("Обработка последнего сообщения");
+        logger.debug("Обработка последнего сообщения");
         // Обработка последнего сообщения
         Message lastMessage = chat.getLastMessage();
         if (lastMessage != null) {
@@ -177,7 +177,7 @@ public class ChatServiceImpl implements ChatService {
             dto.setLastMessageTime(chat.getCreatedAt());
         }
 
-        logger.info("Определяем, есть ли новые сообщения");
+        logger.debug("Определяем, есть ли новые сообщения");
 
         // Определяем, есть ли новые сообщения
         boolean hasNewMessage = chat.getMessages().stream()
@@ -185,7 +185,7 @@ public class ChatServiceImpl implements ChatService {
                 .anyMatch(msg -> !msg.isRead());
         dto.setHasNewMessage(hasNewMessage);
 
-        logger.info("Конвертация закончена");
+        logger.debug("Конвертация закончена");
 
         return dto;
     }

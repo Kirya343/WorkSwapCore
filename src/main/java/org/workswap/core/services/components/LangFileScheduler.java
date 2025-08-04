@@ -1,5 +1,7 @@
 package org.workswap.core.services.components;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -22,6 +24,8 @@ import java.util.Set;
 
 @Component
 public class LangFileScheduler {
+
+    private static final Logger logger = LoggerFactory.getLogger(LangFileScheduler.class);
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final String baseUrl = "https://dash.workswap.org/api/lang";
@@ -49,14 +53,14 @@ public class LangFileScheduler {
                 String[] filePaths = response.getBody();
 
                 if (filePaths == null || filePaths.length == 0) {
-                    System.err.println("Файлы локализации не найдены для " + locale);
+                    logger.error("Файлы локализации не найдены для {}", locale);
                     continue;
                 }
 
                 for (String filePathStr : filePaths) {
                     String[] parts = filePathStr.split("/");
                     if (parts.length != 2) {
-                        System.err.println("Некорректный путь файла: " + filePathStr);
+                    logger.error("Некорректный путь файла: {}", filePathStr);
                         continue;
                     }
 
@@ -78,7 +82,7 @@ public class LangFileScheduler {
                     } catch (HttpClientErrorException.NotFound e) {
                         savedLangs.remove(locale);
                     } catch (Exception e) {
-                        System.err.println("Ошибка при загрузке " + fileUrl + ": " + e.getMessage());
+                        logger.error("Ошибка при загрузке {}: {}", fileUrl, e.getMessage());
                         savedLangs.remove(locale);
                     }
                 }
@@ -92,17 +96,17 @@ public class LangFileScheduler {
                     .forEach(path -> {
                         try {
                             Files.delete(path);
-                            System.out.println("Удалён устаревший файл: " + path);
+                            logger.debug("Удалён устаревший файл: {}", path);
                         } catch (IOException e) {
-                            System.err.println("Не удалось удалить файл: " + path + " — " + e.getMessage());
+                            logger.error("Не удалось удалить файл: {} — {}", path, e.getMessage());
                         }
                     });
             }
 
-            System.out.println("Файлы локализации синхронизированы: " + savedLangs);
+            logger.info("Файлы локализации синхронизированы: {}", savedLangs);
 
         } catch (Exception e) {
-            System.err.println("Ошибка при получении списка файлов: " + e.getMessage());
+            logger.error("Ошибка при получении списка файлов: {}", e.getMessage());
         }
     }
 }

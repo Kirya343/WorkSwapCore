@@ -1,5 +1,7 @@
 package org.workswap.core.services.components;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
@@ -18,6 +20,8 @@ public class AuthService {
     private final StatService statService;
     private final RoleCheckService roleCheckService;
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
+
     private void addAuthenticationAttributes(Model model, OAuth2User oauth2User, User user) {
         if (oauth2User != null) {
             double averageRating = statService.getAverageRating(user);
@@ -26,7 +30,7 @@ public class AuthService {
 
             model.addAttribute("isAuthenticated", true);
             
-            System.out.println("Пользователь прошёл авторизацию: " + user.getName());
+            logger.debug("Пользователь прошёл авторизацию: {}", user.getName());
             model.addAttribute("user", user);
             model.addAttribute("rating", averageRating);
         } else {

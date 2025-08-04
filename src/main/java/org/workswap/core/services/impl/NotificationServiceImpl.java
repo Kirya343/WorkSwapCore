@@ -1,5 +1,7 @@
 package org.workswap.core.services.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.workswap.datasource.central.model.News;
@@ -33,6 +35,8 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
+
+    private static final Logger logger = LoggerFactory.getLogger(NotificationService.class);
 
     private final NotificationRepository notificationRepository;
     private final UserService userService;
@@ -75,13 +79,13 @@ public class NotificationServiceImpl implements NotificationService {
             HttpClient client = HttpClient.newHttpClient();
             client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenAccept(response -> {
-                    System.out.println("Notification sent. Status: " + response.statusCode());
-                    System.out.println("Response: " + response.body());
+                    logger.debug("Notification sent. Status: {}", response.statusCode());
+                    logger.debug("Response: {}", response.body());
                 });
 
         } catch (Exception e) {
             e.printStackTrace();
-            System.err.println("Failed to send notification to Telegramm: " + e.getMessage());
+            logger.error("Failed to send notification to Telegramm: {}", e.getMessage());
         }
     }
 
@@ -94,8 +98,8 @@ public class NotificationServiceImpl implements NotificationService {
             Locale reciverLocale = Locale.of("en");
             
             if (!receiver.getLanguages().isEmpty()) {
-                System.out.println("У пользователя найдено языков: " + receiver.getLanguages());
-                System.out.println("Берём язык: " + receiver.getLanguages().get(0));
+                logger.debug("У пользователя найдено языков: {}", receiver.getLanguages());
+                logger.debug("Берём язык: {}", receiver.getLanguages().get(0));
                 reciverLocale = Locale.of(receiver.getLanguages().get(0));
             }
 
