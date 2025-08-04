@@ -22,14 +22,16 @@ import org.workswap.config.LocalisationConfig.LanguageUtils;
 import org.workswap.datasource.central.model.Listing;
 import org.workswap.datasource.central.model.User;
 import org.workswap.datasource.central.model.DTOs.ListingDTO;
-import org.workswap.datasource.central.model.chat.Conversation;
+import org.workswap.datasource.central.model.chat.Chat;
 import org.workswap.datasource.central.model.enums.SearchModelParamType;
 import org.workswap.datasource.central.model.listingModels.Category;
 import org.workswap.datasource.central.model.listingModels.ListingTranslation;
 import org.workswap.datasource.central.model.listingModels.Location;
-import org.workswap.datasource.central.repository.ConversationRepository;
+import org.workswap.datasource.central.repository.ChatRepository;
 import org.workswap.datasource.central.repository.ListingRepository;
 import org.workswap.datasource.central.repository.UserRepository;
+import org.workswap.datasource.stats.model.StatSnapshot;
+import org.workswap.datasource.stats.repository.StatsRepository;
 import org.workswap.core.services.CategoryService;
 import org.workswap.core.services.ListingService;
 import org.workswap.core.services.LocationService;
@@ -42,11 +44,12 @@ import lombok.RequiredArgsConstructor;
 public class ListingServiceImpl implements ListingService {
 
     private final ListingRepository listingRepository;
-    private final ConversationRepository conversationRepository;
+    private final ChatRepository chatRepository;
     private final CategoryService categoryService;
     private final LocationService locationService;
     private final UserRepository userRepository;
     private final ServiceUtils serviceUtils;
+    private final StatsRepository statsRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(ListingService.class);
     
@@ -119,15 +122,26 @@ public class ListingServiceImpl implements ListingService {
     }
 
     @Override
-    public void deleteListing(Long id) {
-        Listing listing = findListing(id.toString());
+    @Transactional
+    public void deleteListing(Listing listing) {
 
-        // Обнуляем связь listing у всех Conversation
-        List<Conversation> conversations = conversationRepository.findAllByListing(listing);
-        for (Conversation conversation : conversations) {
-            conversation.setListing(null);
+        logger.debug("Начинаем удаление объявления {}", listing.getId());
+
+        // Обнуляем связь listing у всех chat
+        List<Chat> chats = chatRepository.findAllByListing(listing);
+
+        logger.debug("Обнуляем свясь с объявлением у чатов");
+
+        for (Chat chat : chats) {
+            chat.setListing(null);
         }
-        conversationRepository.saveAll(conversations);
+        chatRepository.saveAll(chats);
+
+        logger.debug("Чистим статистику объявления");
+
+        clearStatSnapshots(listing);
+
+        logger.debug("Удаляем объявление");
 
         // Теперь можно удалить объявление
         listingRepository.delete(listing);
@@ -397,5 +411,22 @@ public class ListingServiceImpl implements ListingService {
     @Override
     public boolean isFavorite(User user, Listing listing) {
         return user.getFavoriteListings().contains(listing);
+    }
+
+    @Override
+    @Transactional
+    public void clearStatSnapshots(Listing listing) {
+        logger.debug("Чистим статистику объявления {}", listing.getId());
+
+        List<StatSnapshot> snapshots = statsRepository.findAllByListingId(listing.getId());
+
+        if (!snapshots.isEmpty()) {
+            logger.debug("Чистим снапшоты");
+            for (StatSnapshot snapshot : snapshots) {
+                statsRepository.delete(snapshot);
+            } 
+        } else {
+            logger.debug("У объявления не было снапшотов статистики");
+        }
     }
 }

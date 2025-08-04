@@ -63,9 +63,11 @@ public interface ListingService {
     // Методы обработки объявлений
     //
 
-    void deleteListing(Long id);
+    void deleteListing(Listing listing);
     void save(Listing listing);
     void localizeListing(Listing listing, Locale locale);
+
+    void clearStatSnapshots(Listing listing);
 
     void toggleFavorite(User user, Listing listing);
     void addListingToFavorite(User user, Listing listing);

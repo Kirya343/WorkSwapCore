@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.workswap.datasource.central.model.User;
 import org.workswap.core.exceptions.UserNotRegisteredException;
+import org.workswap.core.services.StatService;
 import org.workswap.core.services.UserService;
 
 import lombok.RequiredArgsConstructor;

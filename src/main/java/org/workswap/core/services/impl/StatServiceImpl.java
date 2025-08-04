@@ -10,6 +10,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -25,10 +27,9 @@ import org.workswap.datasource.stats.model.StatSnapshot.IntervalType;
 import org.workswap.datasource.stats.repository.StatsRepository;
 import org.workswap.core.services.ListingService;
 import org.workswap.core.services.ReviewService;
+import org.workswap.core.services.StatService;
 import org.workswap.core.services.UserService;
-import org.workswap.core.services.components.StatService;
-
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -43,6 +44,8 @@ public class StatServiceImpl implements StatService {
     private final ListingService listingService;
     private final ReviewService reviewService;
     private final UserService userService;
+
+    private static final Logger logger = LoggerFactory.getLogger(StatService.class);
 
     @Override
     public int getTotalViews(User user) {

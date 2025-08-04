@@ -17,8 +17,8 @@ public interface UserService {
 
     // Регистрирация пользователя из OAuth2
     void registerUserFromOAuth2(OAuth2User oauth2User);
+    void deleteUserFromOAuth2(OAuth2User oauth2User);
 
     // Управление пользователями
     User save(User user);
-    void deleteById(Long id);
 }

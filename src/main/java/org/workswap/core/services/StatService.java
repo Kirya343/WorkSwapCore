@@ -1,4 +1,4 @@
-package org.workswap.core.services.components;
+package org.workswap.core.services;
 
 import java.util.Locale;
 import java.util.Map;
