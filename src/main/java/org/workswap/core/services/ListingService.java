@@ -7,7 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.workswap.datasource.central.model.Listing;
 import org.workswap.datasource.central.model.User;
-import org.workswap.datasource.central.model.DTOs.ListingDTO;
+import org.workswap.common.dto.ListingDTO;
 import org.workswap.datasource.central.model.listingModels.Category;
 import org.workswap.datasource.central.model.listingModels.Location;
 

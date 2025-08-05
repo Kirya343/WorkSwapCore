@@ -4,7 +4,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.workswap.datasource.central.model.User;
-import org.workswap.datasource.central.model.enums.Role;
+import org.workswap.common.enums.Role;
 import org.workswap.core.services.UserService;
 
 import lombok.RequiredArgsConstructor;

@@ -24,8 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.workswap.config.LocalisationConfig.LanguageUtils;
+import org.workswap.core.objects.TranslationEntry;
 import org.workswap.core.services.LocalizationService;
-import org.workswap.datasource.admin.model.objects.TranslationEntry;
 
 @Service
 public class LocalizationServiceImpl implements LocalizationService {

@@ -14,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.workswap.config.LocalisationConfig.LanguageUtils;
 import org.workswap.datasource.central.model.News;
 import org.workswap.datasource.central.model.NewsTranslation;
-import org.workswap.datasource.central.model.enums.SearchModelParamType;
+import org.workswap.common.enums.SearchModelParamType;
 import org.workswap.datasource.central.repository.NewsRepository;
 import org.workswap.core.services.NewsService;
 import org.workswap.core.services.StorageService;

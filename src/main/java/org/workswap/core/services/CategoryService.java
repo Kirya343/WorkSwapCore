@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
-import org.workswap.datasource.central.model.DTOs.CategoryDTO;
+import org.workswap.common.dto.CategoryDTO;
 import org.workswap.datasource.central.model.listingModels.Category;
 
 public interface CategoryService {

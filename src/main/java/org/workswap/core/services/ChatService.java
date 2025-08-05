@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.workswap.datasource.central.model.Listing;
 import org.workswap.datasource.central.model.User;
-import org.workswap.datasource.central.model.DTOs.ChatDTO;
+import org.workswap.common.dto.ChatDTO;
 import org.workswap.datasource.central.model.chat.Chat;
 import org.workswap.datasource.central.model.chat.Message;
 

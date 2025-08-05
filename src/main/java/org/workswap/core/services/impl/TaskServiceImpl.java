@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.workswap.datasource.admin.model.Task;
 import org.workswap.datasource.admin.repository.TaskRepository;
-import org.workswap.datasource.central.model.enums.SearchModelParamType;
+import org.workswap.common.enums.SearchModelParamType;
 import org.workswap.core.services.TaksService;
 import org.workswap.core.services.components.ServiceUtils;
 

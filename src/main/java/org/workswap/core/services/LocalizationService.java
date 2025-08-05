@@ -5,7 +5,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
-import org.workswap.datasource.admin.model.objects.TranslationEntry;
+import org.workswap.core.objects.TranslationEntry;
 
 public interface LocalizationService {
     
