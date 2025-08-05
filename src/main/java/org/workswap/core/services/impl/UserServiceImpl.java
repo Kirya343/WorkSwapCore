@@ -91,12 +91,16 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void deleteUserFromOAuth2(OAuth2User oauth2User) {
-        try {
-            // Проверяем, существует ли пользователь с таким email
-            User user = findUser(oauth2User.getAttribute("email"));
+        User user = findUser(oauth2User.getAttribute("email"));
+        deleteUser(user);
+    }
 
+    @Override
+    @Transactional
+    public void deleteUser(User user) {
+        try {
             if (user == null) {
-                throw new RuntimeException("Пользователя с таким email не зарегистрировано.");
+                throw new RuntimeException("Пользователя не зарегистрировано.");
             }
 
             logger.debug("Пользователь {} найден, начинаем удаление", user.getId());

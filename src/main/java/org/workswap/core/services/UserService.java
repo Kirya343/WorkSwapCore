@@ -15,10 +15,11 @@ public interface UserService {
     User findUserFromOAuth2(OAuth2User oauth2User);
     User findUser(String param);
 
-    // Регистрирация пользователя из OAuth2
+    // Управление пользователя из OAuth2
     void registerUserFromOAuth2(OAuth2User oauth2User);
     void deleteUserFromOAuth2(OAuth2User oauth2User);
 
     // Управление пользователями
     User save(User user);
+    void deleteUser(User user);
 }
