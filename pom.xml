@@ -6,7 +6,7 @@
 
     <groupId>org.workswap</groupId>
     <artifactId>workswap-core</artifactId>
-    <version>1.0.17</version>
+    <version>1.0.18</version>
 
     <distributionManagement>
         <repository>
@@ -42,7 +42,7 @@
         <dependency>
             <groupId>org.workswap</groupId>
             <artifactId>workswap-datasource</artifactId>
-            <version>1.0.13</version>
+            <version>1.0.15</version>
         </dependency>
 
         <dependency>

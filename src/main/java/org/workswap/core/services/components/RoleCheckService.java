@@ -1,10 +1,12 @@
 package org.workswap.core.services.components;
 
+import java.util.Set;
+
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.workswap.datasource.central.model.User;
-import org.workswap.common.enums.Role;
+import org.workswap.datasource.central.model.user.Role;
 import org.workswap.core.services.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -16,30 +18,21 @@ public class RoleCheckService {
     private final UserService userService;
 
     public void checkRoles(Model model, OAuth2User oauth2User) {
-        
         User user = userService.findUserFromOAuth2(oauth2User);
+        Set<Role> roles = user.getRoles();
 
-        if (user.getRole().isAtLeast(Role.USER)) {
-            model.addAttribute("rolePremium", true);
-        }
-
-        if (user.getRole().isAtLeast(Role.PREMIUM)) {
-            model.addAttribute("rolePremium", true);
-        }
-
-        if (user.getRole().isAtLeast(Role.BUSINESS)) {
-            model.addAttribute("roleBusiness", true);
-        }
-
-        if (user.getRole().isAtLeast(Role.ADMIN)) {
-            model.addAttribute("roleAdmin", true);
+        for (Role role : roles) {
+            String roleName = role.getName().toUpperCase(); // Пример: "ADMIN"
+            model.addAttribute("role" + capitalize(roleName.toLowerCase()), true);
         }
     }
 
-    public boolean hasRoleAdmin(User user) {
-        if(user.getRole() == Role.ADMIN) {
-            return true;
-        }
-        return false;
+    public boolean hasRole(Set<Role> roles, String roleName) {
+        return roles.stream()
+                .anyMatch(role -> role.getName().equalsIgnoreCase(roleName));
+    }
+
+    private String capitalize(String str) {
+        return str.substring(0, 1).toUpperCase() + str.substring(1);
     }
 }

@@ -14,14 +14,16 @@ import org.workswap.datasource.central.model.Review;
 import org.workswap.datasource.central.model.User;
 import org.workswap.datasource.central.model.chat.Chat;
 import org.workswap.datasource.central.model.chat.ChatParticipant;
-import org.workswap.common.enums.Role;
+import org.workswap.datasource.central.model.user.Role;
 import org.workswap.common.enums.SearchModelParamType;
 import org.workswap.datasource.central.repository.ReviewRepository;
 import org.workswap.datasource.central.repository.UserRepository;
 import org.workswap.core.services.ListingService;
+import org.workswap.core.services.RoleService;
 import org.workswap.core.services.UserService;
 import org.workswap.core.services.components.ServiceUtils;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -36,6 +38,7 @@ public class UserServiceImpl implements UserService {
     private final ChatServiceImpl chatService;
     private final ListingService listingService;
     private final ReviewRepository reviewRepository;
+    private final RoleService roleService;
  
     private User findUserFromRepostirory(String param, SearchModelParamType paramType) {
         switch (paramType) {
@@ -75,12 +78,17 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("Пользователь с таким email уже зарегистрирован.");
         }
 
+        Role role = roleService.getRoleByName("USER");
+
+        Set<Role> roles = new HashSet<>();
+
+        roles.add(role);
         // Создаем нового пользователя
         User newUser = new User(oauth2User.getAttribute("name"),
                                 oauth2User.getAttribute("email"),
                                 oauth2User.getAttribute("sub"),
                                 oauth2User.getAttribute("picture"),
-                                Role.USER,
+                                roles,
                                 true);
 
         // Сохраняем нового пользователя
