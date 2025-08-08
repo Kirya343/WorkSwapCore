@@ -27,7 +27,7 @@ import org.workswap.common.enums.SearchModelParamType;
 import org.workswap.datasource.central.model.listingModels.Category;
 import org.workswap.datasource.central.model.listingModels.ListingTranslation;
 import org.workswap.datasource.central.model.listingModels.Location;
-import org.workswap.datasource.central.repository.ChatRepository;
+import org.workswap.datasource.central.repository.chat.ChatRepository;
 import org.workswap.datasource.central.repository.ListingRepository;
 import org.workswap.datasource.central.repository.UserRepository;
 import org.workswap.datasource.stats.model.StatSnapshot;
