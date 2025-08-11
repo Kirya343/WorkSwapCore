@@ -7,8 +7,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.workswap.datasource.admin.model.Task;
 import org.workswap.datasource.admin.repository.TaskRepository;
-import org.workswap.datasource.central.model.User;
-import org.workswap.datasource.central.repository.UserRepository;
 import org.workswap.common.enums.SearchModelParamType;
 import org.workswap.common.enums.TaskStatus;
 import org.workswap.common.enums.TaskType;
@@ -24,7 +22,6 @@ public class TaskServiceImpl implements TaksService {
 
     private final TaskRepository taskRepository;
     private final ServiceUtils serviceUtils;
-    private final UserRepository userRepository;
 
     private Task findTaskFromRepostirory(String param, SearchModelParamType paramType) {
         switch (paramType) {
@@ -54,23 +51,6 @@ public class TaskServiceImpl implements TaksService {
 
         if (status != null) {
             tasks.removeIf(task -> task.getStatus() != TaskStatus.valueOf(status));
-        }
-
-        for (Task task : tasks) {
-            User executor = null;
-
-            if (task.getExecutorId() != null) {
-                executor = userRepository.findById(task.getExecutorId()).orElse(null);
-            }
-
-            User author = null;
-
-            if (task.getExecutorId() != null) {
-                author = userRepository.findById(task.getAuthorId()).orElse(null);
-            }
-
-            task.setExecutor(executor);
-            task.setAuthor(author);
         }
 
         Comparator<Task> comparator;
