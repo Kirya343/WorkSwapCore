@@ -183,7 +183,7 @@ public class ListingServiceImpl implements ListingService {
                 comparator = Comparator.comparing(Listing::getPrice, Comparator.nullsLast(Comparator.naturalOrder()));
                 break;
             case "rating":
-                comparator = Comparator.comparing(Listing::getAverageRating, Comparator.nullsLast(Comparator.reverseOrder()));
+                comparator = Comparator.comparing(Listing::getRating, Comparator.nullsLast(Comparator.reverseOrder()));
                 break;
             case "popularity":
                 comparator = Comparator.comparing(Listing::getViews, Comparator.nullsLast(Comparator.reverseOrder()));
@@ -370,7 +370,7 @@ public class ListingServiceImpl implements ListingService {
         dto.setPriceType(listing.getPriceType().getDisplayName());
         dto.setCategory(listing.getCategory().getName());
         dto.setLocation(listing.getLocation().getName());
-        dto.setRating(listing.getAverageRating());
+        dto.setRating(listing.getRating());
         dto.setViews(listing.getViews());
         dto.setCreatedAt(listing.getCreatedAt());
         dto.setActive(listing.isActive());

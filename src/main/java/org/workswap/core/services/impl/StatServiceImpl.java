@@ -55,9 +55,9 @@ public class StatServiceImpl implements StatService {
     }
 
     @Override
-    public double getAverageRating(User user) {
+    public double getUserRating(User user) {
         updateRatingForUser(user);
-        return user.getAverageRating();
+        return user.getRating();
     }
 
     @Override
@@ -191,7 +191,7 @@ public class StatServiceImpl implements StatService {
 
             StatSnapshot stat = new StatSnapshot();
             stat.setViews(listing.getViews());
-            stat.setRating(listing.getAverageRating());
+            stat.setRating(listing.getRating());
             stat.setListingId(listing.getId());
             stat.setFavorites(listingRepository.countFavoritesByListingId(listing.getId()));
             stat.setIntervalType(intervalType);
@@ -276,7 +276,7 @@ public class StatServiceImpl implements StatService {
     @Override
     public void updateRatingForListing(Listing listing) {
         double newListingRating = calculateAverageRatingForListing(listing.getId());
-        listing.setAverageRating(newListingRating);
+        listing.setRating(newListingRating);
         listingService.save(listing);
         
         updateRatingForUser(listing.getAuthor());
@@ -285,7 +285,7 @@ public class StatServiceImpl implements StatService {
     @Override
     public void updateRatingForUser(User user) {
         double newUserRating = calculateAverageRatingForUser(user);
-        user.setAverageRating(newUserRating);
+        user.setRating(newUserRating);
         userService.save(user);
     }
 }

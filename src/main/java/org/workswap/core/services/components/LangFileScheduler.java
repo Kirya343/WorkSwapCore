@@ -31,7 +31,7 @@ public class LangFileScheduler {
     private final String baseUrl = "https://dash.workswap.org/api/lang";
     private final Path destinationBasePath = Path.of("lang");
 
-    @Value("${localization.api.key}")
+    @Value("${api.key.localization}")
     private String localizationApiKey;
 
     @Scheduled(fixedRate = 5 * 30 * 1000) // каждые 30 секунд

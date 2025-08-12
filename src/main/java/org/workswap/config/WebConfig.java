@@ -24,6 +24,7 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations("file:" + dir + "/");
     }
+    
     public WebConfig(LocaleChangeInterceptor localeChangeInterceptor) {
         this.localeChangeInterceptor = localeChangeInterceptor;
     }

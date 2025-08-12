@@ -24,7 +24,7 @@ public class AuthService {
 
     private void addAuthenticationAttributes(Model model, OAuth2User oauth2User, User user) {
         if (oauth2User != null) {
-            double averageRating = statService.getAverageRating(user);
+            double rating = statService.getUserRating(user);
 
             roleCheckService.checkRoles(model, oauth2User);
 
@@ -32,7 +32,7 @@ public class AuthService {
             
             logger.debug("Пользователь прошёл авторизацию: {}", user.getName());
             model.addAttribute("user", user);
-            model.addAttribute("rating", averageRating);
+            model.addAttribute("rating", rating);
         } else {
             model.addAttribute("isAuthenticated", false);
         }

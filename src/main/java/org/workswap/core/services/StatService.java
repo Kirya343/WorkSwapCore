@@ -8,7 +8,7 @@ import org.workswap.datasource.central.model.User;
 
 public interface StatService {
     int getTotalViews(User user);
-    double getAverageRating(User user);
+    double getUserRating(User user);
 
     Map<String, Object> getSiteStats(Locale locale);
     Map<String, Object> getUserStats(User user, Locale locale);
