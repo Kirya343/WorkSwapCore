@@ -57,7 +57,7 @@ public class TaskServiceImpl implements TaksService {
 
         switch (sort) {
             case "created":
-                comparator = Comparator.comparing(Task::getCreatedAt, Comparator.nullsFirst(Comparator.naturalOrder()));
+                comparator = Comparator.comparing(Task::getCreatedAt, Comparator.nullsLast(Comparator.reverseOrder()));
                 break;
             case "deadline":
                 comparator = Comparator.comparing(Task::getDeadline, Comparator.nullsLast(Comparator.naturalOrder()));
