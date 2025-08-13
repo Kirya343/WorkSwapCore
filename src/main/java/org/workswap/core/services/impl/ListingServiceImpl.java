@@ -364,22 +364,26 @@ public class ListingServiceImpl implements ListingService {
             return null;
         }
 
-        ListingDTO dto = new ListingDTO();
-        dto.setId(listing.getId());
-        dto.setPrice(listing.getPrice());
-        dto.setPriceType(listing.getPriceType().getDisplayName());
-        dto.setCategory(listing.getCategory().getName());
-        dto.setLocation(listing.getLocation().getFullName());
-        dto.setRating(listing.getRating());
-        dto.setViews(listing.getViews());
-        dto.setCreatedAt(listing.getCreatedAt());
-        dto.setActive(listing.isActive());
-        dto.setImagePath(listing.getImagePath());
-
         localizeListing(listing, locale);
 
-        dto.setLocalizedTitle(listing.getLocalizedTitle());
-        dto.setLocalizedDescription(listing.getLocalizedDescription());
+        ListingDTO dto = new ListingDTO(
+            listing.getId(),
+            listing.getAuthor().getId(),
+            listing.getLocalizedTitle(),
+            listing.getLocalizedDescription(),
+            listing.getPrice(),
+            listing.getPriceType().getDisplayName(),
+            listing.getCategory().getName(),
+            listing.getCategory().getId(),
+            listing.getLocation().getFullName(),
+            listing.getLocation().getId(),
+            listing.getRating(),
+            listing.getViews(),
+            listing.getCreatedAt(),
+            listing.isActive(),
+            listing.getImagePath(),
+            listing.isTestMode()
+        );
 
         return dto;
     }
