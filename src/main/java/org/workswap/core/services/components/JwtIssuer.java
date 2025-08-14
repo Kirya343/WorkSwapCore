@@ -35,19 +35,30 @@ public class JwtIssuer {
         JWSSigner signer = new RSASSASigner(rsaKey);
         Map<String, Object> claims = new HashMap<>();
 
-        claims.put("email", user.getEmail());
-        claims.put("uid", user.getId());
-        claims.put("roles", authorities.stream()
-            .map(GrantedAuthority::getAuthority)
-            .filter(a -> a.startsWith("ROLE_"))
-            .toArray(String[]::new));
-        claims.put("permissions", authorities.stream()
-            .map(GrantedAuthority::getAuthority)
-            .filter(a -> !a.startsWith("ROLE_"))
-            .toArray(String[]::new));
+        if (user != null) {
+            claims.put("email", user.getEmail());
+            claims.put("uid", user.getId());
+        } else {
+            claims.put("email", null);
+            claims.put("uid", null);
+        }
+
+        if (authorities != null) {
+            claims.put("roles", authorities.stream()
+                .map(GrantedAuthority::getAuthority)
+                .filter(a -> a.startsWith("ROLE_"))
+                .toArray(String[]::new));
+            claims.put("permissions", authorities.stream()
+                .map(GrantedAuthority::getAuthority)
+                .filter(a -> !a.startsWith("ROLE_"))
+                .toArray(String[]::new));
+        } else {
+            claims.put("roles", new String[0]);
+            claims.put("permissions", new String[0]);
+        }
 
         JWTClaimsSet set = new JWTClaimsSet.Builder()
-            .subject(user.getEmail())
+            .subject(user != null ? user.getEmail() : null)
             .issueTime(Date.from(now))
             .expirationTime(Date.from(now.plus(Duration.ofMinutes(30)))) // TTL 30 мин
             .claim("roles", claims.get("roles"))
