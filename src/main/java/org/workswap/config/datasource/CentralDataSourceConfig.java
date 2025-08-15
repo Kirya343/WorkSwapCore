@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
     entityManagerFactoryRef = "centralEntityManagerFactory",
     transactionManagerRef = "centralTransactionManager"
 )
-public class СentralDataSourceConfig {
+public class CentralDataSourceConfig {
 
     @Primary
     @Bean
