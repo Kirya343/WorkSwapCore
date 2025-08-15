@@ -1,4 +1,4 @@
-package org.workswap.config.datasource;
+package org.workswap.config;
 
 import java.security.KeyFactory;
 import java.security.interfaces.RSAPrivateKey;
