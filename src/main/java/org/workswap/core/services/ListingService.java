@@ -41,6 +41,7 @@ public interface ListingService {
     List<Listing> findByCategory(Category category);
     List<Listing> findByLocation(Location location);
     List<Listing> findActiveByCommunity(String community);
+    List<Listing> findActiveByCommunities(List<String> communities);
     List<Listing> searchListings(String searchQuery);
 
     // Методы для локализации объявлений пользователя в аккаунте

@@ -2,12 +2,10 @@ package org.workswap.core.services.impl;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -171,6 +169,13 @@ public class ListingServiceImpl implements ListingService {
     }
 
     @Override
+    public List<Listing> findActiveByCommunities(List<String> communities) {
+        List<Listing> listings = listingRepository.findByCommunitiesInAndActiveTrue(communities);
+        logger.debug("Найдены активные объявления: " + listings.size());
+        return listings;
+    }
+
+    @Override
     public Page<Listing> findPageOfSortedListings(Category category, String sortBy, Pageable pageable, Location location, String searchQuery, boolean hasReviews, List<String> languages) {
 
         List<Listing> filteredListings = findSortedListings(category, location, searchQuery, hasReviews, languages);
@@ -210,64 +215,55 @@ public class ListingServiceImpl implements ListingService {
     @Override
     public List<Listing> findSortedListings(Category category, Location location, String searchQuery, boolean hasReviews, List<String> languages) {
 
-        List<Listing> listingsByLanguages = new ArrayList<>();
-        Set<Long> addedIds = new HashSet<>(); // для отслеживания уже добавленных объявлений
+        List<Listing> listings = findActiveByCommunities(languages);
 
-        for (String lang : languages) {
-            logger.debug("Поиск без категории по языку: " + lang);
-            List<Listing> found = findActiveByCommunity(lang);
-            for (Listing listing : found) {
-                if (addedIds.add(listing.getId())) { // добавляется только если ID ещё не было
-                    listingsByLanguages.add(listing);
-                }
-            }
-        }
-
-        logger.debug("Объявления по языку: " + listingsByLanguages.size());
+        logger.debug("Объявления по языку: " + listings.size());
 
         // Фильтруем по категории
 
-        List<Listing> filteredByCategory = listingsByLanguages;
         if (category != null) {
-            List<Listing> categoryResults = findByCategory(category);
-            filteredByCategory.retainAll(categoryResults); // оставляем только те, которые есть и там, и там
+            listings.removeIf(listing -> listing.getCategory() != category);
         }
 
-        logger.debug("Объявления прошли фильтр категории: " + listingsByLanguages.size());
+        logger.debug("Объявления прошли фильтр категории: " + listings.size());
 
         // Фильтруем по локации
-
-        List<Listing> filteredByLocation = filteredByCategory;
         if (location != null) {
-            List<Listing> locationResults = findByLocation(location);
-            filteredByLocation.retainAll(locationResults); // оставляем только те, которые есть и там, и там
+            if (location.isCity()) {
+                // выбрали город -> оставляем только этот город
+                listings.removeIf(listing -> 
+                    !listing.getLocation().equals(location)
+                );
+            } else {
+                // выбрали страну -> оставляем объявления из этой страны или её городов
+                listings.removeIf(listing -> {
+                    Location listingLocation = listing.getLocation();
+                    return !(listingLocation.equals(location) ||
+                            (listingLocation.getCountry() != null && listingLocation.getCountry().equals(location)));
+                });
+            }
         }
 
-        logger.debug("Объявления прошли фильтр локации: " + listingsByLanguages.size());
+        logger.debug("Объявления прошли фильтр локации: " + listings.size());
 
         // Фильтруем по поиску
 
-        List<Listing> filteredBySearch = filteredByLocation;
         if (searchQuery != null && !searchQuery.isBlank()) {
             List<Listing> searchResults = searchListings(searchQuery);
-            filteredBySearch.retainAll(searchResults); // оставляем только те, которые есть и там, и там
+            listings.retainAll(searchResults); // оставляем только те, которые есть и там, и там
         }
 
-        logger.debug("Объявления прошли фильтр поиска: " + listingsByLanguages.size());
+        logger.debug("Объявления прошли фильтр поиска: " + listings.size());
 
         // Фильтруем по наличию отзывов
 
         if (hasReviews) {
-            filteredBySearch = filteredBySearch.stream()
-                    .filter(l -> l.getReviews() != null && !l.getReviews().isEmpty())
-                    .collect(Collectors.toList());
+            listings.removeIf(listing -> listing.getRating() == 0);
         }
 
-        List<Listing> sortedListings = filteredBySearch;
+        logger.debug("Объявления прошли фильтр наличия отзывов: " + listings.size());
 
-        logger.debug("Объявления прошли фильтр наличия отзывов: " + listingsByLanguages.size());
-
-        return sortedListings;
+        return listings;
     }
 
     @Override

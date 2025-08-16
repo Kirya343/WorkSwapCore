@@ -1,6 +1,5 @@
 package org.workswap.core.services.impl;
 
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.workswap.core.services.ListingService;
@@ -61,7 +60,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public void createReview(OAuth2User oauth2User, Long profileId, Long listingId, Double rating, String text) {
+    public void createReview(Long authorId, Long profileId, Long listingId, Double rating, String text) {
         User profile = null;
         Listing listing = null;
         if (profileId != null) {
@@ -73,21 +72,26 @@ public class ReviewServiceImpl implements ReviewService {
             return;
         }
 
-        // Получаем текущего пользователя
-        User user = userService.findUserFromOAuth2(oauth2User);
+        if (rating == null) {
+            return;
+        }
 
-        if (user == profile) {
+        // Получаем текущего пользователя
+        User author = userService.findUser(authorId.toString());
+
+        if (author == profile) {
             return;
         }
 
         // Проверяем, оставлял ли пользователь уже отзыв к этому объявлению
-        boolean alreadyReviewed = hasUserReviewedListing(user, listing);
+        boolean alreadyReviewed = hasUserReviewedListing(author, listing);
+        
         if (alreadyReviewed) {
             return;
         }
 
         // Создаем новый отзыв
-        Review review = new Review(text, rating, user, listing, profile);
+        Review review = new Review(text, rating, author, listing, profile);
 
         saveReview(review);
     }
