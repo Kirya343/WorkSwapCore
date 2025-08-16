@@ -1,5 +1,7 @@
 package org.workswap.core.services.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.workswap.core.services.ListingService;
@@ -17,6 +19,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ReviewServiceImpl implements ReviewService {
+
+    private static final Logger logger = LoggerFactory.getLogger(ReviewService.class);
 
     private final ReviewRepository reviewRepository;
     private final ListingService listingService;
@@ -60,7 +64,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public void createReview(Long authorId, Long profileId, Long listingId, Double rating, String text) {
+    public Review createReview(Long authorId, Long profileId, Long listingId, Double rating, String text) {
         User profile = null;
         Listing listing = null;
         if (profileId != null) {
@@ -69,31 +73,38 @@ public class ReviewServiceImpl implements ReviewService {
             listing = listingService.findListing(listingId.toString());
             profile = listing.getAuthor();
         } else {
-            return;
+            logger.debug("Не было ни профиля, ни объявления");
+            return null;
         }
 
         if (rating == null) {
-            return;
+            logger.debug("Рейтинг нулевой");
+            return null;
         }
 
         // Получаем текущего пользователя
         User author = userService.findUser(authorId.toString());
 
         if (author == profile) {
-            return;
+            logger.debug("Автор объявления оставляет отзыв сам себе");
+            return null;
         }
 
         // Проверяем, оставлял ли пользователь уже отзыв к этому объявлению
         boolean alreadyReviewed = hasUserReviewedListing(author, listing);
-        
+
         if (alreadyReviewed) {
-            return;
+            logger.debug("Пользователь уже оставил отзыв на это объявление");
+            return null;
         }
 
         // Создаем новый отзыв
         Review review = new Review(text, rating, author, listing, profile);
 
         saveReview(review);
+
+        logger.debug("Отзыв сохранён");
+        return review;
     }
 
     @Override

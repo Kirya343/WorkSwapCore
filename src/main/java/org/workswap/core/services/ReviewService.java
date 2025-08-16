@@ -17,6 +17,6 @@ public interface ReviewService {
     boolean hasUserReviewedListing(User user, Listing listing);
     boolean hasUserReviewedProfile(User user, User profile);
 
-    void createReview(Long authorId, Long profileId, Long listingId, Double rating, String text);
+    Review createReview(Long authorId, Long profileId, Long listingId, Double rating, String text);
     void deleteReview(Review review);
 }
