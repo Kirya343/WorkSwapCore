@@ -7,12 +7,12 @@ import org.workswap.common.enums.FileType;
 
 public interface StorageService {
 
-    String storeFile(MultipartFile file, FileType fileType, Long entityId) throws IOException;
+    String storeFile(MultipartFile file, FileType fileType, Long entityId, String ownerSub) throws Exception;
 
-    String storeListingImage(MultipartFile file, Long listingId) throws IOException;
-    String storeAvatar(MultipartFile file, Long userId) throws IOException;
-    String storeNewsImage(MultipartFile file, Long newsId) throws IOException;
-    String storeResume(MultipartFile file, Long userId) throws IOException;
+    String storeListingImage(MultipartFile file, Long listingId, String userSub) throws Exception;
+    String storeAvatar(MultipartFile file, Long userId, String userSub) throws Exception;
+    String storeNewsImage(MultipartFile file, Long newsId) throws Exception;
+    String storeResume(MultipartFile file, Long userId, String userSub) throws Exception;
 
     void deleteFile(String filePath) throws IOException;
     void deleteImage(String filename) throws IOException;

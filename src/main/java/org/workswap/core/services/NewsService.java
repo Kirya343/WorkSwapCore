@@ -1,6 +1,5 @@
 package org.workswap.core.services;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
@@ -20,7 +19,7 @@ public interface NewsService {
     News findNews(String param);
 
     // Метод для сохранения с обработкой изображения
-    News save(News news, MultipartFile imageFile, boolean removeImage) throws IOException;
+    News save(News news, MultipartFile imageFile, boolean removeImage) throws Exception;
 
     // Методы для публичной части
     Page<News> getPublishedNews(int page);

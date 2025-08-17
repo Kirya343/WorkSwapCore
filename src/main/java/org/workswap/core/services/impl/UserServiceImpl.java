@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -29,6 +30,7 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+@Profile("production")
 public class UserServiceImpl implements UserService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);

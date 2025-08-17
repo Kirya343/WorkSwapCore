@@ -9,6 +9,7 @@ import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.workswap.common.dto.CategoryDTO;
@@ -24,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Profile("production")
 public class CategoryServiceImpl implements CategoryService {
 
     private static final Logger logger = LoggerFactory.getLogger(CategoryService.class);

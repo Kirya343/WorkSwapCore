@@ -7,9 +7,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Configuration
-@ConfigurationProperties(prefix = "api")
+@ConfigurationProperties(prefix = "cloud")
 @Getter @Setter
-public class ApiConfig {
+public class CloudConfig {
 
     private String url;
 }

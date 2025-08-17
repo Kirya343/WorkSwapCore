@@ -1,10 +1,16 @@
 package org.workswap.core.services.impl;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.workswap.common.enums.FileType;
 import org.workswap.core.services.StorageService;
+import org.workswap.core.services.components.ChecksumUtil;
+import org.workswap.datasource.cloud.model.File;
+import org.workswap.datasource.cloud.repository.FileRepository;
 
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import net.coobird.thumbnailator.Thumbnails;
 
 import java.io.IOException;
@@ -14,11 +20,16 @@ import java.nio.file.Paths;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
+@Profile("cloud")
 public class StorageServiceImpl implements StorageService {
-    private final Path rootLocation = Paths.get("uploads").toAbsolutePath().normalize();
-    private final long maxFileSize = 20 * 1024 * 1024; // 20MB
 
-    public StorageServiceImpl() {
+    private final Path rootLocation = Paths.get("files").toAbsolutePath().normalize();
+    private final long maxFileSize = 20 * 1024 * 1024; // 20MB
+    private final FileRepository fileRepository;
+
+    @PostConstruct
+    public void init() {
         try {
             Files.createDirectories(rootLocation);
         } catch (IOException e) {
@@ -27,16 +38,20 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
-    public String storeFile(MultipartFile file, FileType fileType, Long entityId) throws IOException {
+    public String storeFile(MultipartFile file, FileType fileType, Long entityId, String ownerSub) throws Exception {
         if (file.isEmpty()) {
             throw new RuntimeException("Failed to store empty file");
         }
         if (file.getSize() > maxFileSize) {
             throw new RuntimeException("File size exceeds size limit");
         }
+        if (!fileType.getAllowedMimeTypes().contains(file.getContentType())) {
+            throw new RuntimeException("Неподдерживаемый MIME-тип файла");
+        }
 
         // Получаем расширение оригинального файла
         String originalFilename = file.getOriginalFilename();
+
         String fileExtension = originalFilename != null ?
                 originalFilename.substring(originalFilename.lastIndexOf(".")).toLowerCase() : "";
 
@@ -58,6 +73,8 @@ public class StorageServiceImpl implements StorageService {
 
         Path destinationFile = targetPath.resolve(filename).normalize();
 
+        Long fileSize = file.getSize();
+
         if (!destinationFile.getParent().equals(targetPath)) {
             throw new RuntimeException("Cannot store file outside the target directory");
         }
@@ -75,28 +92,39 @@ public class StorageServiceImpl implements StorageService {
             Files.copy(file.getInputStream(), destinationFile);
         }
 
-        return "/" + fileType.getDirectory() + "/" + filename;
+        File fileItem = new File(filename,
+                                 fileExtension,
+                                 file.getContentType(),
+                                 ChecksumUtil.getSHA256Checksum(file),
+                                 fileType.getVisibility(),
+                                 fileSize,
+                                 "/" + fileType.getDirectory() + "/" + filename,
+                                 ownerSub);
+
+        File savedFile = fileRepository.save(fileItem);
+
+        return savedFile.getStoragePath();
     }
 
 
     @Override
-    public String storeListingImage(MultipartFile file, Long listingId) throws IOException {
-        return storeFile(file, FileType.LISTING_IMAGE, listingId);
+    public String storeListingImage(MultipartFile file, Long listingId, String ownerSub) throws Exception {
+        return storeFile(file, FileType.LISTING_IMAGE, listingId, ownerSub);
     }
 
     @Override
-    public String storeAvatar(MultipartFile file, Long userId) throws IOException {
-        return storeFile(file, FileType.AVATAR, userId);
+    public String storeAvatar(MultipartFile file, Long userId, String userSub) throws Exception {
+        return storeFile(file, FileType.AVATAR, userId, userSub);
     }
 
     @Override
-    public String storeNewsImage(MultipartFile file, Long newsId) throws IOException {
-        return storeFile(file, FileType.NEWS_IMAGE, newsId);
+    public String storeNewsImage(MultipartFile file, Long newsId) throws Exception {
+        return storeFile(file, FileType.NEWS_IMAGE, newsId, null);
     }
 
     @Override
-    public String storeResume(MultipartFile file, Long userId) throws IOException {
-        return storeFile(file, FileType.RESUME, userId);
+    public String storeResume(MultipartFile file, Long userId, String userSub) throws Exception {
+        return storeFile(file, FileType.RESUME, userId, userSub);
     }
 
     @Override

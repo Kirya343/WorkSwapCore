@@ -20,32 +20,33 @@ import jakarta.persistence.EntityManagerFactory;
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
-    basePackages = "org.workswap.datasource.stats.repository",
-    entityManagerFactoryRef = "statsEntityManagerFactory",
-    transactionManagerRef = "statsTransactionManager"
+    basePackages = "org.workswap.datasource.cloud.repository",
+    entityManagerFactoryRef = "cloudEntityManagerFactory",
+    transactionManagerRef = "cloudTransactionManager"
 )
-@Profile("production")
-public class StatsDataSourceConfig {
+@Profile("cloud")
+public class CloudDataSourceConfig {
+
     @Bean
-    @ConfigurationProperties("spring.statistics-datasource")
-    public DataSource statsDataSource() {
+    @ConfigurationProperties("spring.cloud-datasource")
+    public DataSource cloudDataSource() {
         return DataSourceBuilder.create().build();
     }
 
     @Bean
-    public LocalContainerEntityManagerFactoryBean statsEntityManagerFactory(
+    public LocalContainerEntityManagerFactoryBean cloudEntityManagerFactory(
             EntityManagerFactoryBuilder builder
     ) {
         return builder
-                .dataSource(statsDataSource())
-                .packages("org.workswap.datasource.stats.model") // Пакет с @Entity статистики
-                .persistenceUnit("stats")
+                .dataSource(cloudDataSource())
+                .packages("org.workswap.datasource.cloud.model") // Пакет с @Entity
+                .persistenceUnit("cloud")
                 .build();
     }
 
     @Bean
-    public PlatformTransactionManager statsTransactionManager(
-            @Qualifier("statsEntityManagerFactory") EntityManagerFactory emf
+    public PlatformTransactionManager cloudTransactionManager(
+            @Qualifier("cloudEntityManagerFactory") EntityManagerFactory emf
     ) {
         return new JpaTransactionManager(emf);
     }

@@ -3,6 +3,7 @@ package org.workswap.core.services;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.workswap.common.dto.LocationDTO;
 import org.workswap.datasource.central.model.listingModels.Location;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Profile("production")
 public class LocationService {
     private final LocationRepository locationRepository;
 

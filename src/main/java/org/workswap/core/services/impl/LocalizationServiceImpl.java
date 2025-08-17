@@ -22,12 +22,14 @@ import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.workswap.config.LocalisationConfig.LanguageUtils;
 import org.workswap.core.objects.TranslationEntry;
 import org.workswap.core.services.LocalizationService;
 
 @Service
+@Profile("production")
 public class LocalizationServiceImpl implements LocalizationService {
 
     private static final Logger logger = LoggerFactory.getLogger(LocalizationService.class);

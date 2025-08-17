@@ -3,6 +3,7 @@ package org.workswap.core.services.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.workswap.datasource.central.model.News;
 import org.workswap.datasource.central.model.Notification;
@@ -34,6 +35,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Profile("production")
 public class NotificationServiceImpl implements NotificationService {
 
     private static final Logger logger = LoggerFactory.getLogger(NotificationService.class);

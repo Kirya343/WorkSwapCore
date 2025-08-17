@@ -2,6 +2,7 @@ package org.workswap.core.services.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.workswap.core.services.ListingService;
@@ -18,6 +19,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Profile("production")
 public class ReviewServiceImpl implements ReviewService {
 
     private static final Logger logger = LoggerFactory.getLogger(ReviewService.class);

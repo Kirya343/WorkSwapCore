@@ -1,10 +1,10 @@
 package org.workswap.core.services.impl;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,17 +17,16 @@ import org.workswap.datasource.central.model.NewsTranslation;
 import org.workswap.common.enums.SearchModelParamType;
 import org.workswap.datasource.central.repository.NewsRepository;
 import org.workswap.core.services.NewsService;
-import org.workswap.core.services.StorageService;
 import org.workswap.core.services.components.ServiceUtils;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Profile("production")
 public class NewsServiceImpl implements NewsService {
     private static final int DEFAULT_PAGE_SIZE = 5;
     private final NewsRepository newsRepository;
-    private final StorageService storageService;
     private final ServiceUtils serviceUtils;
 
     private News findNewsFromRepostirory(String param, SearchModelParamType paramType) {
@@ -64,22 +63,22 @@ public class NewsServiceImpl implements NewsService {
     @Override
     public void deleteById(Long id) {
         newsRepository.findById(id).ifPresent(news -> {
-            if (news.getImageUrl() != null) {
+            /* if (news.getImageUrl() != null) {
                 try {
                     storageService.deleteImage(news.getImageUrl());
                 } catch (IOException e) {
                     // Логирование ошибки удаления изображения
                 }
-            }
+            } */
             newsRepository.delete(news);
         });
     }
 
     // Метод для сохранения с обработкой изображения
     @Override
-    public News save(News news, MultipartFile imageFile, boolean removeImage) throws IOException {
+    public News save(News news, MultipartFile imageFile, boolean removeImage) throws Exception {
         // Обработка изображения
-        if (imageFile != null && !imageFile.isEmpty()) {
+        /* if (imageFile != null && !imageFile.isEmpty()) {
             // Удаляем старое изображение если было
             if (news.getImageUrl() != null) {
                 storageService.deleteImage(news.getImageUrl());
@@ -90,7 +89,7 @@ public class NewsServiceImpl implements NewsService {
         } else if (removeImage && news.getImageUrl() != null) {
             storageService.deleteImage(news.getImageUrl());
             news.setImageUrl(null);
-        }
+        } */
 
         return save(news);
     }

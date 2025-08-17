@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.workswap.core.services.ChatService;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Profile("production")
 public class ChatServiceImpl implements ChatService {
 
     private static final Logger logger = LoggerFactory.getLogger(ChatService.class);
