@@ -29,7 +29,7 @@ public class JwtIssuer {
     
     private final RSAKey rsaKey;
 
-    public String issue(User user, Collection<? extends GrantedAuthority> authorities) throws JOSEException {
+    public String issueAccessToken(User user, Collection<? extends GrantedAuthority> authorities) throws JOSEException {
 
         Instant now = Instant.now();
         JWSSigner signer = new RSASSASigner(rsaKey);
@@ -71,6 +71,37 @@ public class JwtIssuer {
 
         SignedJWT jwt = new SignedJWT(header, set);
         jwt.sign(signer);
+        return jwt.serialize();
+    }
+
+    public String issueRefreshToken(User user) throws JOSEException {
+
+        Instant now = Instant.now();
+        JWSSigner signer = new RSASSASigner(rsaKey);
+
+        // Клеймы минимальны: только идентификация
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("uid", user.getId());
+        claims.put("email", user.getEmail());
+
+        JWTClaimsSet set = new JWTClaimsSet.Builder()
+                .subject(user.getEmail())
+                .issueTime(Date.from(now))
+                .expirationTime(Date.from(now.plus(Duration.ofDays(30)))) // TTL 30 дней
+                .claim("uid", claims.get("uid"))
+                .claim("email", claims.get("email"))
+                .claim("typ", "refresh") // пометка типа токена
+                .jwtID(UUID.randomUUID().toString())
+                .build();
+
+        JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.RS256)
+                .keyID(rsaKey.getKeyID())
+                .type(JOSEObjectType.JWT)
+                .build();
+
+        SignedJWT jwt = new SignedJWT(header, set);
+        jwt.sign(signer);
+
         return jwt.serialize();
     }
 }

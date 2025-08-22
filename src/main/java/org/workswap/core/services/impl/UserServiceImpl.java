@@ -16,6 +16,7 @@ import org.workswap.datasource.central.model.User;
 import org.workswap.datasource.central.model.chat.Chat;
 import org.workswap.datasource.central.model.chat.ChatParticipant;
 import org.workswap.datasource.central.model.user.Role;
+import org.workswap.common.dto.UserDTO;
 import org.workswap.common.enums.SearchModelParamType;
 import org.workswap.datasource.central.repository.ReviewRepository;
 import org.workswap.datasource.central.repository.UserRepository;
@@ -188,6 +189,27 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> getRecentUsers(int count) {
         return userRepository.findAllByOrderByCreatedAtDesc(PageRequest.of(0, count)).getContent();
+    }
+
+    @Override
+    public UserDTO convertToDto(User user) {
+        UserDTO dto = new UserDTO(
+            user.getId(), 
+            user.getSub(), 
+            user.getName(), 
+            user.isPhoneVisible() ? user.getPhone() : null, 
+            user.isEmailVisible() ? user.getEmail() : null, 
+            user.getBio(), 
+            user.getAvatarUrl(), 
+            user.getLanguages(), 
+            user.getLocation().getName(), 
+            user.isLocked(), 
+            user.isEnabled(), 
+            user.getAvatarType(), 
+            user.getRating(), 
+            user.isTelegramConnected()
+        );
+        return dto;
     }
 }
 

@@ -1,6 +1,7 @@
 package org.workswap.core.services;
 
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.workswap.common.dto.UserDTO;
 import org.workswap.datasource.central.model.User;
 
 import java.util.List;
@@ -22,4 +23,6 @@ public interface UserService {
     // Управление пользователями
     User save(User user);
     void deleteUser(User user);
+
+    UserDTO convertToDto(User user);
 }
