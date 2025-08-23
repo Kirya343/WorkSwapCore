@@ -1,4 +1,4 @@
-package org.workswap.core.services.components;
+package org.workswap.core.services.components.auth;
 
 import java.util.Set;
 

@@ -1,15 +1,19 @@
-package org.workswap.core.services.components;
+package org.workswap.core.services.components.auth;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.workswap.datasource.central.model.User;
+import org.workswap.datasource.central.model.user.Permission;
+import org.workswap.datasource.central.model.user.Role;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;
@@ -29,45 +33,56 @@ public class JwtIssuer {
     
     private final RSAKey rsaKey;
 
-    public String issueAccessToken(User user, Collection<? extends GrantedAuthority> authorities) throws JOSEException {
+    public String issueAccessToken(User user) throws JOSEException {
+        if (user == null) {
+            throw new IllegalArgumentException("User must not be null");
+        }
 
         Instant now = Instant.now();
         JWSSigner signer = new RSASSASigner(rsaKey);
         Map<String, Object> claims = new HashMap<>();
 
-        if (user != null) {
-            claims.put("email", user.getEmail());
-            claims.put("uid", user.getId());
-        } else {
-            claims.put("email", null);
-            claims.put("uid", null);
+        // Основные данные пользователя
+        claims.put("email", user.getEmail());
+        claims.put("uid", user.getId());
+
+        // Формируем роли и пермишены из User → Role → Permission
+        Set<GrantedAuthority> authorities = new HashSet<>();
+        for (Role role : user.getRoles()) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName().toUpperCase()));
+            for (Permission perm : role.getPermissions()) {
+                authorities.add(new SimpleGrantedAuthority(perm.getName().toUpperCase()));
+            }
         }
 
-        if (authorities != null) {
-            claims.put("roles", authorities.stream()
+        // Отдельно вытаскиваем роли и пермишены в claims
+        String[] roles = authorities.stream()
                 .map(GrantedAuthority::getAuthority)
                 .filter(a -> a.startsWith("ROLE_"))
-                .toArray(String[]::new));
-            claims.put("permissions", authorities.stream()
+                .toArray(String[]::new);
+
+        String[] permissions = authorities.stream()
                 .map(GrantedAuthority::getAuthority)
                 .filter(a -> !a.startsWith("ROLE_"))
-                .toArray(String[]::new));
-        } else {
-            claims.put("roles", new String[0]);
-            claims.put("permissions", new String[0]);
-        }
+                .toArray(String[]::new);
 
+        claims.put("roles", roles);
+        claims.put("permissions", permissions);
+
+        // Строим JWT
         JWTClaimsSet set = new JWTClaimsSet.Builder()
-            .subject(user != null ? user.getEmail() : null)
-            .issueTime(Date.from(now))
-            .expirationTime(Date.from(now.plus(Duration.ofMinutes(30)))) // TTL 30 мин
-            .claim("roles", claims.get("roles"))
-            .claim("permissions", claims.get("permissions"))
-            .jwtID(UUID.randomUUID().toString())
-            .build();
+                .subject(user.getEmail())
+                .issueTime(Date.from(now))
+                .expirationTime(Date.from(now.plus(Duration.ofMinutes(30)))) // TTL 30 мин
+                .claim("roles", roles)
+                .claim("permissions", permissions)
+                .jwtID(UUID.randomUUID().toString())
+                .build();
 
         JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.RS256)
-            .keyID(rsaKey.getKeyID()).type(JOSEObjectType.JWT).build();
+                .keyID(rsaKey.getKeyID())
+                .type(JOSEObjectType.JWT)
+                .build();
 
         SignedJWT jwt = new SignedJWT(header, set);
         jwt.sign(signer);

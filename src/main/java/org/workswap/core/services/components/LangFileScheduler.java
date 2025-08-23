@@ -28,14 +28,19 @@ public class LangFileScheduler {
     private static final Logger logger = LoggerFactory.getLogger(LangFileScheduler.class);
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String baseUrl = "https://dash.workswap.org/api/lang";
     private final Path destinationBasePath = Path.of("lang");
+
+    @Value("${api.url}")
+    private String apiUrl;
 
     @Value("${api.key.localization}")
     private String localizationApiKey;
 
     @Scheduled(fixedRate = 5 * 30 * 1000) // каждые 30 секунд
     public void downloadAllLangFiles() {
+
+        String baseUrl = apiUrl + "/api/lang";
+
         List<String> savedLangs = new ArrayList<>(LanguageUtils.SUPPORTED_LANGUAGES);
         Set<Path> downloadedFiles = new HashSet<>();
 
