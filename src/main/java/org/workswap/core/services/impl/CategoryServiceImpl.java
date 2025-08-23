@@ -173,7 +173,12 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDTO toDTO(Category category, Locale locale) {
         Long parentId = category.getParent() != null ? category.getParent().getId() : null;
         logger.debug("Перевод категории {}: {}", category.getName(), messageSource.getMessage("category." + category.getName(), null, locale));
-        return new CategoryDTO(category.getId(), category.getName(), parentId, category.isLeaf(), messageSource.getMessage("category." + category.getName(), null, locale));
+        return new CategoryDTO(
+            category.getId(), 
+            category.getName(), 
+            parentId,
+            category.isLeaf(),
+            messageSource.getMessage("category." + category.getName(), null, locale));
     }
 
     @Override

@@ -10,11 +10,17 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
+import org.workswap.core.services.UserService;
+import org.workswap.datasource.central.model.User;
+
+import lombok.RequiredArgsConstructor;
 
 @Component
+@RequiredArgsConstructor
 public class RolesPermissionsConverter implements Converter<Jwt, AbstractAuthenticationToken> {
+
+    private final UserService userService;
 
     @Override
     public AbstractAuthenticationToken convert(@NonNull Jwt jwt) {
@@ -29,7 +35,9 @@ public class RolesPermissionsConverter implements Converter<Jwt, AbstractAuthent
         if (perms != null) {
             perms.forEach(perm -> authorities.add(new SimpleGrantedAuthority(perm)));
         }
+        
+        User user = userService.findUser(jwt.getSubject());
 
-        return new JwtAuthenticationToken(jwt, authorities, jwt.getSubject());
+        return new UserJwtAuthenticationToken(jwt, authorities, user);
     }
 }

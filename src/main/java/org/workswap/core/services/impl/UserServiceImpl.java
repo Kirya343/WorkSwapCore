@@ -15,6 +15,7 @@ import org.workswap.datasource.central.model.Review;
 import org.workswap.datasource.central.model.User;
 import org.workswap.datasource.central.model.chat.Chat;
 import org.workswap.datasource.central.model.chat.ChatParticipant;
+import org.workswap.datasource.central.model.listingModels.Location;
 import org.workswap.datasource.central.model.user.Role;
 import org.workswap.common.dto.UserDTO;
 import org.workswap.common.enums.SearchModelParamType;
@@ -27,6 +28,7 @@ import org.workswap.core.services.components.ServiceUtils;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -193,6 +195,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO convertToDto(User user) {
+
+        String locationName = Optional.ofNullable(user.getLocation())
+                              .map(Location::getName)
+                              .orElse(null);
+                              
         UserDTO dto = new UserDTO(
             user.getId(), 
             user.getSub(), 
@@ -202,7 +209,7 @@ public class UserServiceImpl implements UserService {
             user.getBio(), 
             user.getAvatarUrl(), 
             user.getLanguages(), 
-            user.getLocation().getName(), 
+            locationName, 
             user.isLocked(), 
             user.isEnabled(), 
             user.getAvatarType(), 
