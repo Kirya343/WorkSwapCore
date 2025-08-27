@@ -6,11 +6,16 @@ import java.util.List;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.workswap.datasource.admin.model.Task;
+import org.workswap.datasource.admin.model.TaskComment;
 import org.workswap.datasource.admin.repository.TaskRepository;
+import org.workswap.common.dto.TaskCommentDTO;
+import org.workswap.common.dto.TaskDTO;
+import org.workswap.common.dto.UserDTO;
 import org.workswap.common.enums.SearchModelParamType;
 import org.workswap.common.enums.TaskStatus;
 import org.workswap.common.enums.TaskType;
-import org.workswap.core.services.TaksService;
+import org.workswap.core.services.TaskService;
+import org.workswap.core.services.UserService;
 import org.workswap.core.services.components.ServiceUtils;
 
 import lombok.RequiredArgsConstructor;
@@ -18,10 +23,11 @@ import lombok.RequiredArgsConstructor;
 @Service
 @Profile("backoffice")
 @RequiredArgsConstructor
-public class TaskServiceImpl implements TaksService {
+public class TaskServiceImpl implements TaskService {
 
     private final TaskRepository taskRepository;
     private final ServiceUtils serviceUtils;
+    private final UserService userService;
 
     private Task findTaskFromRepostirory(String param, SearchModelParamType paramType) {
         switch (paramType) {
@@ -90,5 +96,72 @@ public class TaskServiceImpl implements TaksService {
     @Override
     public void updateTask() {
 
+    }
+
+    @Override
+    public TaskDTO convertToDto(Task task) {
+
+        Long executorId = task.getExecutorId();
+        Long authorId = task.getAuthorId();
+
+        UserDTO executor = null;
+        if (executorId != null) {
+            executor = userService.convertToDto(userService.findUser(executorId.toString()));
+        }
+        UserDTO author = userService.convertToDto(userService.findUser(authorId.toString()));
+
+        return new TaskDTO(
+            task.getId(),
+            task.getName(),
+            task.getDescription(),
+            task.getStatus().getDisplayName(),
+            task.getTaskType().getDisplayName(),
+            executorId,
+            authorId,
+            author,
+            executor,
+            task.getCreatedAt(),
+            task.getDeadline(),
+            task.getCompleted()
+        );
+    }
+
+    @Override
+    public TaskDTO convertToShortDto(Task task) {
+
+        Long executorId = task.getExecutorId();
+        Long authorId = task.getAuthorId();
+
+        return new TaskDTO(
+            task.getId(),
+            task.getName(),
+            task.getDescription(),
+            task.getStatus().getDisplayName(),
+            task.getTaskType().getDisplayName(),
+            executorId,
+            authorId,
+            null,
+            null,
+            task.getCreatedAt(),
+            task.getDeadline(),
+            task.getCompleted()
+        );
+    }
+
+    @Override
+    public TaskCommentDTO convertCommentToDto(TaskComment comment) {
+
+        Long authorId = comment.getAuthorId();
+
+        UserDTO user = userService.convertToDto(userService.findUser(authorId.toString()));
+
+        return new TaskCommentDTO(
+            comment.getId(),
+            comment.getContent(),
+            authorId,
+            comment.getTask().getId(),
+            comment.getCreatedAt(),
+            user
+        );
     }
 }

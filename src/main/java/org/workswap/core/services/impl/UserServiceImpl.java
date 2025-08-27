@@ -214,7 +214,10 @@ public class UserServiceImpl implements UserService {
             user.isEnabled(), 
             user.getAvatarType(), 
             user.getRating(), 
-            user.isTelegramConnected()
+            user.isTelegramConnected(),
+            user.isTermsAccepted(),
+            user.getCreatedAt(),
+            user.getTermsAcceptanceDate()
         );
         return dto;
     }
