@@ -2,6 +2,7 @@ package org.workswap.core.services.components.security;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -59,6 +60,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
         String accessToken;
         String refreshToken;
+
         try {
             accessToken = jwtIssuer.issueAccessToken(user);
             refreshToken = jwtIssuer.issueRefreshToken(user);
@@ -82,6 +84,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
                     
                     if (params.containsKey("redirect")) {
                         redirectUrl = params.get("redirect");
+                        logger.debug("redirectUrl: {}", redirectUrl);
                     }
                 }
             } catch (Exception e) {
@@ -95,25 +98,48 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
             }
         }
 
+        String domain = "https://workswap.org";
+        String pathAndQuery = "/";
+        try {
+            URI uri = new URI(redirectUrl);
+
+            // Домен + порт + схема
+            domain = uri.getScheme() + "://" + uri.getHost();
+            int port = uri.getPort();
+            if (port != -1) {
+                domain += ":" + port;
+            }
+
+            // Путь + query
+            pathAndQuery = uri.getRawPath(); // /catalog
+            if (uri.getRawQuery() != null) {
+                pathAndQuery += "?" + uri.getRawQuery(); // /catalog?category=123
+            }
+
+            logger.debug("Domain: " + domain);
+            logger.debug("Path + query: " + pathAndQuery);
+
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
 
         Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
         refreshCookie.setHttpOnly(true);
-        // локально HTTPS скорее всего нет → временно false
         refreshCookie.setSecure(false);
         refreshCookie.setPath("/"); // шире, чтобы работало и для /api/auth/refresh
         refreshCookie.setMaxAge((int) Duration.ofDays(30).getSeconds());
 
-        // SameSite=None → браузер будет слать в cross-origin запросах
         String cookie = String.format(
             "refreshToken=%s; Max-Age=%d; Path=/; HttpOnly; SameSite=Lax",
             refreshToken,
             Duration.ofDays(30).getSeconds()
         );
+        
 
         // на проде добавь `; Secure`
         response.setHeader("Set-Cookie", cookie);
 
         // редиректим на фронт (например, React на 3000 порту)
-        response.sendRedirect(backofficeUrl + "/login/success?accessToken=" + accessToken + "&redirect=" + URLEncoder.encode(redirectUrl, StandardCharsets.UTF_8));
+        response.sendRedirect(domain + "/login/success?accessToken=" + accessToken + "&redirect=" + URLEncoder.encode(pathAndQuery, StandardCharsets.UTF_8));
     }   
 }
