@@ -302,7 +302,7 @@ public class ListingServiceImpl implements ListingService {
 
     @Override
     public List<Listing> localizeFavoriteListings(User user, Locale locale) {
-        List<Listing> favorites = new ArrayList<>(user.getFavoriteListings());
+        List<Listing> favorites = findFavoritesListingsByUser(user);
 
         for (Listing listing : favorites) {
             localizeListing(listing, locale);
@@ -430,5 +430,10 @@ public class ListingServiceImpl implements ListingService {
         } else {
             logger.debug("У объявления не было снапшотов статистики");
         }
+    }
+
+    @Override
+    public List<Listing> findFavoritesListingsByUser(User user) {
+        return new ArrayList<>(userRepository.findById(user.getId()).orElse(null).getFavoriteListings());
     }
 }

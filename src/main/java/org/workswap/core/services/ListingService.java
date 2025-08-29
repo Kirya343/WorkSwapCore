@@ -29,6 +29,7 @@ public interface ListingService {
     // Получение по юзеру
     List<Listing> findListingsByUser(User user);
     List<Listing> findActiveListingsByUser(User user);
+    List<Listing> findFavoritesListingsByUser(User user);
 
     // Все объявления
     List<Listing> getAllActiveListings();
@@ -45,6 +46,7 @@ public interface ListingService {
     List<Listing> searchListings(String searchQuery);
 
     // Методы для локализации объявлений пользователя в аккаунте
+
     List<Listing> localizeAccountListings(User user, Locale locale);
     List<Listing> localizeActiveAccountListings(User user, Locale locale);
     List<Listing> localizeFavoriteListings(User user, Locale locale);
