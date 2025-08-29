@@ -7,9 +7,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Base64;
 
 import jakarta.servlet.http.Cookie;
 
@@ -19,8 +17,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
-import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Component;
 import org.workswap.core.services.UserService;
 import org.workswap.datasource.central.model.User;
@@ -68,40 +64,25 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
             throw new ServletException("Ошибка генерации JWT", e);
         }
 
-        SavedRequest savedRequest = new HttpSessionRequestCache().getRequest(request, response);
-        String redirectUrl = null;
+        String encodedRedirect = (String) request.getSession().getAttribute("redirectUrl");
+        logger.debug("encodedRedirect: " + encodedRedirect);
 
-        if (savedRequest != null) {
-            logger.debug("savedRequest: {}", savedRequest);
-            try {
-                URI savedUri = new URI(savedRequest.getRedirectUrl());
-                String query = savedUri.getQuery();
-                if (query != null) {
-                    Map<String, String> params = Arrays.stream(query.split("&"))
-                        .map(s -> s.split("=", 2))
-                        .filter(a -> a.length == 2)
-                        .collect(Collectors.toMap(a -> a[0], a -> URLDecoder.decode(a[1], StandardCharsets.UTF_8)));
-                    
-                    if (params.containsKey("redirect")) {
-                        redirectUrl = params.get("redirect");
-                        logger.debug("redirectUrl: {}", redirectUrl);
-                    }
-                }
-            } catch (Exception e) {
-                logger.error("Ошибка при парсинге savedRequest URL", e);
-            }
-        } else {
-            logger.debug("savedRequest == null");
-            redirectUrl = request.getParameter("redirect");
-            if (redirectUrl == null || redirectUrl.isEmpty()) {
-                redirectUrl = "/";
-            }
+        String redirectUrl = "/";
+        if (encodedRedirect != null && !encodedRedirect.isEmpty()) {
+            String decodedState = URLDecoder.decode(encodedRedirect, StandardCharsets.UTF_8);
+            byte[] decodedBytes = Base64.getUrlDecoder().decode(decodedState);
+            redirectUrl = new String(decodedBytes, StandardCharsets.UTF_8);
+
+            logger.debug("redirectUrl: " + redirectUrl);
         }
 
         String domain = "https://workswap.org";
         String pathAndQuery = "/";
         try {
+            logger.debug("redirectUrl: {}", redirectUrl);
             URI uri = new URI(redirectUrl);
+
+            logger.debug("uri: {}", uri);
 
             // Домен + порт + схема
             domain = uri.getScheme() + "://" + uri.getHost();
