@@ -7,7 +7,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -36,7 +35,7 @@ public class LangFileScheduler {
     @Value("${api.key.localization}")
     private String localizationApiKey;
 
-    @Scheduled(fixedRate = 5 * 30 * 1000) // каждые 30 секунд
+    /* @Scheduled(fixedRate = 5 * 30 * 1000) */ // каждые 30 секунд
     public void downloadAllLangFiles() {
 
         String baseUrl = apiUrl + "/api/lang";

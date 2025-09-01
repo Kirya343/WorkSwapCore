@@ -33,7 +33,6 @@ import org.workswap.datasource.stats.model.StatSnapshot;
 import org.workswap.datasource.stats.repository.StatsRepository;
 import org.workswap.core.services.CategoryService;
 import org.workswap.core.services.ListingService;
-import org.workswap.core.services.LocationService;
 import org.workswap.core.services.components.ServiceUtils;
 
 import lombok.RequiredArgsConstructor;
@@ -46,7 +45,7 @@ public class ListingServiceImpl implements ListingService {
     private final ListingRepository listingRepository;
     private final ChatRepository chatRepository;
     private final CategoryService categoryService;
-    private final LocationService locationService;
+    private final LocationServiceImpl locationService;
     private final UserRepository userRepository;
     private final ServiceUtils serviceUtils;
     private final StatsRepository statsRepository;

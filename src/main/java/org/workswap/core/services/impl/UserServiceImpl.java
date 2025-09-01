@@ -207,7 +207,7 @@ public class UserServiceImpl implements UserService {
             user.isPhoneVisible() ? user.getPhone() : null, 
             user.isEmailVisible() ? user.getEmail() : null, 
             user.getBio(), 
-            user.getAvatarUrl(), 
+            user.getAvatarUrl(),
             user.getLanguages(), 
             locationName, 
             user.isLocked(), 

@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.workswap.common.dto.ReviewDTO;
 import org.workswap.core.services.ListingService;
 import org.workswap.core.services.ReviewService;
 import org.workswap.core.services.UserService;
@@ -113,5 +114,18 @@ public class ReviewServiceImpl implements ReviewService {
     @Transactional
     public void deleteReview(Review review) {
         reviewRepository.delete(review);
+    }
+
+    @Override
+    public ReviewDTO convertToDTO(Review review) {
+        return new ReviewDTO(
+            review.getId(),
+            review.getText(),
+            review.getRating(),
+            review.getAuthor().getId(),
+            review.getProfile().getId(),
+            review.getListing().getId(),
+            review.getCreatedAt()
+        );
     }
 }
