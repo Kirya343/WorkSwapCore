@@ -39,6 +39,8 @@ public class CategoryServiceImpl implements CategoryService {
         switch (paramType) {
             case ID:
                 return categoryRepository.findById(Long.parseLong(param)).orElse(null);
+            case NAME:
+                return categoryRepository.findByName(param);
             default:
                 throw new IllegalArgumentException("Unknown param type: " + paramType);
         }
@@ -48,6 +50,16 @@ public class CategoryServiceImpl implements CategoryService {
     public Category findCategory(String param) {
         SearchModelParamType paramType = serviceUtils.detectParamType(param);
         return findCategoryFromRepostirory(param, paramType);
+    }
+
+    @Override
+    public void save(Category category) {
+        categoryRepository.save(category);
+    }
+    
+    @Override
+    public Category saveAndReturn(Category category) {
+        return categoryRepository.save(category);
     }
 
     @Override

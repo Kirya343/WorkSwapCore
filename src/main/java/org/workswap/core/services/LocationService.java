@@ -6,6 +6,11 @@ import org.workswap.common.dto.LocationDTO;
 import org.workswap.datasource.central.model.listingModels.Location;
 
 public interface LocationService {
+
+    Location findLocation(String param);
+
+    void save(Location location);
+    Location saveAndReturn(Location location);
     
     List<Location> getAllDescendants(Location location);
 

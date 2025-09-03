@@ -5,14 +5,11 @@ import java.io.InputStream;
 import org.springframework.core.io.InputStreamResource;
 
 public class MultipartInputStreamFileResource extends InputStreamResource {
-
     private final String filename;
-    private final long contentLength;
 
-    public MultipartInputStreamFileResource(InputStream inputStream, String filename, long contentLength) {
+    public MultipartInputStreamFileResource(InputStream inputStream, String filename) {
         super(inputStream);
         this.filename = filename;
-        this.contentLength = contentLength;
     }
 
     @Override
@@ -22,6 +19,6 @@ public class MultipartInputStreamFileResource extends InputStreamResource {
 
     @Override
     public long contentLength() {
-        return this.contentLength;
+        return -1; // мы не можем заранее посчитать размер
     }
 }

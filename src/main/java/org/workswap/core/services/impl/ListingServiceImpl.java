@@ -379,7 +379,8 @@ public class ListingServiceImpl implements ListingService {
             listing.getCreatedAt(),
             listing.isActive(),
             listing.getImagePath(),
-            listing.isTestMode()
+            listing.isTestMode(),
+            listing.isTemporary()
         );
 
         return dto;

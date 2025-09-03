@@ -11,6 +11,9 @@ public interface CategoryService {
 
     Category findCategory(String param);
 
+    void save(Category category);
+    Category saveAndReturn(Category category);
+
     Category createCategory(CategoryDTO dto, List<String> translations) throws IOException;
     List<Category> getCategoryTree();
     Category getCategoryById(Long id);
