@@ -22,6 +22,7 @@ import org.workswap.datasource.central.model.Listing;
 import org.workswap.datasource.central.model.User;
 import org.workswap.common.dto.ListingDTO;
 import org.workswap.datasource.central.model.chat.Chat;
+import org.workswap.common.enums.PriceType;
 import org.workswap.common.enums.SearchModelParamType;
 import org.workswap.datasource.central.model.listingModels.Category;
 import org.workswap.datasource.central.model.listingModels.ListingTranslation;
@@ -82,6 +83,11 @@ public class ListingServiceImpl implements ListingService {
     @Override
     public List<Listing> findListingsByUser(User user) {
         return listingRepository.findByAuthor(user);
+    }
+
+    @Override
+    public List<Listing> findMyListings(User user) {
+        return listingRepository.findByAuthorAndTemporary(user, false);
     }
 
     @Override
@@ -174,6 +180,13 @@ public class ListingServiceImpl implements ListingService {
         List<Listing> listings = listingRepository.findByCommunitiesInAndActiveTrue(communities);
         logger.debug("Найдены активные объявления: " + listings.size());
         return listings;
+    }
+
+    @Override
+    public List<Listing> findDrafts(User user) {
+        List<Listing> drafts = listingRepository.findByAuthorAndTemporary(user, true);
+        
+        return drafts;
     }
 
     @Override
@@ -361,6 +374,10 @@ public class ListingServiceImpl implements ListingService {
             return null;
         }
 
+        PriceType priceType = listing.getPriceType();
+        Category cat = listing.getCategory();
+        Location loc = listing.getLocation();
+
         localizeListing(listing, locale);
 
         ListingDTO dto = new ListingDTO(
@@ -369,11 +386,11 @@ public class ListingServiceImpl implements ListingService {
             listing.getLocalizedTitle(),
             listing.getLocalizedDescription(),
             listing.getPrice(),
-            listing.getPriceType().getDisplayName(),
-            listing.getCategory().getName(),
-            listing.getCategory().getId(),
-            listing.getLocation().getFullName(),
-            listing.getLocation().getId(),
+            priceType != null ? priceType.getDisplayName() : null,
+            cat != null ? cat.getName() : null,
+            cat != null ? cat.getId() : null,
+            loc != null ? loc.getFullName() : null,
+            loc != null ? loc.getId() : null,
             listing.getRating(),
             listing.getViews(),
             listing.getCreatedAt(),

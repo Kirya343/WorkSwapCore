@@ -129,14 +129,15 @@ public class StorageServiceImpl implements StorageService {
 
     @Override
     public void deleteFile(String filePath) throws IOException {
+        if (filePath.startsWith("/") || filePath.startsWith("\\")) {
+            filePath = filePath.substring(1);
+        }
+        
         Path fileToDelete = rootLocation.resolve(filePath).normalize();
-        Files.deleteIfExists(fileToDelete);
-    }
 
-    @Override
-    public void deleteImage(String filename) throws IOException {
-        Path filePath = rootLocation.resolve(filename).normalize();
-        Files.deleteIfExists(filePath);
+        System.out.println(fileToDelete.toString());
+
+        Files.deleteIfExists(fileToDelete);
     }
 
     @Override

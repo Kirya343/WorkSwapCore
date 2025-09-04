@@ -15,7 +15,6 @@ public interface StorageService {
     String storeResume(MultipartFile file, Long userId, String userSub) throws Exception;
 
     void deleteFile(String filePath) throws IOException;
-    void deleteImage(String filename) throws IOException;
 
     String getExtension(String filename);
     String getBaseName(String filename);

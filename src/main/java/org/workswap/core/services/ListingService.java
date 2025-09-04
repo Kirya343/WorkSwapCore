@@ -28,8 +28,10 @@ public interface ListingService {
 
     // Получение по юзеру
     List<Listing> findListingsByUser(User user);
+    List<Listing> findMyListings(User user);
     List<Listing> findActiveListingsByUser(User user);
     List<Listing> findFavoritesListingsByUser(User user);
+    List<Listing> findDrafts(User user);
 
     // Все объявления
     List<Listing> getAllActiveListings();
