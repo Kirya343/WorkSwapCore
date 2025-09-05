@@ -6,9 +6,9 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.workswap.common.dto.ReviewDTO;
-import org.workswap.core.services.ListingService;
 import org.workswap.core.services.ReviewService;
 import org.workswap.core.services.UserService;
+import org.workswap.core.services.query.ListingQueryService;
 import org.workswap.datasource.central.model.Listing;
 import org.workswap.datasource.central.model.Review;
 import org.workswap.datasource.central.model.User;
@@ -26,7 +26,7 @@ public class ReviewServiceImpl implements ReviewService {
     private static final Logger logger = LoggerFactory.getLogger(ReviewService.class);
 
     private final ReviewRepository reviewRepository;
-    private final ListingService listingService;
+    private final ListingQueryService listingQueryService;
     private final UserService userService;
 
     // Метод для сохранения отзыва
@@ -73,7 +73,7 @@ public class ReviewServiceImpl implements ReviewService {
         if (profileId != null) {
             profile = userService.findUser(profileId.toString());
         } else if (listingId != null) {
-            listing = listingService.findListing(listingId.toString());
+            listing = listingQueryService.findListing(listingId.toString());
             profile = listing.getAuthor();
         } else {
             logger.debug("Не было ни профиля, ни объявления");

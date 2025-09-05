@@ -21,9 +21,9 @@ import org.workswap.common.dto.UserDTO;
 import org.workswap.common.enums.SearchModelParamType;
 import org.workswap.datasource.central.repository.ReviewRepository;
 import org.workswap.datasource.central.repository.UserRepository;
-import org.workswap.core.services.ListingService;
 import org.workswap.core.services.RoleService;
 import org.workswap.core.services.UserService;
+import org.workswap.core.services.command.ListingCommandService;
 import org.workswap.core.services.components.ServiceUtils;
 
 import java.util.HashSet;
@@ -41,7 +41,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final ServiceUtils serviceUtils;
     private final ChatServiceImpl chatService;
-    private final ListingService listingService;
+    private final ListingCommandService listingCommandService;
     private final ReviewRepository reviewRepository;
     private final RoleService roleService;
  
@@ -142,7 +142,7 @@ public class UserServiceImpl implements UserService {
                 for (Listing listing : listings) {
                     logger.debug(">> Удаление объявления {}", listing.getId());
                     user.getListings().remove(listing);
-                    listingService.deleteListing(listing);
+                    listingCommandService.delete(listing);
                 }
             } else {
                 logger.debug(">> У пользователя не найдено объявлений");

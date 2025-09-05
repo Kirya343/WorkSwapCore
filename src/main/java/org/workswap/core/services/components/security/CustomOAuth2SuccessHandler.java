@@ -9,12 +9,12 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Base64;
 
-import jakarta.servlet.http.Cookie;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -106,21 +106,15 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
             e.printStackTrace();
         }
 
-        Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
-        refreshCookie.setHttpOnly(true);
-        refreshCookie.setSecure(false);
-        refreshCookie.setPath("/"); // шире, чтобы работало и для /api/auth/refresh
-        refreshCookie.setMaxAge((int) Duration.ofDays(30).getSeconds());
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+            .httpOnly(true)
+            .secure(true) // обязательно для HTTPS
+            .path("/")    // доступно для всего API
+            .sameSite("None") // нужно для кросс-доменных запросов
+            .maxAge(Duration.ofDays(30))
+            .build();
 
-        String cookie = String.format(
-            "refreshToken=%s; Max-Age=%d; Path=/; HttpOnly; SameSite=Lax",
-            refreshToken,
-            Duration.ofDays(30).getSeconds()
-        );
-        
-
-        // на проде добавь `; Secure`
-        response.setHeader("Set-Cookie", cookie);
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         // редиректим на фронт (например, React на 3000 порту)
         response.sendRedirect(domain + "/login/success?accessToken=" + accessToken + "&redirect=" + URLEncoder.encode(pathAndQuery, StandardCharsets.UTF_8));

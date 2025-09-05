@@ -26,10 +26,11 @@ import org.workswap.datasource.central.repository.UserRepository;
 import org.workswap.datasource.stats.model.StatSnapshot;
 import org.workswap.datasource.stats.model.StatSnapshot.IntervalType;
 import org.workswap.datasource.stats.repository.StatsRepository;
-import org.workswap.core.services.ListingService;
 import org.workswap.core.services.ReviewService;
 import org.workswap.core.services.StatService;
 import org.workswap.core.services.UserService;
+import org.workswap.core.services.command.ListingCommandService;
+import org.workswap.core.services.query.ListingQueryService;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -43,7 +44,9 @@ public class StatServiceImpl implements StatService {
     private final ResumeRepository resumeRepository;
     private final StatsRepository statsRepository;
     private final ReviewRepository reviewRepository;
-    private final ListingService listingService;
+    
+    private final ListingQueryService listingQueryService;
+    private final ListingCommandService listingCommandService;
     private final ReviewService reviewService;
     private final UserService userService;
 
@@ -240,7 +243,7 @@ public class StatServiceImpl implements StatService {
 
     @Override
     public double calculateAverageRatingForUser(User user) {
-        List<Listing> listings = listingService.findListingsByUser(user);  // Получаем все объявления пользователя
+        List<Listing> listings = listingQueryService.findListingsByUser(user);  // Получаем все объявления пользователя
 
         List<Review> listingReviews = listings.stream()
             .flatMap(listing -> reviewService.getReviewsByListingId(listing.getId()).stream())
@@ -279,7 +282,7 @@ public class StatServiceImpl implements StatService {
     public void updateRatingForListing(Listing listing) {
         double newListingRating = calculateAverageRatingForListing(listing.getId());
         listing.setRating(newListingRating);
-        listingService.save(listing);
+        listingCommandService.save(listing);
         
         updateRatingForUser(listing.getAuthor());
     }
