@@ -8,14 +8,14 @@ import org.springframework.stereotype.Service;
 import org.workswap.datasource.central.model.News;
 import org.workswap.datasource.central.model.Notification;
 import org.workswap.datasource.central.model.User;
-import org.workswap.common.dto.FullNotificationDTO;
-import org.workswap.common.dto.NotificationDTO;
+import org.workswap.common.dto.notification.FullNotificationDTO;
+import org.workswap.common.dto.notification.NotificationDTO;
 import org.workswap.common.enums.Importance;
 import org.workswap.common.enums.NotificationType;
 import org.workswap.datasource.central.repository.NotificationRepository;
 import org.workswap.core.services.NewsService;
 import org.workswap.core.services.NotificationService;
-import org.workswap.core.services.UserService;
+import org.workswap.core.services.query.UserQueryService;
 import org.workswap.core.someClasses.WebhookSigner;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,14 +41,14 @@ public class NotificationServiceImpl implements NotificationService {
     private static final Logger logger = LoggerFactory.getLogger(NotificationService.class);
 
     private final NotificationRepository notificationRepository;
-    private final UserService userService;
+    private final UserQueryService userQueryService;
     private final MessageSource messageSource;
     private final NewsService newsService;
 
     @Override
     public void saveOfflineChatNotification(String userParam, NotificationDTO dto) {
 
-        User user = userService.findUser(userParam);
+        User user = userQueryService.findUser(userParam);
 
         Notification notification = new Notification(user, dto.getTitle(), dto.getMessage(), dto.getLink(), NotificationType.CHAT, Importance.INFO);
         notificationRepository.save(notification);
@@ -93,7 +93,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void sendNewsNotification(News news) {
-        List<User> reciverList = userService.findAll(); 
+        List<User> reciverList = userQueryService.findAll(); 
 
         for(User receiver : reciverList) {
 

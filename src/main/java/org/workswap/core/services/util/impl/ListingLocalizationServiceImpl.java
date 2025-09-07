@@ -4,15 +4,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.workswap.config.LocalisationConfig.LanguageUtils;
-import org.workswap.core.services.query.ListingQueryService;
 import org.workswap.core.services.util.ListingLocalizationService;
 import org.workswap.datasource.central.model.Listing;
-import org.workswap.datasource.central.model.User;
 import org.workswap.datasource.central.model.listingModels.ListingTranslation;
 
 import lombok.RequiredArgsConstructor;
@@ -22,44 +18,7 @@ import lombok.RequiredArgsConstructor;
 @Profile("production")
 public class ListingLocalizationServiceImpl implements ListingLocalizationService {
 
-    private static final Logger logger = LoggerFactory.getLogger(ListingLocalizationService.class);
-
-    private final ListingQueryService listingQueryService;
-
-    public List<Listing> localizeAccountListings(User user, Locale locale) {
-        List<Listing> listings = listingQueryService.findListingsByUser(user);
-        logger.debug("Got locale: " + locale);
-
-        for (Listing listing : listings) {
-            localizeListing(listing, locale);
-        }
-
-        logger.debug("Объявлений: " + listings.size());
-        return listings;
-    }
-
-    public List<Listing> localizeActiveAccountListings(User user, Locale locale) {
-        List<Listing> listings = listingQueryService.findActiveListingsByUser(user);
-        logger.debug("Got locale: " + locale);
-
-        for (Listing listing : listings) {
-            localizeListing(listing, locale);
-        }
-
-        return listings;
-    }
-
-    public List<Listing> localizeFavoriteListings(User user, Locale locale) {
-        List<Listing> favorites = listingQueryService.findFavoritesListingsByUser(user);
-
-        for (Listing listing : favorites) {
-            localizeListing(listing, locale);
-        }
-
-        return favorites;
-    }
-
-    public List<Listing> localizeCatalogListings(List<Listing> listings, Locale locale) {
+    public List<Listing> localizeListings(List<Listing> listings, Locale locale) {
         for (Listing listing : listings) {
             localizeListing(listing, locale);
         }

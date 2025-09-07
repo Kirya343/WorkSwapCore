@@ -48,6 +48,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Category findCategory(String param) {
+        if (param == null) {
+            return null;
+        }
         SearchModelParamType paramType = serviceUtils.detectParamType(param);
         return findCategoryFromRepostirory(param, paramType);
     }

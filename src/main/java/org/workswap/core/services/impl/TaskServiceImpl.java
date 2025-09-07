@@ -8,15 +8,16 @@ import org.springframework.stereotype.Service;
 import org.workswap.datasource.admin.model.Task;
 import org.workswap.datasource.admin.model.TaskComment;
 import org.workswap.datasource.admin.repository.TaskRepository;
-import org.workswap.common.dto.TaskCommentDTO;
-import org.workswap.common.dto.TaskDTO;
-import org.workswap.common.dto.UserDTO;
+import org.workswap.common.dto.task.TaskCommentDTO;
+import org.workswap.common.dto.task.TaskDTO;
+import org.workswap.common.dto.user.UserDTO;
 import org.workswap.common.enums.SearchModelParamType;
 import org.workswap.common.enums.TaskStatus;
 import org.workswap.common.enums.TaskType;
 import org.workswap.core.services.TaskService;
-import org.workswap.core.services.UserService;
 import org.workswap.core.services.components.ServiceUtils;
+import org.workswap.core.services.mapping.UserMappingService;
+import org.workswap.core.services.query.UserQueryService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,7 +28,8 @@ public class TaskServiceImpl implements TaskService {
 
     private final TaskRepository taskRepository;
     private final ServiceUtils serviceUtils;
-    private final UserService userService;
+    private final UserMappingService userMappingService;
+    private final UserQueryService userQueryService;
 
     private Task findTaskFromRepostirory(String param, SearchModelParamType paramType) {
         switch (paramType) {
@@ -106,9 +108,9 @@ public class TaskServiceImpl implements TaskService {
 
         UserDTO executor = null;
         if (executorId != null) {
-            executor = userService.convertToDto(userService.findUser(executorId.toString()));
+            executor = userMappingService.toDto(userQueryService.findUser(executorId.toString()));
         }
-        UserDTO author = userService.convertToDto(userService.findUser(authorId.toString()));
+        UserDTO author = userMappingService.toDto(userQueryService.findUser(authorId.toString()));
 
         return new TaskDTO(
             task.getId(),
@@ -153,7 +155,7 @@ public class TaskServiceImpl implements TaskService {
 
         Long authorId = comment.getAuthorId();
 
-        UserDTO user = userService.convertToDto(userService.findUser(authorId.toString()));
+        UserDTO user = userMappingService.toDto(userQueryService.findUser(authorId.toString()));
 
         return new TaskCommentDTO(
             comment.getId(),

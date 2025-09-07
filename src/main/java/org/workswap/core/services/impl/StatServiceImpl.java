@@ -28,8 +28,8 @@ import org.workswap.datasource.stats.model.StatSnapshot.IntervalType;
 import org.workswap.datasource.stats.repository.StatsRepository;
 import org.workswap.core.services.ReviewService;
 import org.workswap.core.services.StatService;
-import org.workswap.core.services.UserService;
 import org.workswap.core.services.command.ListingCommandService;
+import org.workswap.core.services.command.UserCommandService;
 import org.workswap.core.services.query.ListingQueryService;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -48,7 +48,7 @@ public class StatServiceImpl implements StatService {
     private final ListingQueryService listingQueryService;
     private final ListingCommandService listingCommandService;
     private final ReviewService reviewService;
-    private final UserService userService;
+    private final UserCommandService userCommandService;
 
     private static final Logger logger = LoggerFactory.getLogger(StatService.class);
 
@@ -291,6 +291,6 @@ public class StatServiceImpl implements StatService {
     public void updateRatingForUser(User user) {
         double newUserRating = calculateAverageRatingForUser(user);
         user.setRating(newUserRating);
-        userService.save(user);
+        userCommandService.save(user);
     }
 }

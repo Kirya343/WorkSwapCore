@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.workswap.common.dto.ReviewDTO;
 import org.workswap.core.services.ReviewService;
-import org.workswap.core.services.UserService;
 import org.workswap.core.services.query.ListingQueryService;
+import org.workswap.core.services.query.UserQueryService;
 import org.workswap.datasource.central.model.Listing;
 import org.workswap.datasource.central.model.Review;
 import org.workswap.datasource.central.model.User;
@@ -27,7 +27,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final ListingQueryService listingQueryService;
-    private final UserService userService;
+    private final UserQueryService userQueryService;
 
     // Метод для сохранения отзыва
     @Override
@@ -71,7 +71,7 @@ public class ReviewServiceImpl implements ReviewService {
         User profile = null;
         Listing listing = null;
         if (profileId != null) {
-            profile = userService.findUser(profileId.toString());
+            profile = userQueryService.findUser(profileId.toString());
         } else if (listingId != null) {
             listing = listingQueryService.findListing(listingId.toString());
             profile = listing.getAuthor();
@@ -86,7 +86,7 @@ public class ReviewServiceImpl implements ReviewService {
         }
 
         // Получаем текущего пользователя
-        User author = userService.findUser(authorId.toString());
+        User author = userQueryService.findUser(authorId.toString());
 
         if (author == profile) {
             logger.debug("Автор объявления оставляет отзыв сам себе");

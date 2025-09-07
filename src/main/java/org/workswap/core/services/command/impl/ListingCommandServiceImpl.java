@@ -1,9 +1,11 @@
 package org.workswap.core.services.command.impl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.workswap.common.enums.PriceType;
 import org.workswap.core.services.command.ListingCommandService;
-import org.workswap.core.services.query.ListingQueryService;
 import org.workswap.datasource.central.model.Listing;
 import org.workswap.datasource.central.model.User;
 import org.workswap.datasource.central.model.chat.Chat;
@@ -21,7 +22,6 @@ import org.workswap.datasource.central.model.listingModels.ListingTranslation;
 import org.workswap.datasource.central.model.listingModels.Location;
 import org.workswap.datasource.central.repository.CategoryRepository;
 import org.workswap.datasource.central.repository.ListingRepository;
-import org.workswap.datasource.central.repository.ListingTranslationRepository;
 import org.workswap.datasource.central.repository.LocationRepository;
 import org.workswap.datasource.central.repository.UserRepository;
 import org.workswap.datasource.central.repository.chat.ChatRepository;
@@ -37,9 +37,6 @@ public class ListingCommandServiceImpl implements ListingCommandService {
 
     private static final Logger logger = LoggerFactory.getLogger(ListingCommandService.class);
 
-    private final ListingQueryService queryService;
-
-    private final ListingTranslationRepository listingTranslationRepository;
     private final ListingRepository listingRepository;
     private final ChatRepository chatRepository;
     private final StatsRepository statsRepository;
@@ -77,15 +74,17 @@ public class ListingCommandServiceImpl implements ListingCommandService {
 
     @Transactional
     public void clearStatSnapshots(Listing listing) {
-
         logger.debug("Чистим статистику объявления {}", listing.getId());
         List<StatSnapshot> snapshots = statsRepository.findAllByListingId(listing.getId());
 
         if (!snapshots.isEmpty()) {
-            logger.debug("Чистим снапшоты");
-            for (StatSnapshot snapshot : snapshots) {
-                statsRepository.delete(snapshot);
-            } 
+            logger.debug("Чистим снапшоты batch-ом");
+            // Получаем ID для batch удаления
+            List<Long> snapshotIds = snapshots.stream()
+                    .map(StatSnapshot::getId)
+                    .collect(Collectors.toList());
+            
+            statsRepository.deleteAllByIdInBatch(snapshotIds);
         } else {
             logger.debug("У объявления не было снапшотов статистики");
         }
@@ -112,39 +111,15 @@ public class ListingCommandServiceImpl implements ListingCommandService {
         userRepository.save(user);
     }
 
+    @SuppressWarnings("unchecked")
     public void modifyListingParam(Long id, Map<String, Object> updates) {
-        Listing listing = queryService.findListing(id.toString());
+        Listing listing = listingRepository.findById(id).orElse(null);
 
         if (listing != null) {
             updates.forEach((key, value) -> {
                 switch (key) {
                     case "translation":
-                        if (value instanceof Map) {
-                            Map<?, ?> rawMap = (Map<?, ?>) value;
-
-                            List<String> communities = new ArrayList<>();
-
-                            rawMap.forEach((lang, v) -> {
-                                String language = (String) lang;
-                                if (v instanceof Map) {
-                                    Map<?, ?> vMap = (Map<?, ?>) v;
-                                    String title = (String) vMap.get("title");
-                                    String description = (String) vMap.get("description");
-
-                                    ListingTranslation translation = listingTranslationRepository.findByListingAndLanguage(listing, language);
-
-                                    communities.add(language);
-                                    if (translation == null) {
-                                        translation = new ListingTranslation(language, title, description, listing);
-                                    } else {
-                                        translation.setTitle(title);
-                                        translation.setDescription(description);
-                                    }
-                                    listingTranslationRepository.save(translation);
-                                }
-                                listing.setCommunities(communities);
-                            });
-                        }
+                        updateListingTranslations(listing, (Map<String, Object>) value);
                         break;
                     case "price":
                         if (value != null) {
@@ -188,5 +163,43 @@ public class ListingCommandServiceImpl implements ListingCommandService {
         }
 
         save(listing);
+    }
+
+    @Transactional
+    private void updateListingTranslations(Listing listing, Map<String, Object> translationsMap) {
+        Map<String, ListingTranslation> currentTranslations = listing.getTranslations();
+        Set<String> newLanguages = new HashSet<>();
+
+        // Обновляем или создаем переводы поэлементно
+        for (Map.Entry<String, Object> entry : translationsMap.entrySet()) {
+            String lang = entry.getKey();
+            Object v = entry.getValue();
+
+            if (!(v instanceof Map)) continue;
+            Map<?, ?> vMap = (Map<?, ?>) v;
+
+            String title = (String) vMap.get("title");
+            String description = (String) vMap.get("description");
+            newLanguages.add(lang);
+
+            if (currentTranslations.containsKey(lang)) {
+                // Обновляем существующий
+                ListingTranslation translation = currentTranslations.get(lang);
+                translation.setTitle(title);
+                translation.setDescription(description);
+            } else {
+                // Создаем новый
+                ListingTranslation translation = new ListingTranslation(lang, title, description, listing);
+                currentTranslations.put(lang, translation);
+            }
+        }
+
+        // Удаляем отсутствующие переводы (orphanRemoval сработает автоматически)
+        currentTranslations.keySet().removeIf(lang -> !newLanguages.contains(lang));
+
+        // Обновляем список языков
+        listing.setCommunities(new ArrayList<>(newLanguages));
+        
+        listingRepository.save(listing);
     }
 }

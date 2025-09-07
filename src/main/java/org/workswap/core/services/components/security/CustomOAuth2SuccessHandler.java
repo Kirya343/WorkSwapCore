@@ -19,7 +19,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import org.workswap.core.services.UserService;
+import org.workswap.core.services.command.UserCommandService;
+import org.workswap.core.services.query.UserQueryService;
 import org.workswap.datasource.central.model.User;
 
 import com.nimbusds.jose.JOSEException;
@@ -37,7 +38,8 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
     private static final Logger logger = LoggerFactory.getLogger(CustomOAuth2SuccessHandler.class);
 
     private final JwtIssuer jwtIssuer; // твой сервис для access JWT
-    private final UserService userService;
+    private final UserQueryService userQueryService;
+    private final UserCommandService userCommandService;
 
     @Value("${backoffice.url}")
     private String backofficeUrl;
@@ -48,13 +50,17 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
                                         Authentication authentication) throws IOException, ServletException {
         OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
         String email = oidcUser.getEmail();
+        String googleAvatar = oidcUser.getPicture();
 
-        User user = userService.findUser(email);
+        User user = userQueryService.findUser(email);
         if (user == null) {
             response.sendRedirect(backofficeUrl + "/register?email=" 
                     + URLEncoder.encode(email, StandardCharsets.UTF_8));
             return;
         }
+
+        user.getSettings().setGoogleAvatar(googleAvatar);
+        userCommandService.save(user);
 
         String accessToken;
         String refreshToken;

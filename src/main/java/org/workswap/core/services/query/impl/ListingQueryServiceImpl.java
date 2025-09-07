@@ -15,23 +15,24 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.workswap.common.dto.ImageDTO;
-import org.workswap.common.dto.ListingDTO;
-import org.workswap.common.dto.ListingTranslationDTO;
+import org.workswap.common.dto.listing.ImageDTO;
+import org.workswap.common.dto.listing.ListingDTO;
+import org.workswap.common.dto.listing.ListingTranslationDTO;
 import org.workswap.common.enums.SearchModelParamType;
 import org.workswap.core.services.CategoryService;
 import org.workswap.core.services.LocationService;
 import org.workswap.core.services.components.ServiceUtils;
 import org.workswap.core.services.mapping.ListingMappingService;
 import org.workswap.core.services.query.ListingQueryService;
+import org.workswap.core.services.util.ListingLocalizationService;
 import org.workswap.datasource.central.model.Listing;
 import org.workswap.datasource.central.model.User;
 import org.workswap.datasource.central.model.listingModels.Category;
 import org.workswap.datasource.central.model.listingModels.Location;
 import org.workswap.datasource.central.repository.ListingRepository;
-import org.workswap.datasource.central.repository.ListingTranslationRepository;
 import org.workswap.datasource.central.repository.UserRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -43,13 +44,13 @@ public class ListingQueryServiceImpl implements ListingQueryService {
 
     private final ListingRepository listingRepository;
     private final UserRepository userRepository;
-    private final ListingTranslationRepository listingTranslationRepository;
 
     private final ServiceUtils serviceUtils;
 
     private final CategoryService categoryService;
     private final LocationService locationService;
     private final ListingMappingService mappingService;
+    private final ListingLocalizationService localizationService;
 
     private Listing findListingFromRepostirory(String param, SearchModelParamType paramType) {
         switch (paramType) {
@@ -302,15 +303,18 @@ public class ListingQueryServiceImpl implements ListingQueryService {
             .collect(Collectors.toList());
     }
 
-    public List<Map<String, ListingTranslationDTO>> getTranslations(Long id) {
-        return listingTranslationRepository
-            .findByListingId(id)
-            .stream()
-            .map(t -> Map.<String, ListingTranslationDTO>of(
-                t.getLanguage(), 
-                new ListingTranslationDTO(t.getTitle(), t.getDescription())
-            ))
-            .collect(Collectors.toList());
+    public Map<String, ListingTranslationDTO> getTranslations(Long id) {
+        Listing listing = listingRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Listing not found"));
+        
+        return listing.getTranslations().entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> new ListingTranslationDTO(
+                    entry.getValue().getTitle(), 
+                    entry.getValue().getDescription()
+                )
+            ));
     }
 
     public List<ImageDTO> getImages(Long id) {
@@ -319,6 +323,39 @@ public class ListingQueryServiceImpl implements ListingQueryService {
             .stream()
             .map(image -> new ImageDTO(image.getId(), id, image.getPath()))
             .collect(Collectors.toList());
+    }
+
+    public List<Listing> localizeAccountListings(User user, Locale locale) {
+        List<Listing> listings = findListingsByUser(user);
+        logger.debug("Got locale: " + locale);
+
+        for (Listing listing : listings) {
+            localizationService.localizeListing(listing, locale);
+        }
+
+        logger.debug("Объявлений: " + listings.size());
+        return listings;
+    }
+
+    public List<Listing> localizeActiveAccountListings(User user, Locale locale) {
+        List<Listing> listings = findActiveListingsByUser(user);
+        logger.debug("Got locale: " + locale);
+
+        for (Listing listing : listings) {
+            localizationService.localizeListing(listing, locale);
+        }
+
+        return listings;
+    }
+
+    public List<Listing> localizeFavoriteListings(User user, Locale locale) {
+        List<Listing> favorites = findFavoritesListingsByUser(user);
+
+        for (Listing listing : favorites) {
+            localizationService.localizeListing(listing, locale);
+        }
+
+        return favorites;
     }
 
     public ListingDTO getListingDTO(Long id, String locale) {

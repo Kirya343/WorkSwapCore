@@ -2,8 +2,8 @@ package org.workswap.core.services;
 
 import java.util.List;
 
-import org.workswap.common.dto.TaskCommentDTO;
-import org.workswap.common.dto.TaskDTO;
+import org.workswap.common.dto.task.TaskCommentDTO;
+import org.workswap.common.dto.task.TaskDTO;
 import org.workswap.datasource.admin.model.Task;
 import org.workswap.datasource.admin.model.TaskComment;
 

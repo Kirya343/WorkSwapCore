@@ -1,15 +1,21 @@
-package org.workswap.core.services.impl;
+package org.workswap.core.services.command.impl;
 
-import org.springframework.transaction.annotation.Transactional;
-import lombok.RequiredArgsConstructor;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.workswap.core.services.RoleService;
+import org.workswap.core.services.command.ListingCommandService;
+import org.workswap.core.services.command.UserCommandService;
+import org.workswap.core.services.impl.ChatServiceImpl;
+import org.workswap.core.services.query.UserQueryService;
 import org.workswap.datasource.central.model.Listing;
 import org.workswap.datasource.central.model.Review;
 import org.workswap.datasource.central.model.User;
@@ -17,67 +23,33 @@ import org.workswap.datasource.central.model.chat.Chat;
 import org.workswap.datasource.central.model.chat.ChatParticipant;
 import org.workswap.datasource.central.model.listingModels.Location;
 import org.workswap.datasource.central.model.user.Role;
-import org.workswap.common.dto.UserDTO;
-import org.workswap.common.enums.SearchModelParamType;
+import org.workswap.datasource.central.model.user.UserSettings;
+import org.workswap.datasource.central.repository.LocationRepository;
 import org.workswap.datasource.central.repository.ReviewRepository;
 import org.workswap.datasource.central.repository.UserRepository;
-import org.workswap.core.services.RoleService;
-import org.workswap.core.services.UserService;
-import org.workswap.core.services.command.ListingCommandService;
-import org.workswap.core.services.components.ServiceUtils;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 @Profile("production")
-public class UserServiceImpl implements UserService {
+public class UserCommandServiceImpl implements UserCommandService {
 
-    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+    private static final Logger logger = LoggerFactory.getLogger(UserCommandService.class);
 
-    private final UserRepository userRepository;
-    private final ServiceUtils serviceUtils;
+    private final UserQueryService queryService;
+    private final RoleService roleService;
     private final ChatServiceImpl chatService;
     private final ListingCommandService listingCommandService;
     private final ReviewRepository reviewRepository;
-    private final RoleService roleService;
- 
-    private User findUserFromRepostirory(String param, SearchModelParamType paramType) {
-        switch (paramType) {
-            case ID:
-                return userRepository.findById(Long.parseLong(param)).orElse(null);
-            case EMAIL:
-                return userRepository.findByEmail(param).orElse(null);
-            case NAME:
-                return userRepository.findByName(param).orElse(null); // если есть такой метод
-            case SUB:
-                return userRepository.findBySub(param).orElse(null);
-            default:
-                throw new IllegalArgumentException("Unknown param type: " + paramType);
-        }
-    }
+    private final UserRepository userRepository;
+    private final LocationRepository locationRepository;
 
-    @Override
-    public User findUser(String param) {
-        SearchModelParamType paramType = serviceUtils.detectParamType(param);
-        return findUserFromRepostirory(param, paramType);
-    }
-
-    @Override
-    public User findUserFromOAuth2(OAuth2User oauth2User) {
-        User user = findUser(oauth2User.getAttribute("email"));
-        return user;
-    }
-
-    @Override
     @Transactional
     public void registerUserFromOAuth2(OAuth2User oauth2User) {
 
         // Проверяем, существует ли пользователь с таким email
-        User existingUser = findUser(oauth2User.getAttribute("email"));
+        User existingUser = queryService.findUser(oauth2User.getAttribute("email"));
 
         if (existingUser != null) {
             throw new RuntimeException("Пользователь с таким email уже зарегистрирован.");
@@ -97,18 +69,16 @@ public class UserServiceImpl implements UserService {
                                 true);
 
         // Сохраняем нового пользователя
-        newUser = userRepository.save(newUser);
+        newUser = save(newUser);
 
     }
 
-    @Override
     @Transactional
     public void deleteUserFromOAuth2(OAuth2User oauth2User) {
-        User user = findUser(oauth2User.getAttribute("email"));
+        User user = queryService.findUser(oauth2User.getAttribute("email"));
         deleteUser(user);
     }
 
-    @Override
     @Transactional
     public void deleteUser(User user) {
         try {
@@ -177,49 +147,52 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    @Override
-    public List<User> findAll() {
-        return userRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
-    }
-
-    @Override
-    @Transactional
     public User save(User user) {
         return userRepository.save(user);
     }
 
-    @Override
-    public List<User> getRecentUsers(int count) {
-        return userRepository.findAllByOrderByCreatedAtDesc(PageRequest.of(0, count)).getContent();
-    }
+    public void modifyUserParam(User user, Map<String, Object> updates) {
 
-    @Override
-    public UserDTO convertToDto(User user) {
+        UserSettings settings = user.getSettings();
 
-        String locationName = Optional.ofNullable(user.getLocation())
-                              .map(Location::getName)
-                              .orElse(null);
-                              
-        UserDTO dto = new UserDTO(
-            user.getId(), 
-            user.getSub(), 
-            user.getName(), 
-            user.isPhoneVisible() ? user.getPhone() : null, 
-            user.isEmailVisible() ? user.getEmail() : null, 
-            user.getBio(), 
-            user.getAvatarUrl(),
-            user.getLanguages(), 
-            locationName, 
-            user.isLocked(), 
-            user.isEnabled(), 
-            user.getAvatarType(), 
-            user.getRating(), 
-            user.isTelegramConnected(),
-            user.isTermsAccepted(),
-            user.getCreatedAt(),
-            user.getTermsAcceptanceDate()
-        );
-        return dto;
+        if (user != null) {
+            updates.forEach((key, value) -> {
+                switch (key) {
+                    case "name":
+                        user.setName((String) value);
+                        break;
+                    case "phone":
+                        user.setPhone((String) value);
+                        break;
+                    case "phoneVisible":
+                        settings.setPhoneVisible((Boolean) value);
+                        break;
+                    case "emailVisible":
+                        settings.setEmailVisible((Boolean) value);
+                        break;
+                    case "avatarType":
+                        settings.setAvatarType((String) value);
+                        break;
+                    case "avatarUrl":
+                        user.setAvatarUrl((String) value);
+                        break;
+                    case "languages":
+                        user.setLanguages((List<String>) value);
+                        break;
+                    case "location":
+                        if (value != null) {
+                            Long locId = ((Number) value).longValue(); // безопасно для Integer и Long
+                            Location loc = locationRepository.findById(locId).orElse(null);
+                            user.setLocation(loc);
+                        }
+                        break;
+                    case "bio":
+                        user.setBio((String) value);
+                        break;
+                }
+            });
+        }
+
+        save(user);
     }
 }
-

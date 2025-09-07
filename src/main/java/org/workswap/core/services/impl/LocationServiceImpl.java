@@ -36,6 +36,9 @@ public class LocationServiceImpl implements LocationService {
 
     @Override
     public Location findLocation(String param) {
+        if (param == null) {
+            return null;
+        }
         SearchModelParamType paramType = serviceUtils.detectParamType(param);
         return findLocationFromRepostirory(param, paramType);
     }

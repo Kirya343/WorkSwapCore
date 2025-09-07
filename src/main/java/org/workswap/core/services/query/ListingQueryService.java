@@ -1,13 +1,14 @@
 package org.workswap.core.services.query;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.workswap.common.dto.ImageDTO;
-import org.workswap.common.dto.ListingDTO;
-import org.workswap.common.dto.ListingTranslationDTO;
+import org.workswap.common.dto.listing.ImageDTO;
+import org.workswap.common.dto.listing.ListingDTO;
+import org.workswap.common.dto.listing.ListingTranslationDTO;
 import org.workswap.datasource.central.model.Listing;
 import org.workswap.datasource.central.model.User;
 import org.workswap.datasource.central.model.listingModels.Category;
@@ -33,6 +34,9 @@ public interface ListingQueryService {
     List<Listing> findByLocation(Location location);
     List<Listing> findFavoritesListingsByUser(User user);
     List<Listing> searchListings(String searchQuery);
+    List<Listing> localizeAccountListings(User user, Locale locale);
+    List<Listing> localizeActiveAccountListings(User user, Locale locale);
+    List<Listing> localizeFavoriteListings(User user, Locale locale);
 
     boolean isFavorite(User user, Listing listing);
 
@@ -68,6 +72,6 @@ public interface ListingQueryService {
     List<ListingDTO> getListingDtosByUser(Long id, String locale);
     List<ListingDTO> getRecentListings(int amount, String locale);
     List<ListingDTO> getFavorites(User user, String locale);
-    List<Map<String, ListingTranslationDTO>> getTranslations(Long id);
+    Map<String, ListingTranslationDTO> getTranslations(Long id);
     List<ImageDTO> getImages(Long id);
 }
