@@ -111,7 +111,6 @@ public class ListingCommandServiceImpl implements ListingCommandService {
         userRepository.save(user);
     }
 
-    @SuppressWarnings("unchecked")
     public void modifyListingParam(Long id, Map<String, Object> updates) {
         Listing listing = listingRepository.findById(id).orElse(null);
 

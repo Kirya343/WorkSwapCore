@@ -20,6 +20,8 @@ public class UserMappingServiceImpl implements UserMappingService {
 
     public UserDTO toDto(User user) {
 
+        if (user == null) return null;
+
         UserSettings settings = user.getSettings();
                               
         UserDTO dto = new UserDTO(
@@ -31,8 +33,7 @@ public class UserMappingServiceImpl implements UserMappingService {
             user.getBio(), 
             user.getAvatarUrl(),
             user.getLanguages(),
-            user.isLocked(), 
-            user.isEnabled(), 
+            user.getStatus().toString(), 
             user.getRating(),
             user.getCreatedAt()
         );
@@ -40,6 +41,8 @@ public class UserMappingServiceImpl implements UserMappingService {
     }
 
     public FullUserDTO toFullDto(User user) {
+
+        if (user == null) return null;
 
         Long locationId = Optional
             .ofNullable(user.getLocation())
@@ -58,8 +61,7 @@ public class UserMappingServiceImpl implements UserMappingService {
             user.getAvatarUrl(),
             user.getLanguages(),
             locationId,
-            user.isLocked(),
-            user.isEnabled(),
+            user.getStatus().toString(),
             settings.getAvatarType(),
             user.getRating(),
             settings.isTelegramConnected(),

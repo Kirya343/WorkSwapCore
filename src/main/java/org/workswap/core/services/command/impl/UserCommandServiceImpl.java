@@ -1,5 +1,6 @@
 package org.workswap.core.services.command.impl;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.workswap.common.enums.UserStatus;
 import org.workswap.core.services.RoleService;
 import org.workswap.core.services.command.ListingCommandService;
 import org.workswap.core.services.command.UserCommandService;
@@ -70,7 +72,14 @@ public class UserCommandServiceImpl implements UserCommandService {
 
         // Сохраняем нового пользователя
         newUser = save(newUser);
+    }
 
+    public void registerUser(User user) {
+        user.setStatus(UserStatus.ACTIVE);
+        user.setTermsAccepted(true);
+        user.setTermsAcceptanceDate(LocalDateTime.now());
+
+        save(user);
     }
 
     @Transactional

@@ -140,8 +140,14 @@ public class ListingQueryServiceImpl implements ListingQueryService {
 
     public Page<Listing> findPageOfSortedListings(Category category, String sortBy, Pageable pageable, Location location, String searchQuery, boolean hasReviews, List<String> languages) {
 
+        logger.debug("Категория: {}", category != null ? category.getId() : null);
+        logger.debug("Сортинг: {}", sortBy);
+        logger.debug("Локация: {}", location != null ? location.getId() : null);
+        logger.debug("Поиск: {}", searchQuery);
+        logger.debug("Отзывы: ", hasReviews);
+        logger.debug("Языки для поиска: {}", languages);
+
         List<Listing> filteredListings = findSortedListings(category, location, searchQuery, hasReviews, languages);
-        logger.debug("[GetListingsSorted] Языки для поиска: " + languages);
 
         // Выбор компаратора для сортировки
         Comparator<Listing> comparator;
@@ -192,15 +198,48 @@ public class ListingQueryServiceImpl implements ListingQueryService {
         if (location != null) {
             if (location.isCity()) {
                 // выбрали город -> оставляем только этот город
-                listings.removeIf(listing -> 
-                    !listing.getLocation().equals(location)
-                );
+                logger.debug("Локация пользователя: город");
+                listings.removeIf(listing -> {
+                    boolean sameLocation = listing.getLocation().getId().equals(location.getId());
+                    logger.debug(
+                        "Локация объявления({}) {} совпадает со указанной локацией({}): {}", 
+                        listing.getLocation().getId(), 
+                        listing.getId(), 
+                        location.getId(), 
+                        sameLocation
+                    );
+                    return !(sameLocation);
+                });
+                
             } else {
+                logger.debug("Локация пользователя: страна");
                 // выбрали страну -> оставляем объявления из этой страны или её городов
                 listings.removeIf(listing -> {
                     Location listingLocation = listing.getLocation();
-                    return !(listingLocation.equals(location) ||
-                            (listingLocation.getCountry() != null && listingLocation.getCountry().equals(location)));
+
+                    boolean sameLocation = listingLocation.getId().equals(location.getId());
+
+                    logger.debug(
+                        "Локация объявления({}) {} совпадает со указанной локацией({}): {}", 
+                        listingLocation.getId(), 
+                        listing.getId(), 
+                        location.getId(), 
+                        sameLocation
+                    );
+
+                    boolean sameCountry = listingLocation.getCountry() != null
+                        && listingLocation.getCountry().getId().equals(location.getId());
+
+                    logger.debug(
+                        "Страна локации объявления({}) {} совпадает со указанной локацией({}): {}", 
+                        listingLocation.getCountry() != null ? listingLocation.getCountry().getId() : null, 
+                        listing.getId(), 
+                        location.getId(), 
+                        sameCountry
+                    );
+
+                    // Удаляем, если ни локация, ни страна не совпали
+                    return !(sameLocation || sameCountry);
                 });
             }
         }
