@@ -131,7 +131,7 @@ public class ListingCommandServiceImpl implements ListingCommandService {
                             listing.setPrice(price);
                         }
                         break;
-                    case "mainImageUrl":
+                    case "mainImage":
                         listing.setImagePath((String) value);
                         break;
                     case "priceType":

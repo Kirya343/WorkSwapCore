@@ -50,6 +50,15 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
     @Value("${backoffice.url}")
     private String backofficeUrl;
+
+    @Value("${app.cookie.secure}")
+    private boolean cookieSecure;
+
+    @Value("${app.cookie.domain}")
+    private String cookieDomain;
+
+    @Value("${app.cookie.sameSite}")
+    private String cookieSameSite;
     
     @Override
     public void onAuthenticationSuccess(
@@ -119,7 +128,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        String redirectQuery = "?accessToken=" + accessToken + "&redirect=" + URLEncoder.encode(data.pathAndQuery, StandardCharsets.UTF_8);
+        String redirectQuery = "?redirect=" + URLEncoder.encode(data.pathAndQuery, StandardCharsets.UTF_8);
 
         if (newUser == false) {
             response.sendRedirect(data.domain + "/login/success" + redirectQuery);
@@ -132,9 +141,10 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
         ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
             .httpOnly(true)
-            .secure(true) // обязательно для HTTPS
-            .path("/")    // доступно для всего API
-            .sameSite("None") // нужно для кросс-доменных запросов
+            .secure(cookieSecure)
+            .path("/")
+            .sameSite(cookieSameSite)
+            .domain(cookieDomain.isEmpty() ? null : cookieDomain)
             .maxAge(Duration.ofDays(30))
             .build();
 

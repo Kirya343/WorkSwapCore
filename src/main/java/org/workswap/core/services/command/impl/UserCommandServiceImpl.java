@@ -74,12 +74,12 @@ public class UserCommandServiceImpl implements UserCommandService {
         newUser = save(newUser);
     }
 
-    public void registerUser(User user) {
+    public User registerUser(User user) {
         user.setStatus(UserStatus.ACTIVE);
         user.setTermsAccepted(true);
         user.setTermsAcceptanceDate(LocalDateTime.now());
 
-        save(user);
+        return save(user);
     }
 
     @Transactional

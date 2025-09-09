@@ -10,7 +10,7 @@ public interface UserCommandService {
     //старый метод регистрации(не используется)
     void registerUserFromOAuth2(OAuth2User oauth2User);
 
-    void registerUser(User user);
+    User registerUser(User user);
 
     //старый метод удаления пользователя из oauth(не используется)
     void deleteUserFromOAuth2(OAuth2User oauth2User);
