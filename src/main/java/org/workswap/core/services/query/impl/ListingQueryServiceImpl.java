@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.workswap.common.dto.listing.CatalogListingDTO;
 import org.workswap.common.dto.listing.ImageDTO;
 import org.workswap.common.dto.listing.ListingDTO;
 import org.workswap.common.dto.listing.ListingTranslationDTO;
@@ -186,6 +187,10 @@ public class ListingQueryServiceImpl implements ListingQueryService {
 
         logger.debug("Объявления по языку: " + listings.size());
 
+        // Убираем тестовые
+
+        listings.removeIf(listing -> listing.isTestMode() == true);
+
         // Фильтруем по категории
 
         if (category != null) {
@@ -272,7 +277,7 @@ public class ListingQueryServiceImpl implements ListingQueryService {
         return listingRepository.searchAllFields(query);
     }
 
-    public List<ListingDTO> getSortedCatalogDto(
+    public List<CatalogListingDTO> getSortedCatalogDto(
         User user, 
         String location, 
         String lang,
@@ -304,9 +309,9 @@ public class ListingQueryServiceImpl implements ListingQueryService {
 
         Page<Listing> listingsPage = findPageOfSortedListings(categoryType, sortBy, pageable, locationType, searchQuery, hasReviews, languages);
 
-        List<ListingDTO> listings = new ArrayList<>();
+        List<CatalogListingDTO> listings = new ArrayList<>();
         for(Listing l : listingsPage.getContent()) {
-            listings.add(mappingService.convertToDTO(l, Locale.of(lang)));
+            listings.add(mappingService.convertToCatalogDTO(l, Locale.of(lang)));
         }
 
         return listings;

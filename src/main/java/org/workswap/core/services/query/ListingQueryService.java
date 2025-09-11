@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.workswap.common.dto.listing.CatalogListingDTO;
 import org.workswap.common.dto.listing.ImageDTO;
 import org.workswap.common.dto.listing.ListingDTO;
 import org.workswap.common.dto.listing.ListingTranslationDTO;
@@ -56,7 +57,7 @@ public interface ListingQueryService {
         boolean hasReviews, 
         List<String> languages);
 
-    List<ListingDTO> getSortedCatalogDto(
+    List<CatalogListingDTO> getSortedCatalogDto(
         User user, 
         String location, 
         String lang,
