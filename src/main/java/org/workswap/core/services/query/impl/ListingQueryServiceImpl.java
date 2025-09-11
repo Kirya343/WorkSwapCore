@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -194,7 +195,15 @@ public class ListingQueryServiceImpl implements ListingQueryService {
         // Фильтруем по категории
 
         if (category != null) {
-            listings.removeIf(listing -> listing.getCategory() != category);
+
+            List<Category> categories = categoryService.getAllDescendants(category);
+            Set<Long> categoryIds = categories.stream()
+                .map(Category::getId)
+                .collect(Collectors.toSet());
+
+            logger.debug("Список айди категорий для поиска: {}", categoryIds);
+            
+            listings.removeIf(listing -> !categoryIds.contains(listing.getCategory().getId()));
         }
 
         logger.debug("Объявления прошли фильтр категории: " + listings.size());
