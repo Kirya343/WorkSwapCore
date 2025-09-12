@@ -68,13 +68,24 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public Review createReview(Long authorId, Long profileId, Long listingId, Double rating, String text) {
+
         User profile = null;
         Listing listing = null;
+        boolean alreadyReviewed = true;
+
+        logger.debug("profileId {}", profileId);
+        logger.debug("listingId {}", listingId);
+
+        // Получаем текущего пользователя
+        User author = userQueryService.findUser(authorId.toString());
+
         if (profileId != null) {
             profile = userQueryService.findUser(profileId.toString());
+            alreadyReviewed = hasUserReviewedProfile(author, profile);
         } else if (listingId != null) {
             listing = listingQueryService.findListing(listingId.toString());
             profile = listing.getAuthor();
+            alreadyReviewed = hasUserReviewedListing(author, listing);
         } else {
             logger.debug("Не было ни профиля, ни объявления");
             return null;
@@ -85,16 +96,10 @@ public class ReviewServiceImpl implements ReviewService {
             return null;
         }
 
-        // Получаем текущего пользователя
-        User author = userQueryService.findUser(authorId.toString());
-
         if (author == profile) {
             logger.debug("Автор объявления оставляет отзыв сам себе");
             return null;
         }
-
-        // Проверяем, оставлял ли пользователь уже отзыв к этому объявлению
-        boolean alreadyReviewed = hasUserReviewedListing(author, listing);
 
         if (alreadyReviewed) {
             logger.debug("Пользователь уже оставил отзыв на это объявление");
@@ -122,9 +127,9 @@ public class ReviewServiceImpl implements ReviewService {
             review.getId(),
             review.getText(),
             review.getRating(),
-            review.getAuthor().getId(),
-            review.getProfile().getId(),
-            review.getListing().getId(),
+            review.getAuthor() != null ? review.getAuthor().getId() : null,
+            review.getProfile() != null ? review.getProfile().getId() : null,
+            review.getListing() != null ? review.getListing().getId() : null,
             review.getCreatedAt()
         );
     }
