@@ -20,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 @Component
 @Profile({"production", "backoffice"})
 @RequiredArgsConstructor
-public class RolesPermissionsConverter implements Converter<Jwt, AbstractAuthenticationToken> {
+public class JwtTokenConverter implements Converter<Jwt, AbstractAuthenticationToken> {
 
     private final UserRepository userRepository;
 

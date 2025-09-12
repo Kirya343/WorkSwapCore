@@ -1,4 +1,4 @@
-package org.workswap.core.services.components.security;
+package org.workswap.core.services.components.security.authentication;
 
 import java.io.IOException;
 import java.net.URI;
@@ -24,6 +24,7 @@ import org.springframework.stereotype.Component;
 import org.workswap.common.enums.UserStatus;
 import org.workswap.core.services.RoleService;
 import org.workswap.core.services.command.UserCommandService;
+import org.workswap.core.services.components.security.JwtIssuer;
 import org.workswap.core.services.query.UserQueryService;
 import org.workswap.datasource.central.model.User;
 import org.workswap.datasource.central.model.user.Role;
