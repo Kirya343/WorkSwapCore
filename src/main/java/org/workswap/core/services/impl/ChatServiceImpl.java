@@ -111,8 +111,8 @@ public class ChatServiceImpl implements ChatService {
 
         // Отправляем обновление конкретному пользователю
         messagingTemplate.convertAndSendToUser(
-                user.getSub(),
-                "/queue/chats.updates",
+                user.getEmail(),
+                "queue/chats.updates",
                 chatDto
         );
     }
@@ -137,10 +137,8 @@ public class ChatServiceImpl implements ChatService {
     @Transactional
     public Message sendMessage(Chat chat, User sender, String text) {
 
-        // Создание нового сообщения
         Message message = new Message(chat, sender, chat.getInterlocutor(sender), text);
 
-        // Сохраняем сообщение
         messageRepository.save(message);
 
         return message;
