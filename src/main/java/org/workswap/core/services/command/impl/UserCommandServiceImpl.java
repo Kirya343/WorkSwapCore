@@ -1,6 +1,7 @@
 package org.workswap.core.services.command.impl;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,7 @@ import org.workswap.core.services.command.UserCommandService;
 import org.workswap.core.services.impl.ChatServiceImpl;
 import org.workswap.core.services.query.UserQueryService;
 import org.workswap.datasource.central.model.Listing;
+import org.workswap.datasource.central.model.Notification;
 import org.workswap.datasource.central.model.Review;
 import org.workswap.datasource.central.model.User;
 import org.workswap.datasource.central.model.chat.Chat;
@@ -27,6 +29,7 @@ import org.workswap.datasource.central.model.listingModels.Location;
 import org.workswap.datasource.central.model.user.Role;
 import org.workswap.datasource.central.model.user.UserSettings;
 import org.workswap.datasource.central.repository.LocationRepository;
+import org.workswap.datasource.central.repository.NotificationRepository;
 import org.workswap.datasource.central.repository.ReviewRepository;
 import org.workswap.datasource.central.repository.UserRepository;
 
@@ -43,9 +46,11 @@ public class UserCommandServiceImpl implements UserCommandService {
     private final RoleService roleService;
     private final ChatServiceImpl chatService;
     private final ListingCommandService listingCommandService;
+
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final LocationRepository locationRepository;
+    private final NotificationRepository notificationRepository;
 
     @Transactional
     public void registerUserFromOAuth2(OAuth2User oauth2User) {
@@ -83,12 +88,6 @@ public class UserCommandServiceImpl implements UserCommandService {
     }
 
     @Transactional
-    public void deleteUserFromOAuth2(OAuth2User oauth2User) {
-        User user = queryService.findUser(oauth2User.getAttribute("email"));
-        deleteUser(user);
-    }
-
-    @Transactional
     public void deleteUser(User user) {
         try {
             if (user == null) {
@@ -99,7 +98,7 @@ public class UserCommandServiceImpl implements UserCommandService {
 
             // Чистка разговоров
 
-            Set<ChatParticipant> chatParticipants = user.getChatParticipants();
+            Set<ChatParticipant> chatParticipants = new HashSet<>(user.getChatParticipants());
             logger.debug("> Чистка чатов");
 
             if (!chatParticipants.isEmpty()) {
@@ -114,7 +113,7 @@ public class UserCommandServiceImpl implements UserCommandService {
             }
 
             // Чистка объявлений
-            List<Listing> listings = user.getListings();
+            List<Listing> listings = new ArrayList<>(user.getListings());
             logger.debug("> Чистка объявлений");
 
             if (!listings.isEmpty()) {
@@ -128,7 +127,7 @@ public class UserCommandServiceImpl implements UserCommandService {
             }
 
             // Чистка отзывов
-            List<Review> reviews = user.getReviews();
+            List<Review> reviews = new ArrayList<>(user.getReviews());
             logger.debug("> Чистка отзывов");
 
             if (!reviews.isEmpty()) {
@@ -139,6 +138,17 @@ public class UserCommandServiceImpl implements UserCommandService {
                 }
             } else {
                 logger.debug(">> У пользователя не найдено отзывов");
+            }
+
+            // Чистка уведомления
+            List<Notification> notifications = new ArrayList<>(notificationRepository.findByRecipient(user));
+            logger.debug("> Чистка уведомлений");
+
+            if (!notifications.isEmpty()) {
+                logger.debug(">> Удаляем {} уведомлений", notifications.size());
+                notificationRepository.deleteAll(notifications);
+            } else {
+                logger.debug(">> У пользователя не найдено уведомлений");
             }
 
             // Удаление пользователя

@@ -12,9 +12,6 @@ public interface UserCommandService {
 
     User registerUser(User user);
 
-    //старый метод удаления пользователя из oauth(не используется)
-    void deleteUserFromOAuth2(OAuth2User oauth2User);
-
     //универсальный метод удаления, работает и используется
     void deleteUser(User user);
     

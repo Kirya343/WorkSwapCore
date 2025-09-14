@@ -1,41 +1,31 @@
 package org.workswap.config;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.lang.NonNull;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
-import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
-import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
-import org.workswap.core.services.components.security.JwtService;
+import org.workswap.core.services.components.security.AuthChannelInterceptor;
 
 import lombok.RequiredArgsConstructor;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.security.Principal;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 @Configuration
 @EnableWebSocketMessageBroker
 @RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    private final JwtService jwtService;
+    private final AuthChannelInterceptor authChannelInterceptor;
 
     @Override
     public void registerStompEndpoints(@NonNull StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("*")
-                .setHandshakeHandler(new JwtHandshakeHandler());
+                .setAllowedOriginPatterns("*");
     }
 
     @Override
@@ -51,27 +41,35 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         return false;
     }
 
-    private class JwtHandshakeHandler extends DefaultHandshakeHandler {
+    @Override
+    public void configureClientInboundChannel(@NonNull ChannelRegistration registration) {
+        registration.interceptors(authChannelInterceptor);
+    }
+
+    /* private class JwtHandshakeHandler extends DefaultHandshakeHandler {
+
+        private static final Logger logger = LoggerFactory.getLogger(WebSocketConfig.class);
+        
         @Override
         protected Principal determineUser(
                 @NonNull ServerHttpRequest request,
                 @NonNull WebSocketHandler wsHandler,
                 @NonNull Map<String, Object> attributes
         ) {
-            // Достаём токен из параметра
-            String uri = request.getURI().toString();
-            String token = extractTokenFromUri(uri);
+            List<String> authHeaders = request.getHeaders().get("Authorization");
+            logger.debug("authHeaders: {}", authHeaders);
+            if (authHeaders == null || authHeaders.isEmpty()) return null;
 
-            if (token == null) {
-                return null; // Нет токена — анонимный пользователь
-            }
+            String bearer = authHeaders.get(0);
+            logger.debug("bearer: {}", bearer);
+            if (!bearer.startsWith("Bearer ")) return null;
 
-            // Валидируем токен, получаем username
+            String token = bearer.substring(7);
             String email = jwtService.validateAndGetEmail(token);
-            return () -> email; // Возвращаем Principal
+            return () -> email;
         }
 
-        private String extractTokenFromUri(String uri) {
+        /* private String extractTokenFromUri(String uri) {
             // Простая реализация — достаём параметр из URL
             try {
                 Map<String, String> params = splitQuery(new URI(uri));
@@ -94,5 +92,5 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
             }
             return params;
         }
-    }
+    } */
 }
