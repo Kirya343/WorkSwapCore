@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 import org.workswap.datasource.central.model.Listing;
 import org.workswap.datasource.central.model.Review;
 import org.workswap.datasource.central.model.User;
-import org.workswap.datasource.central.repository.ListingRepository;
+import org.workswap.datasource.central.repository.listing.ListingRepository;
 import org.workswap.datasource.central.repository.ResumeRepository;
 import org.workswap.datasource.central.repository.ReviewRepository;
 import org.workswap.datasource.central.repository.UserRepository;

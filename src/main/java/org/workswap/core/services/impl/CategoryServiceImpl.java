@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -196,16 +198,44 @@ public class CategoryServiceImpl implements CategoryService {
             messageSource.getMessage("category." + category.getName(), null, locale));
     }
 
+    private void collectDescendants(Category parent, Map<Long, List<Category>> parentMap, List<Category> result) {
+        result.add(parent);
+        List<Category> children = parentMap.getOrDefault(parent.getId(), Collections.emptyList());
+        for (Category child : children) {
+            collectDescendants(child, parentMap, result);
+        }
+    }
+
     @Override
     public List<Category> getAllDescendants(Category parent) {
-        List<Category> descendants = new ArrayList<>();
-        descendants.add(parent);
-        List<Category> children = categoryRepository.findByParent(parent);
-        for (Category child : children) {
-            descendants.add(child);
-            descendants.addAll(getAllDescendants(child));
-            logger.debug("Дочерняя категория найдена: {}", child.getName());
+        List<Category> allCategories = categoryRepository.findAll();
+
+        // строим карту parentId -> список детей
+        Map<Long, List<Category>> parentMap = allCategories.stream()
+            .filter(c -> c.getParent() != null)
+            .collect(Collectors.groupingBy(c -> c.getParent().getId()));
+
+        List<Category> result = new ArrayList<>();
+        collectDescendants(parent, parentMap, result);
+
+        return result;
+    }
+
+    public List<Category> getAllDescendantsById(Long parentId) {
+        List<Category> allCategories = categoryRepository.findAll(); // 1 запрос
+        Map<Long, List<Category>> parentMap = allCategories.stream()
+            .filter(c -> c.getParent() != null)
+            .collect(Collectors.groupingBy(c -> c.getParent().getId()));
+
+        List<Category> result = new ArrayList<>();
+        Category parent = allCategories.stream()
+            .filter(c -> c.getId().equals(parentId))
+            .findFirst()
+            .orElse(null);
+
+        if (parent != null) {
+            collectDescendants(parent, parentMap, result);
         }
-        return descendants;
+        return result;
     }
 }

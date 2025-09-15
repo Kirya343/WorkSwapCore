@@ -27,4 +27,5 @@ public interface CategoryService {
 
     //метод получения всех дочерних категорий
     List<Category> getAllDescendants(Category parent);
+    List<Category> getAllDescendantsById(Long parentId);
 }

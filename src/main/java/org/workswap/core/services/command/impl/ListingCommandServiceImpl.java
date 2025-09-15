@@ -21,7 +21,7 @@ import org.workswap.datasource.central.model.listingModels.Category;
 import org.workswap.datasource.central.model.listingModels.ListingTranslation;
 import org.workswap.datasource.central.model.listingModels.Location;
 import org.workswap.datasource.central.repository.CategoryRepository;
-import org.workswap.datasource.central.repository.ListingRepository;
+import org.workswap.datasource.central.repository.listing.ListingRepository;
 import org.workswap.datasource.central.repository.LocationRepository;
 import org.workswap.datasource.central.repository.UserRepository;
 import org.workswap.datasource.central.repository.chat.ChatRepository;

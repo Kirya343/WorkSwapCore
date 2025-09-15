@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.workswap.common.dto.listing.CatalogListingDTO;
 import org.workswap.common.dto.listing.ImageDTO;
 import org.workswap.common.dto.listing.ListingDTO;
@@ -19,9 +17,6 @@ public interface ListingQueryService {
 
     Listing findListing(String param);
 
-    Page<Listing> findListingsByCategory(String category, Pageable pageable);
-    Page<Listing> findActiveListingsByCategory(String category, Pageable pageable);
-
     List<Listing> getRecentListings(int count);
     List<Listing> findListingsByUser(User user);
     List<Listing> findMyListings(User user);
@@ -34,35 +29,18 @@ public interface ListingQueryService {
     List<Listing> findByCategory(Category category);
     List<Listing> findByLocation(Location location);
     List<Listing> findFavoritesListingsByUser(User user);
-    List<Listing> searchListings(String searchQuery);
     List<Listing> localizeAccountListings(User user, Locale locale);
     List<Listing> localizeActiveAccountListings(User user, Locale locale);
     List<Listing> localizeFavoriteListings(User user, Locale locale);
 
     boolean isFavorite(User user, Listing listing);
 
-    Page<Listing> findPageOfSortedListings(
-        Category category, 
-        String sortBy, 
-        Pageable pageable, 
-        Location location, 
-        String searchQuery, 
-        boolean hasReviews, 
-        List<String> languages);
-
-    List<Listing> findSortedListings(
-        Category category, 
-        Location location, 
-        String searchQuery, 
-        boolean hasReviews, 
-        List<String> languages);
-
     List<CatalogListingDTO> getSortedCatalogDto(
         User user, 
         String location, 
         String lang,
         int page,
-        String category,
+        Long categoryId,
         String sortBy,
         String searchQuery,
         boolean hasReviews);

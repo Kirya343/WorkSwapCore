@@ -5,14 +5,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -31,7 +28,7 @@ import org.workswap.datasource.central.model.Listing;
 import org.workswap.datasource.central.model.User;
 import org.workswap.datasource.central.model.listingModels.Category;
 import org.workswap.datasource.central.model.listingModels.Location;
-import org.workswap.datasource.central.repository.ListingRepository;
+import org.workswap.datasource.central.repository.listing.ListingRepository;
 import org.workswap.datasource.central.repository.UserRepository;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -68,10 +65,6 @@ public class ListingQueryServiceImpl implements ListingQueryService {
         return findListingFromRepostirory(param, paramType);
     }
 
-    public Page<Listing> findListingsByCategory(String category, Pageable pageable) {
-        return listingRepository.findByCategory(category, pageable);
-    }
-
     public List<Listing> getRecentListings(int count) {
         Pageable pageable = PageRequest.of(0, count);
         return listingRepository.findAllByOrderByCreatedAtDesc(pageable).getContent();
@@ -88,10 +81,6 @@ public class ListingQueryServiceImpl implements ListingQueryService {
     public List<Listing> findActiveListingsByUser(User user) {
         return listingRepository.findByAuthorAndActiveTrue(user);
     } 
-
-    public Page<Listing> findActiveListingsByCategory(String category, Pageable pageable) {
-        return listingRepository.findActiveByCategory(category, pageable);
-    }
 
     public List<Listing> getAllActiveListings() {
         return listingRepository.findListByActiveTrue(); // Предполагая, что у вас есть поле `active` в сущности
@@ -140,18 +129,28 @@ public class ListingQueryServiceImpl implements ListingQueryService {
         return user.getFavoriteListings().contains(listing);
     }
 
-    public Page<Listing> findPageOfSortedListings(Category category, String sortBy, Pageable pageable, Location location, String searchQuery, boolean hasReviews, List<String> languages) {
+    public List<CatalogListingDTO> getSortedCatalogDto(
+        User user, 
+        String location, 
+        String lang,
+        int page,
+        Long categoryId,
+        String sortBy,
+        String searchQuery,
+        boolean hasReviews
+    ) {
+        List<String> languages = new ArrayList<>();
 
-        logger.debug("Категория: {}", category != null ? category.getId() : null);
-        logger.debug("Сортинг: {}", sortBy);
-        logger.debug("Локация: {}", location != null ? location.getId() : null);
-        logger.debug("Поиск: {}", searchQuery);
-        logger.debug("Отзывы: ", hasReviews);
-        logger.debug("Языки для поиска: {}", languages);
+        if (user != null) {
+            languages = user.getLanguages();
+        }
 
-        List<Listing> filteredListings = findSortedListings(category, location, searchQuery, hasReviews, languages);
+        if (!languages.contains(lang)) {
+            languages.add(lang);
+        }
 
-        // Выбор компаратора для сортировки
+        List<Category> categories = categoryService.getAllDescendantsById(categoryId);
+
         Comparator<Listing> comparator;
         switch (sortBy) {
             case "price":
@@ -169,157 +168,12 @@ public class ListingQueryServiceImpl implements ListingQueryService {
                 break;
         }
 
-        // Применяем сортировку
-        filteredListings.sort(comparator);
+        List<Listing> foundListings = listingRepository.findListings(categories, location, searchQuery, hasReviews, languages, page, 12);
 
-        // Пагинация
-        int start = (int) pageable.getOffset();
-        int end = Math.min(start + pageable.getPageSize(), filteredListings.size());
-
-        List<Listing> pageContent = (start <= end) ? filteredListings.subList(start, end) : List.of();
-        logger.debug("Отфильтрованные и отсортированные объявления: " + pageContent.size());
-
-        return new PageImpl<>(pageContent, pageable, filteredListings.size());
-    }
-
-    public List<Listing> findSortedListings(Category category, Location location, String searchQuery, boolean hasReviews, List<String> languages) {
-
-        List<Listing> listings = findActiveByCommunities(languages);
-
-        logger.debug("Объявления по языку: " + listings.size());
-
-        // Убираем тестовые
-
-        listings.removeIf(listing -> listing.isTestMode() == true);
-
-        // Фильтруем по категории
-
-        if (category != null) {
-
-            List<Category> categories = categoryService.getAllDescendants(category);
-            Set<Long> categoryIds = categories.stream()
-                .map(Category::getId)
-                .collect(Collectors.toSet());
-
-            logger.debug("Список айди категорий для поиска: {}", categoryIds);
-            
-            listings.removeIf(listing -> !categoryIds.contains(listing.getCategory().getId()));
-        }
-
-        logger.debug("Объявления прошли фильтр категории: " + listings.size());
-
-        // Фильтруем по локации
-        if (location != null) {
-            if (location.isCity()) {
-                // выбрали город -> оставляем только этот город
-                logger.debug("Локация пользователя: город");
-                listings.removeIf(listing -> {
-                    boolean sameLocation = listing.getLocation().getId().equals(location.getId());
-                    logger.debug(
-                        "Локация объявления({}) {} совпадает со указанной локацией({}): {}", 
-                        listing.getLocation().getId(), 
-                        listing.getId(), 
-                        location.getId(), 
-                        sameLocation
-                    );
-                    return !(sameLocation);
-                });
-                
-            } else {
-                logger.debug("Локация пользователя: страна");
-                // выбрали страну -> оставляем объявления из этой страны или её городов
-                listings.removeIf(listing -> {
-                    Location listingLocation = listing.getLocation();
-
-                    boolean sameLocation = listingLocation.getId().equals(location.getId());
-
-                    logger.debug(
-                        "Локация объявления({}) {} совпадает со указанной локацией({}): {}", 
-                        listingLocation.getId(), 
-                        listing.getId(), 
-                        location.getId(), 
-                        sameLocation
-                    );
-
-                    boolean sameCountry = listingLocation.getCountry() != null
-                        && listingLocation.getCountry().getId().equals(location.getId());
-
-                    logger.debug(
-                        "Страна локации объявления({}) {} совпадает со указанной локацией({}): {}", 
-                        listingLocation.getCountry() != null ? listingLocation.getCountry().getId() : null, 
-                        listing.getId(), 
-                        location.getId(), 
-                        sameCountry
-                    );
-
-                    // Удаляем, если ни локация, ни страна не совпали
-                    return !(sameLocation || sameCountry);
-                });
-            }
-        }
-
-        logger.debug("Объявления прошли фильтр локации: " + listings.size());
-
-        // Фильтруем по поиску
-
-        if (searchQuery != null && !searchQuery.isBlank()) {
-            List<Listing> searchResults = searchListings(searchQuery);
-            listings.retainAll(searchResults); // оставляем только те, которые есть и там, и там
-        }
-
-        logger.debug("Объявления прошли фильтр поиска: " + listings.size());
-
-        // Фильтруем по наличию отзывов
-
-        if (hasReviews) {
-            listings.removeIf(listing -> listing.getRating() == 0);
-        }
-
-        logger.debug("Объявления прошли фильтр наличия отзывов: " + listings.size());
-
-        return listings;
-    }
-
-    public List<Listing> searchListings(String searchQuery) {
-        String query = "%" + searchQuery.toLowerCase() + "%";
-        
-        return listingRepository.searchAllFields(query);
-    }
-
-    public List<CatalogListingDTO> getSortedCatalogDto(
-        User user, 
-        String location, 
-        String lang,
-        int page,
-        String category,
-        String sortBy,
-        String searchQuery,
-        boolean hasReviews
-    ) {
-        List<String> languages = new ArrayList<>();
-        Location locationType = null;
-        if (user != null) {
-            languages = user.getLanguages();
-        }
-
-        if (location == null && user != null) {
-            locationType = user.getLocation();
-        } else {
-            locationType = locationService.findLocation(location);
-        }
-
-        if (!languages.contains(lang)) {
-            languages.add(lang);
-        }
-
-        Pageable pageable = PageRequest.of(page, 12);
-
-        Category categoryType = categoryService.findCategory(category);
-
-        Page<Listing> listingsPage = findPageOfSortedListings(categoryType, sortBy, pageable, locationType, searchQuery, hasReviews, languages);
+        foundListings.sort(comparator);
 
         List<CatalogListingDTO> listings = new ArrayList<>();
-        for(Listing l : listingsPage.getContent()) {
+        for(Listing l : foundListings) {
             listings.add(mappingService.convertToCatalogDTO(l, Locale.of(lang)));
         }
 
