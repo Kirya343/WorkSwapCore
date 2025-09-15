@@ -2,6 +2,7 @@ package org.workswap.core.services.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -45,6 +46,9 @@ public class NotificationServiceImpl implements NotificationService {
     private final MessageSource messageSource;
     private final NewsService newsService;
 
+    @Value("${tgbot.url}")
+    private String tgBotUrl;
+
     @Override
     public void saveOfflineChatNotification(String userParam, NotificationDTO dto) {
 
@@ -55,6 +59,8 @@ public class NotificationServiceImpl implements NotificationService {
 
         // Отправляем в телеграмм
         try {
+
+            logger.error("Начинаем отправлять уведомление в телеграм");
             // Строим JSON вручную или через ObjectMapper
             ObjectMapper objectMapper = new ObjectMapper();
 
@@ -72,7 +78,7 @@ public class NotificationServiceImpl implements NotificationService {
             String signature = WebhookSigner.generateSignature(json);
 
             HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://s1.qwer-host.xyz:25079/api/notifications/send"))
+                .uri(URI.create(tgBotUrl + "/api/notifications/send"))
                 .header("Content-Type", "application/json")
                 .header("X-Webhook-Signature", signature)
                 .POST(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8))
