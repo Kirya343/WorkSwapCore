@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -94,7 +93,7 @@ public class ChatServiceImpl implements ChatService {
                     return date2.compareTo(date1);
                 })
                 .map(conv -> convertToDTO(conv, user, locale))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override

@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
@@ -76,7 +75,7 @@ public class LocalizationServiceImpl implements LocalizationService {
             return paths
                 .filter(Files::isDirectory)
                 .map(p -> p.getFileName().toString())
-                .collect(Collectors.toList());
+                .toList();
         }
     }
 

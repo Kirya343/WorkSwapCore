@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -247,7 +246,7 @@ public class StatServiceImpl implements StatService {
 
         List<Review> listingReviews = listings.stream()
             .flatMap(listing -> reviewService.getReviewsByListingId(listing.getId()).stream())
-            .collect(Collectors.toList());
+            .toList();
 
         List<Review> profileReviews = reviewService.getReviewsByProfileId(user.getId());
 

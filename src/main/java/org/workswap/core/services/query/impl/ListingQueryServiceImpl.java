@@ -184,14 +184,14 @@ public class ListingQueryServiceImpl implements ListingQueryService {
         return findDrafts(user)
             .stream()
             .map(listing -> mappingService.convertToDTO(listing, Locale.of(locale)))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     public List<ListingDTO> getRecentListings(int amount, String locale) {
         return getRecentListings(amount)
             .stream()
             .map(listing -> mappingService.convertToDTO(listing, Locale.of(locale)))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     public List<ListingDTO> getListingDtosByUser(Long id, String locale) {
@@ -200,14 +200,14 @@ public class ListingQueryServiceImpl implements ListingQueryService {
         return findListingsByUser(user)
             .stream()
             .map(listing -> mappingService.convertToDTO(listing, Locale.of(locale)))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     public List<ListingDTO> getFavorites(User user, String locale) {
         return findFavoritesListingsByUser(user)
             .stream()
             .map(listing -> mappingService.convertToDTO(listing, Locale.of(locale)))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     public Map<String, ListingTranslationDTO> getTranslations(Long id) {
@@ -229,7 +229,7 @@ public class ListingQueryServiceImpl implements ListingQueryService {
             .getImages()
             .stream()
             .map(image -> new ImageDTO(image.getId(), id, image.getPath()))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     public List<Listing> localizeAccountListings(User user, Locale locale) {
