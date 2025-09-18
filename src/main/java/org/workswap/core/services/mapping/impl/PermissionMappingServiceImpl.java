@@ -16,10 +16,10 @@ import lombok.RequiredArgsConstructor;
 public class PermissionMappingServiceImpl implements PermissionMappingService{
     
     public PermissionDTO convertPermissionDTO(Permission perm) {
-        return new PermissionDTO(perm.getId(), perm.getName());
+        return new PermissionDTO(perm.getId(), perm.getName(), perm.getComment());
     }
 
     public RoleDTO convertRoleDTO(Role role) {
-        return new RoleDTO(role.getId(), role.getName());
+        return new RoleDTO(role.getId(), role.getName(), role.getLevel());
     }
 }

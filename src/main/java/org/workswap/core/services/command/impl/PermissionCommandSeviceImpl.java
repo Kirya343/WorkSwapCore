@@ -38,6 +38,14 @@ public class PermissionCommandSeviceImpl implements PermissionCommandSevice {
         logger.debug("Найденые новые пермишны: {}", newPerms);
 
         role.setPermissions(newPerms);
-        roleRepository.save(role);
+        saveRole(role);
+    }
+
+    public Role saveRole(Role role) {
+        return roleRepository.save(role);
+    }
+
+    public Permission savePermission(Permission permission) {
+        return permissionRepository.save(permission);
     }
 }
