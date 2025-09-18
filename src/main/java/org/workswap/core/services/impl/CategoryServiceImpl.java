@@ -8,9 +8,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,10 +27,7 @@ import lombok.RequiredArgsConstructor;
 @Profile("production")
 public class CategoryServiceImpl implements CategoryService {
 
-    private static final Logger logger = LoggerFactory.getLogger(CategoryService.class);
-
     private final CategoryRepository categoryRepository;
-    private final MessageSource messageSource;
     private final ServiceUtils serviceUtils;
     private final LocalizationService localizationService;
 
@@ -189,13 +183,11 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDTO toDTO(Category category, Locale locale) {
         Long parentId = category.getParent() != null ? category.getParent().getId() : null;
-        logger.debug("Перевод категории {}: {}", category.getName(), messageSource.getMessage("category." + category.getName(), null, locale));
         return new CategoryDTO(
             category.getId(), 
             category.getName(), 
             parentId,
-            category.isLeaf(),
-            messageSource.getMessage("category." + category.getName(), null, locale));
+            category.isLeaf());
     }
 
     private void collectDescendants(Category parent, Map<Long, List<Category>> parentMap, List<Category> result) {

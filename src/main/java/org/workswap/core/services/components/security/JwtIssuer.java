@@ -73,7 +73,7 @@ public class JwtIssuer {
         JWTClaimsSet set = new JWTClaimsSet.Builder()
                 .subject(user.getEmail())
                 .issueTime(Date.from(now))
-                .expirationTime(Date.from(now.plus(Duration.ofMinutes(30)))) // TTL 30 мин
+                .expirationTime(Date.from(now.plus(Duration.ofMinutes(30)))) // TTL 30 мин (для теста 3 минуты, вернуть на 30) 
                 .claim("roles", roles)
                 .claim("permissions", permissions)
                 .jwtID(UUID.randomUUID().toString())

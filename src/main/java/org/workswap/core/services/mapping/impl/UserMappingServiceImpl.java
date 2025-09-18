@@ -2,6 +2,7 @@ package org.workswap.core.services.mapping.impl;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.context.annotation.Profile;
@@ -23,6 +24,8 @@ public class UserMappingServiceImpl implements UserMappingService {
         if (user == null) return null;
 
         UserSettings settings = user.getSettings();
+        
+        List<String> roles = user.getRoles().stream().map(role -> role.getName()).toList();
                               
         UserDTO dto = new UserDTO(
             user.getId(), 
@@ -33,6 +36,7 @@ public class UserMappingServiceImpl implements UserMappingService {
             user.getBio(), 
             user.getAvatarUrl(),
             user.getLanguages(),
+            roles,
             user.getStatus().toString(), 
             user.getRating(),
             user.getCreatedAt()
@@ -51,6 +55,8 @@ public class UserMappingServiceImpl implements UserMappingService {
             
         UserSettings settings = user.getSettings();
 
+        List<String> roles = user.getRoles().stream().map(role -> role.getName()).toList();
+
         FullUserDTO dto = new FullUserDTO(
             user.getId(),
             user.getSub(),
@@ -60,6 +66,7 @@ public class UserMappingServiceImpl implements UserMappingService {
             user.getBio(),
             user.getAvatarUrl(),
             user.getLanguages(),
+            roles,
             locationId,
             user.getStatus().toString(),
             settings.getAvatarType(),
