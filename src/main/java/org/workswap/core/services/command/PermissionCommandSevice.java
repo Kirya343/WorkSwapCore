@@ -1,14 +1,11 @@
 package org.workswap.core.services.command;
 
-import java.util.List;
-
-import org.workswap.common.dto.permission.PermissionDTO;
 import org.workswap.datasource.central.model.user.Permission;
 import org.workswap.datasource.central.model.user.Role;
 
 public interface PermissionCommandSevice {
 
-    void updateRolePermissions(Role role, List<PermissionDTO> permissions);
+    void updateRolePermission(Role role, Permission permission, boolean enabled);
 
     Role saveRole(Role role);
     Permission savePermission(Permission permission);
