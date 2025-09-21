@@ -1,5 +1,6 @@
 package org.workswap.core.services.command;
 
+import java.nio.file.AccessDeniedException;
 import java.util.Map;
 
 import org.workswap.datasource.central.model.Listing;
@@ -17,5 +18,5 @@ public interface ListingCommandService {
     void addListingToFavorite(User user, Listing listing);
     void removeListingFromFavorite(User user, Listing listing);
 
-    void modifyListingParam(Long id, Map<String, Object> updates);
+    void modifyListingParam(User user, Long id, Map<String, Object> updates) throws AccessDeniedException;
 }

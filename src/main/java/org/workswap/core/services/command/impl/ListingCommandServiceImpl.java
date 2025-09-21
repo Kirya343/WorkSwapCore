@@ -1,5 +1,6 @@
 package org.workswap.core.services.command.impl;
 
+import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -110,9 +111,13 @@ public class ListingCommandServiceImpl implements ListingCommandService {
         userRepository.save(user);
     }
 
-    public void modifyListingParam(Long id, Map<String, Object> updates) {
+    public void modifyListingParam(User user, Long id, Map<String, Object> updates) throws AccessDeniedException {
         Listing listing = listingRepository.findById(id).orElse(null);
 
+        if (listing.getAuthor().getId() != user.getId()) {
+            throw new AccessDeniedException("Это не ваше объявление!");
+        }
+        
         if (listing != null) {
             updates.forEach((key, value) -> {
                 switch (key) {
