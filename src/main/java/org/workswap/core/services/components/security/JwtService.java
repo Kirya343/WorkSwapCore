@@ -8,10 +8,17 @@ import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
 
 import com.nimbusds.jose.jwk.RSAKey;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -47,6 +54,35 @@ public class JwtService {
         } catch (ParseException | JOSEException e) {
             return null;
         }
+    }
+
+    /**
+     * Валидирует токен и возвращает список GrantedAuthority
+     * @param token JWT токен
+     * @return список GrantedAuthority или пустой список, если токен невалиден
+     * @throws ParseException 
+     */
+    public Collection<GrantedAuthority> getAuthorities(String token) throws ParseException {
+        JWTClaimsSet claims = validate(token);
+        if (claims == null) {
+            return Collections.emptyList();
+        }
+
+        Collection<GrantedAuthority> authorities = new ArrayList<>();
+
+        // роли
+        List<String> roles = claims.getStringListClaim("roles");
+        if (roles != null) {
+            roles.forEach(role -> authorities.add(new SimpleGrantedAuthority(role)));
+        }
+
+        // права/permissions
+        List<String> perms = claims.getStringListClaim("permissions");
+        if (perms != null) {
+            perms.forEach(perm -> authorities.add(new SimpleGrantedAuthority(perm)));
+        }
+
+        return authorities;
     }
 
     public String validateAndGetEmail(String token) {

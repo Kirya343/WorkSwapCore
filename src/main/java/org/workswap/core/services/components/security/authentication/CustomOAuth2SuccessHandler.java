@@ -6,7 +6,6 @@ import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.Base64;
 import java.util.HashSet;
 import java.util.Set;
@@ -15,8 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -24,12 +21,10 @@ import org.springframework.stereotype.Component;
 import org.workswap.common.enums.UserStatus;
 import org.workswap.core.services.RoleService;
 import org.workswap.core.services.command.UserCommandService;
-import org.workswap.core.services.components.security.JwtIssuer;
+import org.workswap.core.services.components.security.AuthCookiesService;
 import org.workswap.core.services.query.UserQueryService;
 import org.workswap.datasource.central.model.User;
 import org.workswap.datasource.central.model.user.Role;
-
-import com.nimbusds.jose.JOSEException;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -43,30 +38,21 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
     private static final Logger logger = LoggerFactory.getLogger(CustomOAuth2SuccessHandler.class);
 
-    private final JwtIssuer jwtIssuer; // твой сервис для access JWT
-
     private final UserQueryService userQueryService;
     private final UserCommandService userCommandService;
     private final RoleService roleService;
 
+    private final AuthCookiesService cookiesService;
+
     @Value("${backoffice.url}")
     private String backofficeUrl;
-
-    @Value("${app.cookie.secure}")
-    private boolean cookieSecure;
-
-    @Value("${app.cookie.domain}")
-    private String cookieDomain;
-
-    @Value("${app.cookie.sameSite}")
-    private String cookieSameSite;
     
     @Override
     public void onAuthenticationSuccess(
         HttpServletRequest request,
         HttpServletResponse response,
         Authentication authentication
-    ) throws IOException, ServletException {
+    ) throws ServletException, IOException  {
 
         OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
         String email = oidcUser.getEmail();
@@ -102,20 +88,6 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         user.getSettings().setGoogleAvatar(googleAvatar);
         userCommandService.save(user);
 
-        String accessToken;
-        String refreshToken;
-
-        try {
-            logger.debug("Генерируем токены для: {}", user.getName());
-            accessToken = jwtIssuer.issueAccessToken(user);
-            refreshToken = jwtIssuer.issueRefreshToken(user);
-        } catch (JOSEException e) {
-            throw new ServletException("Ошибка генерации JWT", e);
-        }
-
-        logger.debug("accessToken: {}", accessToken);
-        logger.debug("refreshToken: {}", refreshToken);
-
         String encodedRedirect = (String) request.getSession().getAttribute("redirectUrl");
         logger.debug("encodedRedirect: " + encodedRedirect);
 
@@ -125,9 +97,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
         RedirectData data = getRedirectPath(redirectUrl);
 
-        ResponseCookie cookie = setRefreshCookie(response, refreshToken);
-
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        cookiesService.setAuthCookies(response, user);
 
         String redirectQuery = "?redirect=" + URLEncoder.encode(data.pathAndQuery, StandardCharsets.UTF_8);
 
@@ -138,20 +108,6 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         }
     }   
 
-    private ResponseCookie setRefreshCookie(HttpServletResponse response, String refreshToken) {
-
-        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
-            .httpOnly(true)
-            .secure(cookieSecure)
-            .path("/")
-            .sameSite(cookieSameSite)
-            .domain(cookieDomain.isEmpty() ? null : cookieDomain)
-            .maxAge(Duration.ofDays(30))
-            .build();
-
-        return cookie;
-    }
-
     private String decodeRedirect(String encodedRedirect, String redirectUrl) {
 
         if (encodedRedirect != null && !encodedRedirect.isEmpty()) {
@@ -160,7 +116,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
             byte[] decodedBytes = Base64.getUrlDecoder().decode(decodedState);
             redirectUrl = new String(decodedBytes, StandardCharsets.UTF_8);
 
-            logger.debug("redirectUrl: " + redirectUrl);
+            logger.debug("redirectUrl: {}", redirectUrl);
             
             return redirectUrl;
         }

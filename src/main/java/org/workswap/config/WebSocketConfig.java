@@ -10,6 +10,7 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.workswap.core.services.components.security.AuthChannelInterceptor;
+import org.workswap.core.services.components.security.AuthHandshakeInterceptor;
 
 import lombok.RequiredArgsConstructor;
 
@@ -21,11 +22,13 @@ import java.util.List;
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final AuthChannelInterceptor authChannelInterceptor;
+    private final AuthHandshakeInterceptor authHandshakeInterceptor;
 
     @Override
     public void registerStompEndpoints(@NonNull StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("*");
+                .setAllowedOriginPatterns("*")
+                .addInterceptors(authHandshakeInterceptor);
     }
 
     @Override
@@ -45,52 +48,4 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void configureClientInboundChannel(@NonNull ChannelRegistration registration) {
         registration.interceptors(authChannelInterceptor);
     }
-
-    /* private class JwtHandshakeHandler extends DefaultHandshakeHandler {
-
-        private static final Logger logger = LoggerFactory.getLogger(WebSocketConfig.class);
-        
-        @Override
-        protected Principal determineUser(
-                @NonNull ServerHttpRequest request,
-                @NonNull WebSocketHandler wsHandler,
-                @NonNull Map<String, Object> attributes
-        ) {
-            List<String> authHeaders = request.getHeaders().get("Authorization");
-            logger.debug("authHeaders: {}", authHeaders);
-            if (authHeaders == null || authHeaders.isEmpty()) return null;
-
-            String bearer = authHeaders.get(0);
-            logger.debug("bearer: {}", bearer);
-            if (!bearer.startsWith("Bearer ")) return null;
-
-            String token = bearer.substring(7);
-            String email = jwtService.validateAndGetEmail(token);
-            return () -> email;
-        }
-
-        /* private String extractTokenFromUri(String uri) {
-            // Простая реализация — достаём параметр из URL
-            try {
-                Map<String, String> params = splitQuery(new URI(uri));
-                return params.get("access_token");
-            } catch (URISyntaxException e) {
-                return null;
-            }
-        }
-
-        private Map<String, String> splitQuery(URI uri) {
-            Map<String, String> params = new LinkedHashMap<>();
-            String query = uri.getQuery();
-            if (query != null) {
-                for (String param : query.split("&")) {
-                    String[] pair = param.split("=");
-                    if (pair.length == 2) {
-                        params.put(pair[0], URLDecoder.decode(pair[1], StandardCharsets.UTF_8));
-                    }
-                }
-            }
-            return params;
-        }
-    } */
 }

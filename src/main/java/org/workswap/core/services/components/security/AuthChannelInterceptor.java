@@ -1,8 +1,10 @@
 package org.workswap.core.services.components.security;
 
+import java.util.Collection;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.lang.NonNull;
@@ -13,42 +15,63 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
+
+import lombok.RequiredArgsConstructor;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 99)
+@RequiredArgsConstructor
 public class AuthChannelInterceptor implements ChannelInterceptor {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(AuthChannelInterceptor.class);
-    
-    @Autowired
-    private JwtService jwtService;
-    
+
+    private final JwtService jwtService;
+
     @Override
     public Message<?> preSend(@NonNull Message<?> message, @NonNull MessageChannel channel) {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-        
+
         if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
-            // Токен приходит в STOMP заголовках, НЕ в HTTP заголовках
-            String authHeader = accessor.getFirstNativeHeader("Authorization");
-            logger.debug("STOMP Authorization header: {}", authHeader != null ? "present" : "null");
+
+            Map<String, Object> sessionAttributes = accessor.getSessionAttributes();
+
+            if (sessionAttributes == null) {
+                logger.error("No session attributes in WebSocket CONNECT");
+                throw new MessagingException("Missing session attributes");
+            }
             
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                String token = authHeader.substring(7);
-                try {
-                    String email = jwtService.validateAndGetEmail(token);
-                    accessor.setUser(() -> email);
-                    logger.debug("STOMP user authenticated: {}", email);
-                } catch (Exception e) {
-                    logger.error("STOMP token validation failed: {}", e.getMessage());
-                    throw new MessagingException("Invalid token");
+            String token = (String) sessionAttributes.get("accessToken");
+
+            if (token == null) {
+                logger.debug("No accessToken in WebSocket handshake");
+                throw new MessagingException("Missing access token");
+            }
+
+            try {
+                String email = jwtService.validateAndGetEmail(token);
+                if (email == null) {
+                    throw new MessagingException("Invalid or expired token");
                 }
-            } else {
-                logger.debug("No Authorization header in STOMP CONNECT");
-                throw new MessagingException("Missing Authorization header");
+
+                Collection<GrantedAuthority> authorities = jwtService.getAuthorities(token);
+
+                Authentication authentication =
+                    new UsernamePasswordAuthenticationToken(email, null, authorities);
+
+                accessor.setUser(authentication);
+
+                logger.debug("STOMP user authenticated: {}", email);
+
+            } catch (Exception e) {
+                logger.error("STOMP token validation failed: {}", e.getMessage());
+                throw new MessagingException("Invalid token");
             }
         }
-        
+
         return message;
     }
 }
