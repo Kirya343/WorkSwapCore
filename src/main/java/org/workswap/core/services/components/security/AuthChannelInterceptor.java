@@ -18,6 +18,8 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
@@ -64,7 +66,11 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
 
                 accessor.setUser(authentication);
 
-                logger.debug("STOMP user authenticated: {}", email);
+                SecurityContext context = SecurityContextHolder.createEmptyContext();
+                context.setAuthentication(authentication);
+                SecurityContextHolder.setContext(context);
+
+                logger.debug("STOMP user authenticated: {}", context);
 
             } catch (Exception e) {
                 logger.error("STOMP token validation failed: {}", e.getMessage());

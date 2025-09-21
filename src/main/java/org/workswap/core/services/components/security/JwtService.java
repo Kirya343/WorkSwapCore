@@ -11,14 +11,17 @@ import com.nimbusds.jose.jwk.RSAKey;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -83,6 +86,34 @@ public class JwtService {
         }
 
         return authorities;
+    }
+
+    public Jwt parseToSpringJwt(String token) throws Exception {
+        SignedJWT signedJWT = SignedJWT.parse(token);
+
+        RSASSAVerifier verifier = new RSASSAVerifier(rsaKey.toRSAPublicKey());
+        if (!signedJWT.verify(verifier)) {
+            throw new SecurityException("JWT signature validation failed");
+        }
+
+        JWTClaimsSet claims = signedJWT.getJWTClaimsSet();
+
+        Date expiration = claims.getExpirationTime();
+        if (expiration == null || expiration.before(new Date())) {
+            throw new SecurityException("JWT is expired");
+        }
+
+        // Переносим claims в Map
+        Map<String, Object> claimsMap = claims.getClaims();
+
+        // Создаём Jwt (Spring Security объект)
+        return new Jwt(
+                token,
+                claims.getIssueTime() != null ? claims.getIssueTime().toInstant() : Instant.now(),
+                claims.getExpirationTime() != null ? claims.getExpirationTime().toInstant() : Instant.now().plusSeconds(60),
+                Map.of("alg", signedJWT.getHeader().getAlgorithm().getName()),
+                claimsMap
+        );
     }
 
     public String validateAndGetEmail(String token) {

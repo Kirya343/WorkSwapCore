@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.NonNull;
@@ -22,6 +24,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class JwtTokenConverter implements Converter<Jwt, AbstractAuthenticationToken> {
 
+    private static final Logger logger = LoggerFactory.getLogger(JwtTokenConverter.class);
+
     private final UserRepository userRepository;
 
     @Override
@@ -38,8 +42,12 @@ public class JwtTokenConverter implements Converter<Jwt, AbstractAuthenticationT
         if (perms != null) {
             perms.forEach(perm -> authorities.add(new SimpleGrantedAuthority(perm)));
         }
+
+        logger.debug("email: {}", jwt.getSubject());
         
         User user = userRepository.findByEmail(jwt.getSubject()).orElse(null);
+
+        logger.debug("userName: {}", user.getName());
 
         return new UserJwtAuthenticationToken(jwt, authorities, user);
     }

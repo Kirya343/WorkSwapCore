@@ -11,6 +11,7 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.workswap.core.services.components.security.AuthChannelInterceptor;
 import org.workswap.core.services.components.security.AuthHandshakeInterceptor;
+import org.springframework.security.messaging.context.SecurityContextChannelInterceptor;
 
 import lombok.RequiredArgsConstructor;
 
@@ -46,6 +47,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureClientInboundChannel(@NonNull ChannelRegistration registration) {
-        registration.interceptors(authChannelInterceptor);
+        registration.interceptors(
+            authChannelInterceptor, // твой
+            new SecurityContextChannelInterceptor() // важный interceptor!
+        );
     }
 }
