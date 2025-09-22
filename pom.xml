@@ -6,7 +6,7 @@
 
     <groupId>org.workswap</groupId>
     <artifactId>workswap-core</artifactId>
-    <version>1.4.7</version>
+    <version>1.4.8</version>
 
     <distributionManagement>
         <repository>

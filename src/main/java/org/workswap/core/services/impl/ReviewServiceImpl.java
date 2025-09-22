@@ -79,13 +79,13 @@ public class ReviewServiceImpl implements ReviewService {
         // Получаем текущего пользователя
         User author = userQueryService.findUser(authorId.toString());
 
-        if (profileId != null) {
-            profile = userQueryService.findUser(profileId.toString());
-            alreadyReviewed = hasUserReviewedProfile(author, profile);
-        } else if (listingId != null) {
+        if (listingId != null) {
             listing = listingQueryService.findListing(listingId.toString());
             profile = listing.getAuthor();
             alreadyReviewed = hasUserReviewedListing(author, listing);
+        } else if (profileId != null) {
+            profile = userQueryService.findUser(profileId.toString());
+            alreadyReviewed = hasUserReviewedProfile(author, profile);
         } else {
             logger.debug("Не было ни профиля, ни объявления");
             return null;
