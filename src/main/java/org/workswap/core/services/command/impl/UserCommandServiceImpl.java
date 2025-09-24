@@ -14,6 +14,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.workswap.common.enums.UserStatus;
+import org.workswap.common.enums.UserType;
 import org.workswap.core.services.RoleService;
 import org.workswap.core.services.command.ListingCommandService;
 import org.workswap.core.services.command.UserCommandService;
@@ -85,6 +86,22 @@ public class UserCommandServiceImpl implements UserCommandService {
         user.setTermsAcceptanceDate(LocalDateTime.now());
 
         return save(user);
+    }
+
+    public User createTempUser() {
+
+        Set<Role> roles = new HashSet<>();
+        Role role = roleService.getRoleByName("TEMP_USER");
+
+        roles.add(role);
+
+        User user = new User(
+            UserStatus.TEMP,
+            UserType.TEMP,
+            roles
+        );
+
+        return userRepository.save(user);
     }
 
     @Transactional

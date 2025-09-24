@@ -43,9 +43,9 @@ public class JwtTokenConverter implements Converter<Jwt, AbstractAuthenticationT
             perms.forEach(perm -> authorities.add(new SimpleGrantedAuthority(perm)));
         }
 
-        logger.debug("email: {}", jwt.getSubject());
+        logger.debug("userId: {}", jwt.getSubject());
         
-        User user = userRepository.findByEmail(jwt.getSubject()).orElse(null);
+        User user = userRepository.findById(Long.valueOf(jwt.getSubject())).orElse(null);
 
         logger.debug("userName: {}", user.getName());
 

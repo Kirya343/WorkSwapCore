@@ -71,7 +71,7 @@ public class JwtIssuer {
 
         // Строим JWT
         JWTClaimsSet set = new JWTClaimsSet.Builder()
-                .subject(user.getEmail())
+                .subject(user.getId().toString())
                 .issueTime(Date.from(now))
                 .expirationTime(Date.from(now.plus(Duration.ofMinutes(30)))) // TTL 30 мин (для теста 3 минуты, вернуть на 30) 
                 .claim("roles", roles)
@@ -100,7 +100,7 @@ public class JwtIssuer {
         claims.put("email", user.getEmail());
 
         JWTClaimsSet set = new JWTClaimsSet.Builder()
-                .subject(user.getEmail())
+                .subject(user.getId().toString())
                 .issueTime(Date.from(now))
                 .expirationTime(Date.from(now.plus(Duration.ofDays(30)))) // TTL 30 дней
                 .claim("uid", claims.get("uid"))
