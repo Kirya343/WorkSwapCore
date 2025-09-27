@@ -24,7 +24,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-@Profile("production")
+@Profile({"production", "statistic"})
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;

@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-@Profile("production")
+@Profile({"production", "statistic"})
 public class ListingMappingServiceImpl implements ListingMappingService {
 
     private final ListingLocalizationService listingLocalizationService;

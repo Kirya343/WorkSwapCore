@@ -1,4 +1,4 @@
-package org.workswap.core.services.components.security.authentication;
+package org.workswap.core.services.security.authentication;
 
 import java.io.IOException;
 import java.net.URI;
@@ -18,29 +18,34 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.workswap.common.enums.UserStatus;
-import org.workswap.core.services.RoleService;
 import org.workswap.core.services.command.UserCommandService;
-import org.workswap.core.services.components.security.AuthCookiesService;
+import org.workswap.core.services.security.AuthCookiesService;
+import org.workswap.core.services.query.PermissionQueryService;
 import org.workswap.core.services.query.UserQueryService;
+import org.workswap.datasource.central.model.Listing;
 import org.workswap.datasource.central.model.User;
 import org.workswap.datasource.central.model.user.Role;
+import org.workswap.datasource.central.repository.UserRepository;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
-@Profile({"production", "backoffice"})
+@Profile("production")
 @Component
 @RequiredArgsConstructor
 public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(CustomOAuth2SuccessHandler.class);
 
+    private final UserRepository userRepository;
+
     private final UserQueryService userQueryService;
     private final UserCommandService userCommandService;
-    private final RoleService roleService;
+    private final PermissionQueryService permissionQueryService;
 
     private final AuthCookiesService cookiesService;
 
@@ -48,6 +53,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
     private String backofficeUrl;
     
     @Override
+    @Transactional
     public void onAuthenticationSuccess(
         HttpServletRequest request,
         HttpServletResponse response,
@@ -66,7 +72,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
             newUser = true;
 
             if (user == null) {
-                Role role = roleService.getRoleByName("USER");
+                Role role = permissionQueryService.findRole("USER");
 
                 Set<Role> roles = new HashSet<>();
 
@@ -84,6 +90,12 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         }
 
         user = userCommandService.save(user);
+
+        String tempUserId = request.getSession().getAttribute("tempUserId").toString();
+
+        Set<Listing> favotires = importTempUser(tempUserId, user);
+
+        user.getFavoriteListings().addAll(favotires);
 
         user.getSettings().setGoogleAvatar(googleAvatar);
         userCommandService.save(user);
@@ -106,7 +118,19 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         } else {
             response.sendRedirect(data.domain + "/register" + redirectQuery);
         }
-    }   
+    }
+
+    private Set<Listing> importTempUser(String tempUserId, User user) {
+        User tempUser = userQueryService.findUser(tempUserId);
+
+        Set<Listing> favorites = new HashSet<>();
+
+        favorites = tempUser.getFavoriteListings();
+
+        userRepository.deleteById(Long.valueOf(tempUserId));
+
+        return favorites;
+    }
 
     private String decodeRedirect(String encodedRedirect, String redirectUrl) {
 

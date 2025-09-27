@@ -12,7 +12,7 @@ public interface ListingCommandService {
     Listing saveAndReturn(Listing listing);
 
     void delete(Listing listing);
-    void clearStatSnapshots(Listing listing);
+    void clearListingStatSnapshots(Listing listing);
 
     void toggleFavorite(User user, Listing listing);
     void addListingToFavorite(User user, Listing listing);

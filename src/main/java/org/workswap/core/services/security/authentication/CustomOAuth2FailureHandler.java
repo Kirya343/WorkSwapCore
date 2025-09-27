@@ -1,4 +1,4 @@
-package org.workswap.core.services.components.security.authentication;
+package org.workswap.core.services.security.authentication;
 
 import java.io.IOException;
 import java.net.URI;
@@ -10,6 +10,7 @@ import java.util.Base64;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
+@Profile("production")
 public class CustomOAuth2FailureHandler implements AuthenticationFailureHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(CustomOAuth2FailureHandler.class);

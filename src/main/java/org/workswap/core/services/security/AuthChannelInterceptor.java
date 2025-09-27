@@ -1,10 +1,11 @@
-package org.workswap.core.services.components.security;
+package org.workswap.core.services.security;
 
 import java.util.Collection;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.lang.NonNull;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 
 @Component
+@Profile("production")
 @Order(Ordered.HIGHEST_PRECEDENCE + 99)
 @RequiredArgsConstructor
 public class AuthChannelInterceptor implements ChannelInterceptor {

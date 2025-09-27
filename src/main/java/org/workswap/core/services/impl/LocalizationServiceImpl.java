@@ -28,7 +28,7 @@ import org.workswap.core.objects.TranslationEntry;
 import org.workswap.core.services.LocalizationService;
 
 @Service
-@Profile("production")
+@Profile({"production", "statistic"})
 public class LocalizationServiceImpl implements LocalizationService {
 
     private static final Logger logger = LoggerFactory.getLogger(LocalizationService.class);

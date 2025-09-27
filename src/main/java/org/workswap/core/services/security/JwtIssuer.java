@@ -1,4 +1,4 @@
-package org.workswap.core.services.components.security;
+package org.workswap.core.services.security;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,7 @@ import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
 
 @Service
+@Profile("production")
 @RequiredArgsConstructor
 public class JwtIssuer {
     
@@ -71,7 +74,7 @@ public class JwtIssuer {
 
         // Строим JWT
         JWTClaimsSet set = new JWTClaimsSet.Builder()
-                .subject(user.getEmail())
+                .subject(user.getId().toString())
                 .issueTime(Date.from(now))
                 .expirationTime(Date.from(now.plus(Duration.ofMinutes(30)))) // TTL 30 мин (для теста 3 минуты, вернуть на 30) 
                 .claim("roles", roles)
@@ -100,7 +103,7 @@ public class JwtIssuer {
         claims.put("email", user.getEmail());
 
         JWTClaimsSet set = new JWTClaimsSet.Builder()
-                .subject(user.getEmail())
+                .subject(user.getId().toString())
                 .issueTime(Date.from(now))
                 .expirationTime(Date.from(now.plus(Duration.ofDays(30)))) // TTL 30 дней
                 .claim("uid", claims.get("uid"))

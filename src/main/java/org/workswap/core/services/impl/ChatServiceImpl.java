@@ -198,6 +198,7 @@ public class ChatServiceImpl implements ChatService {
     @Override
     @Transactional
     public void deleteChat(Chat chat) {
+        
         logger.debug("Начинаем удаление чата {}", chat.getId());
         List<Message> messages = chat.getMessages();
 

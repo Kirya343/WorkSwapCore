@@ -19,7 +19,7 @@ import org.workswap.datasource.central.repository.RoleRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
-@Profile("backoffice")
+@Profile({"production", "statistic"})
 @RequiredArgsConstructor
 public class PermissionQueryServiceImpl implements PermissionQueryService {
     

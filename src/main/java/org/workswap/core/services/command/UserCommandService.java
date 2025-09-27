@@ -12,6 +12,8 @@ public interface UserCommandService {
 
     User registerUser(User user);
 
+    User createTempUser();
+
     //универсальный метод удаления, работает и используется
     void deleteUser(User user);
     

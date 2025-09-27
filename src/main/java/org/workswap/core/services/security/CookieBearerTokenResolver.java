@@ -1,16 +1,15 @@
-package org.workswap.core.services.components.security;
+package org.workswap.core.services.security;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
 
+@RequiredArgsConstructor
 public class CookieBearerTokenResolver implements BearerTokenResolver {
 
     private final String cookieName;
-
-    public CookieBearerTokenResolver(String cookieName) {
-        this.cookieName = cookieName;
-    }
 
     @Override
     public String resolve(HttpServletRequest request) {

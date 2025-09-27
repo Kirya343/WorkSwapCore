@@ -1,4 +1,4 @@
-package org.workswap.core.services.components.security;
+package org.workswap.core.services.security;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,7 +20,7 @@ import org.workswap.datasource.central.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
 @Component
-@Profile({"production", "backoffice"})
+@Profile("production")
 @RequiredArgsConstructor
 public class JwtTokenConverter implements Converter<Jwt, AbstractAuthenticationToken> {
 
@@ -43,9 +43,9 @@ public class JwtTokenConverter implements Converter<Jwt, AbstractAuthenticationT
             perms.forEach(perm -> authorities.add(new SimpleGrantedAuthority(perm)));
         }
 
-        logger.debug("email: {}", jwt.getSubject());
+        logger.debug("userId: {}", jwt.getSubject());
         
-        User user = userRepository.findByEmail(jwt.getSubject()).orElse(null);
+        User user = userRepository.findById(Long.valueOf(jwt.getSubject())).orElse(null);
 
         logger.debug("userName: {}", user.getName());
 

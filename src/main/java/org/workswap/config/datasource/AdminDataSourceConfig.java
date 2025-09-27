@@ -24,7 +24,7 @@ import jakarta.persistence.EntityManagerFactory;
     entityManagerFactoryRef = "adminEntityManagerFactory",
     transactionManagerRef = "adminTransactionManager"
 )
-@Profile("backoffice")
+@Profile({"backoffice", "statistic"})
 public class AdminDataSourceConfig {
 
     @Bean

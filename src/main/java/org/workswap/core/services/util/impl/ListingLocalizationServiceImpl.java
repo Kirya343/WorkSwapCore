@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-@Profile("production")
+@Profile({"production", "statistic"})
 public class ListingLocalizationServiceImpl implements ListingLocalizationService {
 
     public List<Listing> localizeListings(List<Listing> listings, Locale locale) {

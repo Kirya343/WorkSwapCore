@@ -24,15 +24,21 @@ public class UserMappingServiceImpl implements UserMappingService {
         if (user == null) return null;
 
         UserSettings settings = user.getSettings();
+        boolean phoneVisible = false;
+        boolean emailVisible = false;
+        if (settings != null) {
+            phoneVisible = settings.isPhoneVisible();
+            emailVisible = settings.isEmailVisible();
+        }
         
         List<String> roles = user.getRoles().stream().map(role -> role.getName()).toList();
                               
         UserDTO dto = new UserDTO(
             user.getId(), 
-            user.getSub(), 
+            user.getType().toString(), 
             user.getName(), 
-            settings.isPhoneVisible() ? user.getPhone() : null, 
-            settings.isEmailVisible() ? user.getEmail() : null, 
+            phoneVisible ? user.getPhone() : null, 
+            emailVisible ? user.getEmail() : null, 
             user.getBio(), 
             user.getAvatarUrl(),
             user.getLanguages(),
@@ -59,6 +65,7 @@ public class UserMappingServiceImpl implements UserMappingService {
 
         FullUserDTO dto = new FullUserDTO(
             user.getId(),
+            user.getType().toString(),
             user.getSub(),
             user.getName(),
             user.getPhone(),
