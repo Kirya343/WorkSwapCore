@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-@Profile("production")
+@Profile({"production", "statistic"})
 public class UserQueryServiceImpl implements UserQueryService {
 
     private final UserRepository userRepository;

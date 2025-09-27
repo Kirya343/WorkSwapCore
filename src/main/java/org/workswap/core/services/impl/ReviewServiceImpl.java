@@ -20,7 +20,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Profile("production")
+@Profile({"production", "statistic"})
 public class ReviewServiceImpl implements ReviewService {
 
     private static final Logger logger = LoggerFactory.getLogger(ReviewService.class);
@@ -109,10 +109,12 @@ public class ReviewServiceImpl implements ReviewService {
         // Создаем новый отзыв
         Review review = new Review(text, rating, author, listing, profile);
 
-        saveReview(review);
+        Review saved = saveReview(review);
 
         logger.debug("Отзыв сохранён");
-        return review;
+
+
+        return saved;
     }
 
     @Override

@@ -1,46 +1,40 @@
-package org.workswap.core.services.impl;
+package org.workswap.core.services.command.impl;
 
-import java.text.NumberFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Sort;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.workswap.core.services.ReviewService;
+import org.workswap.core.services.command.ListingCommandService;
+import org.workswap.core.services.command.StatisticCommandService;
+import org.workswap.core.services.command.UserCommandService;
+import org.workswap.core.services.query.ListingQueryService;
 import org.workswap.datasource.central.model.Listing;
 import org.workswap.datasource.central.model.Review;
 import org.workswap.datasource.central.model.User;
-import org.workswap.datasource.central.repository.listing.ListingRepository;
-import org.workswap.datasource.central.repository.ResumeRepository;
 import org.workswap.datasource.central.repository.ReviewRepository;
-import org.workswap.datasource.central.repository.UserRepository;
+import org.workswap.datasource.central.repository.listing.ListingRepository;
 import org.workswap.datasource.stats.model.StatSnapshot;
 import org.workswap.datasource.stats.model.StatSnapshot.IntervalType;
 import org.workswap.datasource.stats.repository.StatsRepository;
-import org.workswap.core.services.ReviewService;
-import org.workswap.core.services.StatService;
-import org.workswap.core.services.command.ListingCommandService;
-import org.workswap.core.services.command.UserCommandService;
-import org.workswap.core.services.query.ListingQueryService;
-import org.springframework.transaction.annotation.Transactional;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
+@Profile({"production", "statistic"})
 @RequiredArgsConstructor
-@Profile("production")
-public class StatServiceImpl implements StatService {
-
-    private final UserRepository userRepository;
+public class StatisticCommandServiceImpl implements StatisticCommandService {
+    
     private final ListingRepository listingRepository;
-    private final ResumeRepository resumeRepository;
     private final StatsRepository statsRepository;
     private final ReviewRepository reviewRepository;
     
@@ -49,102 +43,10 @@ public class StatServiceImpl implements StatService {
     private final ReviewService reviewService;
     private final UserCommandService userCommandService;
 
-    private static final Logger logger = LoggerFactory.getLogger(StatService.class);
+    private static final Logger logger = LoggerFactory.getLogger(StatisticCommandService.class);
 
-    @Override
-    public int getTotalViews(User user) {
-        return user.getListings().stream()
-                .mapToInt(Listing::getViews)
-                .sum();
-    }
-
-    @Override
-    public double getUserRating(User user) {
-        updateRatingForUser(user);
-        return user.getRating();
-    }
-
-    @Override
-    public int getMonthlyListingStats(Long listingId, int daysBack, String metric) {
-        LocalDateTime dateEnd = LocalDateTime.now().minusDays(daysBack);
-        LocalDateTime dateStart = LocalDateTime.now().minusDays(30 + daysBack);
-
-        return countStats(listingId, dateStart, dateEnd, metric);
-    }
-
-    @Override
-    public Map<String, Object> getSiteStats(Locale locale) {
-        Map<String, Object> stats = new HashMap<>();
-
-        // Получаем реальные данные из репозиториев
-        long usersCount = userRepository.count();
-        long resumesCount = resumeRepository.countByPublishedTrue();
-        long activeListingsCount = listingRepository.findListByActiveTrue().size();
-        long totalViews = listingRepository.findAll().stream()
-                .mapToInt(Listing::getViews)
-                .sum();
-
-        // Форматируем числа в зависимости от локали
-        NumberFormat numberFormat = NumberFormat.getInstance(locale);
-
-        stats.put("usersCount", numberFormat.format(usersCount));
-        stats.put("listingsCount", numberFormat.format(activeListingsCount));
-        stats.put("viewsCount", numberFormat.format(totalViews));
-        stats.put("resumesCount", numberFormat.format(resumesCount));
-
-        // Пока используем фиктивные данные для сделок
-        stats.put("dealsCount", "2,000+");
-
-        return stats;
-    }
-
-    @Override
-    public Map<String, Object> getUserStats(User user, Locale locale) {
-        Map<String, Object> stats = new HashMap<>();
-
-        // Получаем статистику пользователя
-        int totalViews = getTotalViews(user);
-        int totalResponses = 0;
-        int completedDeals = 0;
-
-        // Форматируем числа в зависимости от локали
-        NumberFormat numberFormat = NumberFormat.getInstance(locale);
-
-        stats.put("totalViews", numberFormat.format(totalViews));
-        stats.put("totalResponses", numberFormat.format(totalResponses));
-        stats.put("completedDeals", numberFormat.format(completedDeals));
-
-        return stats;
-    }
-
-    @Override
-    @Scheduled(fixedRate = 5 * 60 * 1000) // 5 минут (5 * 60 * 1000)
-    public void create5minStatSnapshot() {
-        saveStat(IntervalType.FIVE_MINUTES);
-    }
-
-    @Override
-    @Scheduled(fixedRate = 60 * 60 * 1000) // 5 минут (5 * 60 * 1000)
-    public void createHourStatSnapshot() {
-        saveStat(IntervalType.HOURLY);
-    }
-
-    @Override
-    @Scheduled(cron = "0 0 0 * * *", zone = "Europe/Helsinki")
-    public void createDayStatSnapshot() {
-        saveStat(IntervalType.DAILY);
-    }
-
-    @Override
-    @Scheduled(cron = "0 0 0 * * SUN", zone = "Europe/Helsinki")
-    public void createWeekStatSnapshot() {
-        saveStat(IntervalType.WEEKLY);
-    }
-
-    @Override
     @Transactional
-    @Scheduled(cron = "0 0 3 * * *")
-    public void cleanUpDuplicateSnapshots() {
+    public void cleanUpDuplicateListingsStat() {
         List<StatSnapshot> allSnapshots = statsRepository.findAll(Sort.by("listingId", "intervalType", "time"));
 
         logger.debug("Найдено снапшотов: {}", allSnapshots.size());
@@ -172,7 +74,7 @@ public class StatServiceImpl implements StatService {
     }
 
     @Transactional
-    private void saveStat(IntervalType intervalType) {
+    public void saveListingsStat(IntervalType intervalType) {
         Duration checkWindow;
 
         // Устанавливаем окно времени для каждого интервала
@@ -203,28 +105,6 @@ public class StatServiceImpl implements StatService {
         }
     }
 
-    private int countStats(Long listingId, LocalDateTime dateStart, LocalDateTime dateEnd, String metric) {
-        StatSnapshot statMin = statsRepository.findMinByMetric(listingId, dateStart, dateEnd, null, metric);
-        StatSnapshot statMax = statsRepository.findMaxByMetric(listingId, dateStart, dateEnd, null, metric);
-
-        if (statMin == null || statMax == null) {
-            return 0;
-        }
-
-        switch (metric) {
-            case "views":
-                return statMax.getViews() - statMin.getViews();
-            case "favorites":
-                return statMax.getFavorites() - statMin.getFavorites();
-            case "rating":
-                // Assuming rating is a double, you may want to return (int) or change return type
-                return (int) (statMax.getRating() - statMin.getRating());
-            default:
-                throw new IllegalArgumentException("Unknown metric: " + metric);
-        }
-    }
-
-    @Override
     public double calculateAverageRatingForListing(Long listingId) {
         List<Review> reviews = reviewRepository.findByListingIdOrderByCreatedAtDesc(listingId);
 
@@ -240,7 +120,6 @@ public class StatServiceImpl implements StatService {
         return totalRating / reviews.size();  // Средний рейтинг
     }
 
-    @Override
     public double calculateAverageRatingForUser(User user) {
         List<Listing> listings = listingQueryService.findListingsByUser(user);  // Получаем все объявления пользователя
 
@@ -277,7 +156,6 @@ public class StatServiceImpl implements StatService {
         }
     }
 
-    @Override
     public void updateRatingForListing(Listing listing) {
         double newListingRating = calculateAverageRatingForListing(listing.getId());
         listing.setRating(newListingRating);
@@ -286,7 +164,6 @@ public class StatServiceImpl implements StatService {
         updateRatingForUser(listing.getAuthor());
     }
 
-    @Override
     public void updateRatingForUser(User user) {
         double newUserRating = calculateAverageRatingForUser(user);
         user.setRating(newUserRating);

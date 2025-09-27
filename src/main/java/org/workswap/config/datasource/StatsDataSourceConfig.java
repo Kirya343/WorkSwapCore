@@ -24,7 +24,7 @@ import jakarta.persistence.EntityManagerFactory;
     entityManagerFactoryRef = "statsEntityManagerFactory",
     transactionManagerRef = "statsTransactionManager"
 )
-@Profile("production")
+@Profile({"production", "statistic"})
 public class StatsDataSourceConfig {
     @Bean
     @ConfigurationProperties("spring.statistics-datasource")

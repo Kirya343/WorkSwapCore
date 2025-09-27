@@ -32,7 +32,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-@Profile("production")
+@Profile({"production", "statistic"})
 public class ListingCommandServiceImpl implements ListingCommandService {
 
     private static final Logger logger = LoggerFactory.getLogger(ListingCommandService.class);

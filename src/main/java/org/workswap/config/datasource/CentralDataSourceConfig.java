@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
     entityManagerFactoryRef = "centralEntityManagerFactory",
     transactionManagerRef = "centralTransactionManager"
 )
-@Profile("production")
+@Profile({"production", "statistic"})
 public class CentralDataSourceConfig {
 
     @Primary

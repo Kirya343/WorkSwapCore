@@ -15,10 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.workswap.common.enums.UserStatus;
 import org.workswap.common.enums.UserType;
-import org.workswap.core.services.RoleService;
 import org.workswap.core.services.command.ListingCommandService;
 import org.workswap.core.services.command.UserCommandService;
-import org.workswap.core.services.impl.ChatServiceImpl;
+import org.workswap.core.services.query.PermissionQueryService;
 import org.workswap.core.services.query.UserQueryService;
 import org.workswap.datasource.central.model.Listing;
 import org.workswap.datasource.central.model.Notification;
@@ -33,19 +32,20 @@ import org.workswap.datasource.central.repository.LocationRepository;
 import org.workswap.datasource.central.repository.NotificationRepository;
 import org.workswap.datasource.central.repository.ReviewRepository;
 import org.workswap.datasource.central.repository.UserRepository;
+import org.workswap.datasource.central.repository.chat.ChatRepository;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-@Profile("production")
+@Profile({"production", "statistic"})
 public class UserCommandServiceImpl implements UserCommandService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserCommandService.class);
 
     private final UserQueryService queryService;
-    private final RoleService roleService;
-    private final ChatServiceImpl chatService;
+    private final PermissionQueryService permissionQueryService;
+    private final ChatRepository chatRepository;
     private final ListingCommandService listingCommandService;
 
     private final ReviewRepository reviewRepository;
@@ -63,7 +63,7 @@ public class UserCommandServiceImpl implements UserCommandService {
             throw new RuntimeException("Пользователь с таким email уже зарегистрирован.");
         }
 
-        Role role = roleService.getRoleByName("USER");
+        Role role = permissionQueryService.findRole("USER");
 
         Set<Role> roles = new HashSet<>();
 
@@ -91,7 +91,7 @@ public class UserCommandServiceImpl implements UserCommandService {
     public User createTempUser() {
 
         Set<Role> roles = new HashSet<>();
-        Role role = roleService.getRoleByName("TEMP_USER");
+        Role role = permissionQueryService.findRole("TEMP_USER");
 
         roles.add(role);
 
@@ -123,7 +123,7 @@ public class UserCommandServiceImpl implements UserCommandService {
                     Chat chat = chatParticipant.getChat();
                     user.getChatParticipants().remove(chatParticipant);
                     logger.debug(">> Удаление чата {}", chat.getId());
-                    chatService.deleteChat(chat);
+                    chatRepository.delete(chat);
                 }
             } else {
                 logger.debug(">> У пользователя не найдено чатов");

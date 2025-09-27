@@ -1,4 +1,4 @@
-package org.workswap.core.services.components.security;
+package org.workswap.core.services.security;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,7 +20,7 @@ import org.workswap.datasource.central.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
 @Component
-@Profile({"production", "backoffice"})
+@Profile("production")
 @RequiredArgsConstructor
 public class JwtTokenConverter implements Converter<Jwt, AbstractAuthenticationToken> {
 

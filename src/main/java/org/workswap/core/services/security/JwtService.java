@@ -1,4 +1,4 @@
-package org.workswap.core.services.components.security;
+package org.workswap.core.services.security;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 
 import com.nimbusds.jose.jwk.RSAKey;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@Profile("production")
 @RequiredArgsConstructor
 public class JwtService {
 

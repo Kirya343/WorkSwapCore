@@ -1,4 +1,4 @@
-package org.workswap.core.services.components.security;
+package org.workswap.core.services.security;
 
 import java.util.Collection;
 

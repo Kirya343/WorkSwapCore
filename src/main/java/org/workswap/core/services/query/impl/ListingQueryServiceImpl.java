@@ -36,7 +36,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-@Profile("production")
+@Profile({"production", "statistic"})
 public class ListingQueryServiceImpl implements ListingQueryService {
 
     private static final Logger logger = LoggerFactory.getLogger(ListingQueryService.class);
