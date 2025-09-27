@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.workswap.common.enums.IntervalType;
 import org.workswap.core.services.ReviewService;
 import org.workswap.core.services.command.ListingCommandService;
 import org.workswap.core.services.command.StatisticCommandService;
@@ -23,9 +24,10 @@ import org.workswap.datasource.central.model.Review;
 import org.workswap.datasource.central.model.User;
 import org.workswap.datasource.central.repository.ReviewRepository;
 import org.workswap.datasource.central.repository.listing.ListingRepository;
-import org.workswap.datasource.stats.model.StatSnapshot;
-import org.workswap.datasource.stats.model.StatSnapshot.IntervalType;
-import org.workswap.datasource.stats.repository.StatsRepository;
+import org.workswap.datasource.stats.model.ListingStatSnapshot;
+import org.workswap.datasource.stats.model.ListingView;
+import org.workswap.datasource.stats.repository.ListingStatRepository;
+import org.workswap.datasource.stats.repository.ListingViewRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -35,8 +37,9 @@ import lombok.RequiredArgsConstructor;
 public class StatisticCommandServiceImpl implements StatisticCommandService {
     
     private final ListingRepository listingRepository;
-    private final StatsRepository statsRepository;
+    private final ListingStatRepository listingStatRepository;
     private final ReviewRepository reviewRepository;
+    private final ListingViewRepository listingViewRepository;
     
     private final ListingQueryService listingQueryService;
     private final ListingCommandService listingCommandService;
@@ -47,14 +50,14 @@ public class StatisticCommandServiceImpl implements StatisticCommandService {
 
     @Transactional
     public void cleanUpDuplicateListingsStat() {
-        List<StatSnapshot> allSnapshots = statsRepository.findAll(Sort.by("listingId", "intervalType", "time"));
+        List<ListingStatSnapshot> allSnapshots = listingStatRepository.findAll(Sort.by("listingId", "intervalType", "time"));
 
         logger.debug("Найдено снапшотов: {}", allSnapshots.size());
 
-        Map<String, StatSnapshot> seenSnapshots = new HashMap<>();
-        List<StatSnapshot> toDelete = new ArrayList<>();
+        Map<String, ListingStatSnapshot> seenSnapshots = new HashMap<>();
+        List<ListingStatSnapshot> toDelete = new ArrayList<>();
 
-        for (StatSnapshot snapshot : allSnapshots) {
+        for (ListingStatSnapshot snapshot : allSnapshots) {
             String key = snapshot.getListingId() + "-" +
                          snapshot.getViews() + "-" +
                          snapshot.getFavorites() + "-" +
@@ -69,7 +72,7 @@ public class StatisticCommandServiceImpl implements StatisticCommandService {
             }
         }
 
-        statsRepository.deleteAll(toDelete);
+        listingStatRepository.deleteAll(toDelete);
         logger.debug("Удалено {} дубликатов статистики.", toDelete.size());
     }
 
@@ -90,18 +93,20 @@ public class StatisticCommandServiceImpl implements StatisticCommandService {
         List<Listing> listings = listingRepository.findAll();
 
         for (Listing listing : listings) {
-            long count = statsRepository.countRecentSnapshots(listing.getId(), intervalType, since);
+            long count = listingStatRepository.countRecentSnapshots(listing.getId(), intervalType, since);
             if (count > 0) {
                 continue; // уже есть снапшот за этот период
             }
 
-            StatSnapshot stat = new StatSnapshot();
-            stat.setViews(listing.getViews());
-            stat.setRating(listing.getRating());
-            stat.setListingId(listing.getId());
-            stat.setFavorites(listingRepository.countFavoritesByListingId(listing.getId()));
-            stat.setIntervalType(intervalType);
-            statsRepository.save(stat);
+            ListingStatSnapshot stat = new ListingStatSnapshot(
+                listing.getId(),
+                listing.getViews(),
+                listingRepository.countFavoritesByListingId(listing.getId()),
+                listing.getRating(),
+                intervalType
+            );
+
+            listingStatRepository.save(stat);
         }
     }
 
@@ -168,5 +173,25 @@ public class StatisticCommandServiceImpl implements StatisticCommandService {
         double newUserRating = calculateAverageRatingForUser(user);
         user.setRating(newUserRating);
         userCommandService.save(user);
+    }
+
+    public void addListingView(Long userId, Long listingId) {
+        boolean alreadyExists = true;
+        if (userId != null && listingId != null) {
+            System.out.println("Айди объявления: " + listingId);
+            System.out.println("Айди пользователя: " + userId);
+            alreadyExists = listingViewRepository.existsByUserIdAndListingId(userId, listingId);
+
+            System.out.println("Просмотр уже существует? " + alreadyExists);
+
+            if (alreadyExists == false) {
+                ListingView newView = new ListingView(userId, listingId);
+                listingViewRepository.save(newView);
+                Listing listing = listingQueryService.findListing(listingId.toString());
+                int views = listing.getViews();
+                listing.setViews(views + 1);
+                listingRepository.save(listing);
+            }
+        }
     }
 }

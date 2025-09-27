@@ -14,8 +14,8 @@ import org.workswap.datasource.central.model.User;
 import org.workswap.datasource.central.repository.ResumeRepository;
 import org.workswap.datasource.central.repository.UserRepository;
 import org.workswap.datasource.central.repository.listing.ListingRepository;
-import org.workswap.datasource.stats.model.StatSnapshot;
-import org.workswap.datasource.stats.repository.StatsRepository;
+import org.workswap.datasource.stats.model.ListingStatSnapshot;
+import org.workswap.datasource.stats.repository.ListingStatRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,7 +24,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class StatisticQueryServiceImpl implements StatisticQueryService {
 
-    private final StatsRepository statsRepository;
+    private final ListingStatRepository listingStatRepository;
     private final UserRepository userRepository;
     private final ListingRepository listingRepository;
     private final ResumeRepository resumeRepository;
@@ -86,8 +86,8 @@ public class StatisticQueryServiceImpl implements StatisticQueryService {
     }
 
     private int countStats(Long listingId, LocalDateTime dateStart, LocalDateTime dateEnd, String metric) {
-        StatSnapshot statMin = statsRepository.findMinByMetric(listingId, dateStart, dateEnd, null, metric);
-        StatSnapshot statMax = statsRepository.findMaxByMetric(listingId, dateStart, dateEnd, null, metric);
+        ListingStatSnapshot statMin = listingStatRepository.findMinByMetric(listingId, dateStart, dateEnd, null, metric);
+        ListingStatSnapshot statMax = listingStatRepository.findMaxByMetric(listingId, dateStart, dateEnd, null, metric);
 
         if (statMin == null || statMax == null) {
             return 0;

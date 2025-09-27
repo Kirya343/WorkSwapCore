@@ -1,8 +1,8 @@
 package org.workswap.core.services.command;
 
+import org.workswap.common.enums.IntervalType;
 import org.workswap.datasource.central.model.Listing;
 import org.workswap.datasource.central.model.User;
-import org.workswap.datasource.stats.model.StatSnapshot.IntervalType;
 
 public interface StatisticCommandService {
     
@@ -15,4 +15,6 @@ public interface StatisticCommandService {
     void cleanUpDuplicateListingsStat();
 
     void saveListingsStat(IntervalType intervalType);
+
+    void addListingView(Long listingId, Long userId);
 }

@@ -25,8 +25,8 @@ import org.workswap.datasource.central.repository.listing.ListingRepository;
 import org.workswap.datasource.central.repository.LocationRepository;
 import org.workswap.datasource.central.repository.UserRepository;
 import org.workswap.datasource.central.repository.chat.ChatRepository;
-import org.workswap.datasource.stats.model.StatSnapshot;
-import org.workswap.datasource.stats.repository.StatsRepository;
+import org.workswap.datasource.stats.model.ListingStatSnapshot;
+import org.workswap.datasource.stats.repository.ListingStatRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -39,7 +39,7 @@ public class ListingCommandServiceImpl implements ListingCommandService {
 
     private final ListingRepository listingRepository;
     private final ChatRepository chatRepository;
-    private final StatsRepository statsRepository;
+    private final ListingStatRepository listingStatRepository;
     private final UserRepository userRepository;
     private final LocationRepository locationRepository;
     private final CategoryRepository categoryRepository;
@@ -66,25 +66,25 @@ public class ListingCommandServiceImpl implements ListingCommandService {
         chatRepository.saveAll(chats);
 
         logger.debug("Чистим статистику объявления");
-        clearStatSnapshots(listing);
+        clearListingStatSnapshots(listing);
 
         logger.debug("Удаляем объявление");
         listingRepository.delete(listing);
     }
 
     @Transactional
-    public void clearStatSnapshots(Listing listing) {
+    public void clearListingStatSnapshots(Listing listing) {
         logger.debug("Чистим статистику объявления {}", listing.getId());
-        List<StatSnapshot> snapshots = statsRepository.findAllByListingId(listing.getId());
+        List<ListingStatSnapshot> snapshots = listingStatRepository.findAllByListingId(listing.getId());
 
         if (!snapshots.isEmpty()) {
             logger.debug("Чистим снапшоты batch-ом");
             // Получаем ID для batch удаления
             List<Long> snapshotIds = snapshots.stream()
-                    .map(StatSnapshot::getId)
+                    .map(ListingStatSnapshot::getId)
                     .toList();
             
-            statsRepository.deleteAllByIdInBatch(snapshotIds);
+            listingStatRepository.deleteAllByIdInBatch(snapshotIds);
         } else {
             logger.debug("У объявления не было снапшотов статистики");
         }
