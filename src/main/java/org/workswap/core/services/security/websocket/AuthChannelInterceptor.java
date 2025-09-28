@@ -2,6 +2,7 @@ package org.workswap.core.services.security.websocket;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +39,8 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
     private final JwtService jwtService;
     private final OnlineCounter onlineCounter;
 
+    private final Map<String, String> activeSessions = new ConcurrentHashMap<>();
+
     @Override
     public Message<?> preSend(@NonNull Message<?> message, @NonNull MessageChannel channel) {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
@@ -64,6 +67,13 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
                     throw new MessagingException("Invalid or expired token");
                 }
 
+                // 🔹 проверка на активную сессию
+                String existingSession = activeSessions.putIfAbsent(userId, accessor.getSessionId());
+                if (existingSession != null) {
+                    logger.warn("User {} already has an active session: {}", userId, existingSession);
+                    throw new MessagingException("Only one active connection is allowed");
+                }
+
                 Collection<GrantedAuthority> authorities = jwtService.getAuthorities(token);
 
                 Authentication authentication =
@@ -75,7 +85,10 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
                 context.setAuthentication(authentication);
                 SecurityContextHolder.setContext(context);
 
-                onlineCounter.increment();
+                if (sessionAttributes.get("onlineCounted") == null) {
+                    onlineCounter.increment();
+                    sessionAttributes.put("onlineCounted", true);
+                }
 
                 logger.debug("STOMP user authenticated: {}", context);
 
@@ -97,7 +110,11 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
         if (command != null) {
             switch (command) {
                 case DISCONNECT:
-                    onlineCounter.decrement();
+                    Map<String, Object> sessionAttributes = accessor.getSessionAttributes();
+                    if (sessionAttributes != null && Boolean.TRUE.equals(sessionAttributes.get("onlineCounted"))) {
+                        onlineCounter.decrement();
+                        sessionAttributes.remove("onlineCounted");
+                    }
                     break;
                 default:
                     break;
