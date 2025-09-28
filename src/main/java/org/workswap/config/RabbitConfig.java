@@ -16,6 +16,11 @@ public class RabbitConfig {
     }
 
     @Bean
+    public Queue onlineStatQueue() {
+        return new Queue("onlineStatQueue", true);
+    }
+
+    @Bean
     public Queue listingViewQueue() {
         return new Queue("listingViewQueue", true);
     }

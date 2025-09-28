@@ -123,12 +123,18 @@ public class JwtService {
         return (claims != null) ? Long.valueOf(claims.getSubject()) : null;
     }
 
+    public String validateAndGetUserIdStr(String token) {
+        JWTClaimsSet claims = validate(token);
+        return (claims != null) ? claims.getSubject() : null;
+    }
+
     public String validateAndGetEmail(String token) {
         JWTClaimsSet claims = validate(token);
         String email = null;
         try {
 
             email = claims.getStringClaim("email");
+            System.out.println("email: " + email);
 
         } catch(ParseException e) {
             System.out.println(e);

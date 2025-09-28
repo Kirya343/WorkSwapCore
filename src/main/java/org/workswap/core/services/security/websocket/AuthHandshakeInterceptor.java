@@ -1,4 +1,4 @@
-package org.workswap.core.services.security;
+package org.workswap.core.services.security.websocket;
 
 import java.util.Map;
 

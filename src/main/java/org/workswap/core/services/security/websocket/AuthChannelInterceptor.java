@@ -1,4 +1,4 @@
-package org.workswap.core.services.security;
+package org.workswap.core.services.security.websocket;
 
 import java.util.Collection;
 import java.util.Map;
@@ -22,6 +22,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.workswap.core.services.analytic.OnlineCounter;
+import org.workswap.core.services.security.JwtService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -34,6 +36,7 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
     private static final Logger logger = LoggerFactory.getLogger(AuthChannelInterceptor.class);
 
     private final JwtService jwtService;
+    private final OnlineCounter onlineCounter;
 
     @Override
     public Message<?> preSend(@NonNull Message<?> message, @NonNull MessageChannel channel) {
@@ -56,21 +59,23 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
             }
 
             try {
-                String email = jwtService.validateAndGetEmail(token);
-                if (email == null) {
+                String userId = jwtService.validateAndGetUserIdStr(token);
+                if (userId == null) {
                     throw new MessagingException("Invalid or expired token");
                 }
 
                 Collection<GrantedAuthority> authorities = jwtService.getAuthorities(token);
 
                 Authentication authentication =
-                    new UsernamePasswordAuthenticationToken(email, null, authorities);
+                    new UsernamePasswordAuthenticationToken(userId, null, authorities);
 
                 accessor.setUser(authentication);
 
                 SecurityContext context = SecurityContextHolder.createEmptyContext();
                 context.setAuthentication(authentication);
                 SecurityContextHolder.setContext(context);
+
+                onlineCounter.increment();
 
                 logger.debug("STOMP user authenticated: {}", context);
 
@@ -81,5 +86,22 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
         }
 
         return message;
+    }
+
+    @Override
+    public void postSend(@NonNull Message<?> message, @NonNull MessageChannel channel, boolean sent) {
+        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+
+        StompCommand command = accessor.getCommand();
+
+        if (command != null) {
+            switch (command) {
+                case DISCONNECT:
+                    onlineCounter.decrement();
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 }

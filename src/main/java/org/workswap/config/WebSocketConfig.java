@@ -10,8 +10,8 @@ import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
-import org.workswap.core.services.security.AuthChannelInterceptor;
-import org.workswap.core.services.security.AuthHandshakeInterceptor;
+import org.workswap.core.services.security.websocket.AuthChannelInterceptor;
+import org.workswap.core.services.security.websocket.AuthHandshakeInterceptor;
 import org.springframework.security.messaging.context.SecurityContextChannelInterceptor;
 
 import lombok.RequiredArgsConstructor;

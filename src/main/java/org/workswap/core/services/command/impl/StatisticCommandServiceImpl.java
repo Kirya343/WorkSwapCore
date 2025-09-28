@@ -26,8 +26,10 @@ import org.workswap.datasource.central.repository.ReviewRepository;
 import org.workswap.datasource.central.repository.listing.ListingRepository;
 import org.workswap.datasource.stats.model.ListingStatSnapshot;
 import org.workswap.datasource.stats.model.ListingView;
+import org.workswap.datasource.stats.model.OnlineStatSnapshot;
 import org.workswap.datasource.stats.repository.ListingStatRepository;
 import org.workswap.datasource.stats.repository.ListingViewRepository;
+import org.workswap.datasource.stats.repository.OnlineStatRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -40,6 +42,7 @@ public class StatisticCommandServiceImpl implements StatisticCommandService {
     private final ListingStatRepository listingStatRepository;
     private final ReviewRepository reviewRepository;
     private final ListingViewRepository listingViewRepository;
+    private final OnlineStatRepository onlineStatRepository;
     
     private final ListingQueryService listingQueryService;
     private final ListingCommandService listingCommandService;
@@ -193,5 +196,10 @@ public class StatisticCommandServiceImpl implements StatisticCommandService {
                 listingRepository.save(listing);
             }
         }
+    }
+
+    public void saveOnlineStatSnapshot(int online, LocalDateTime timestamp) {
+        OnlineStatSnapshot snapshot = new OnlineStatSnapshot(online, timestamp);
+        onlineStatRepository.save(snapshot);
     }
 }
