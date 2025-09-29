@@ -42,7 +42,7 @@
         <dependency>
             <groupId>org.workswap</groupId>
             <artifactId>workswap-datasource</artifactId>
-            <version>1.1.16</version>
+            <version>1.1.17</version>
         </dependency>
 
         <dependency>
