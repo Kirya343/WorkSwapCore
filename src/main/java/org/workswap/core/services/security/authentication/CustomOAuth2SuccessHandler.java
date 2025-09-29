@@ -123,9 +123,7 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
     private Set<Listing> importTempUser(String tempUserId, User user) {
         User tempUser = userQueryService.findUser(tempUserId);
 
-        Set<Listing> favorites = new HashSet<>();
-
-        favorites = tempUser.getFavoriteListings();
+        Set<Listing> favorites = new HashSet<>(tempUser.getFavoriteListings());
 
         userRepository.deleteById(Long.valueOf(tempUserId));
 

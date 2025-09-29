@@ -93,8 +93,8 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
                 logger.debug("STOMP user authenticated: {}", context);
 
             } catch (Exception e) {
-                logger.error("STOMP token validation failed: {}", e.getMessage());
-                throw new MessagingException("Invalid token");
+                logger.error("STOMP token validation failed", e);
+                throw new MessagingException(e.getMessage(), e);
             }
         }
 
@@ -111,11 +111,25 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
             switch (command) {
                 case DISCONNECT:
                     Map<String, Object> sessionAttributes = accessor.getSessionAttributes();
+
                     if (sessionAttributes != null && Boolean.TRUE.equals(sessionAttributes.get("onlineCounted"))) {
                         onlineCounter.decrement();
                         sessionAttributes.remove("onlineCounted");
                     }
+
+                    Authentication auth = (Authentication) accessor.getUser();
+                    if (auth != null) {
+                        String userId = (String) auth.getPrincipal();
+                        String sessionId = accessor.getSessionId();
+
+                        String existingSession = activeSessions.get(userId);
+                        if (existingSession != null && existingSession.equals(sessionId)) {
+                            activeSessions.remove(userId);
+                            logger.debug("Removed session {} for user {}", sessionId, userId);
+                        }
+                    }
                     break;
+                    
                 default:
                     break;
             }
