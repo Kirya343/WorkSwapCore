@@ -120,6 +120,7 @@ public class ListingCommandServiceImpl implements ListingCommandService {
         
         if (listing != null) {
             updates.forEach((key, value) -> {
+                logger.debug("Обновляем часть объявления: {}", key );
                 switch (key) {
                     case "translation":
                         updateListingTranslations(listing, (Map<String, Object>) value);
@@ -183,7 +184,12 @@ public class ListingCommandServiceImpl implements ListingCommandService {
 
             String title = (String) vMap.get("title");
             String description = (String) vMap.get("description");
-            newLanguages.add(lang);
+
+            if ((title != null && !title.isEmpty()) || (description != null && !description.isEmpty())) {
+                logger.debug("title {}: {}", lang, title);
+                logger.debug("title {}: {}", lang, description);
+                newLanguages.add(lang);
+            }
 
             if (currentTranslations.containsKey(lang)) {
                 // Обновляем существующий
@@ -201,8 +207,7 @@ public class ListingCommandServiceImpl implements ListingCommandService {
         currentTranslations.keySet().removeIf(lang -> !newLanguages.contains(lang));
 
         // Обновляем список языков
+        logger.debug("Сохраням переводы: {}", newLanguages);
         listing.setCommunities(new ArrayList<>(newLanguages));
-        
-        listingRepository.save(listing);
     }
 }

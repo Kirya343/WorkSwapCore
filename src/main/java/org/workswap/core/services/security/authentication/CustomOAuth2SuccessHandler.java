@@ -91,11 +91,15 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
         user = userCommandService.save(user);
 
-        String tempUserId = request.getSession().getAttribute("tempUserId").toString();
+        Object tempUserId = request.getSession().getAttribute("tempUserId");
 
-        Set<Listing> favotires = importTempUser(tempUserId, user);
+        if (tempUserId != null) {
 
-        user.getFavoriteListings().addAll(favotires);
+            String tempUserIdStr = tempUserId.toString();
+            Set<Listing> favotires = importTempUser(tempUserIdStr, user);
+
+            user.getFavoriteListings().addAll(favotires);
+        }
 
         user.getSettings().setGoogleAvatar(googleAvatar);
         userCommandService.save(user);
