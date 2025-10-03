@@ -20,6 +20,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.workswap.common.enums.UserStatus;
+import org.workswap.common.enums.UserType;
 import org.workswap.core.services.command.UserCommandService;
 import org.workswap.core.services.security.AuthCookiesService;
 import org.workswap.core.services.query.PermissionQueryService;
@@ -129,33 +130,38 @@ public class CustomOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
         Set<Listing> favorites = new HashSet<>(tempUser.getFavoriteListings());
 
-        userRepository.deleteById(Long.valueOf(tempUserId));
-
-        return favorites;
-    }
-
-    private String decodeRedirect(String encodedRedirect, String redirectUrl) {
-
-        if (encodedRedirect != null && !encodedRedirect.isEmpty()) {
-
-            String decodedState = URLDecoder.decode(encodedRedirect, StandardCharsets.UTF_8);
-            byte[] decodedBytes = Base64.getUrlDecoder().decode(decodedState);
-            redirectUrl = new String(decodedBytes, StandardCharsets.UTF_8);
-
-            logger.debug("redirectUrl: {}", redirectUrl);
-            
-            return redirectUrl;
+        if(tempUser.getType().equals(UserType.TEMP)) {
+            userRepository.deleteById(Long.valueOf(tempUserId));
+            return favorites;
         }
 
-        return null;
+        return new HashSet<>();
+    }
+
+    private String decodeRedirect(String encodedRedirect, String defaultRedirect) {
+
+        if (encodedRedirect != null && !encodedRedirect.isEmpty()) {
+            try {
+                String decodedState = URLDecoder.decode(encodedRedirect, StandardCharsets.UTF_8);
+                byte[] decodedBytes = Base64.getUrlDecoder().decode(decodedState);
+                String redirectUrl = new String(decodedBytes, StandardCharsets.UTF_8);
+
+                logger.debug("Decoded redirectUrl: {}", redirectUrl);
+                return redirectUrl;
+            } catch (IllegalArgumentException e) {
+                logger.warn("Failed to decode redirect, using default", e);
+            }
+        }
+
+        return defaultRedirect; // возвращаем безопасный дефолт
     }
 
     private RedirectData getRedirectPath(String redirectUrl) {
 
         RedirectData data = new RedirectData();
 
+        logger.debug("redirectUrl: {}", redirectUrl);
         try {
-            logger.debug("redirectUrl: {}", redirectUrl);
             URI uri = new URI(redirectUrl);
 
             logger.debug("uri: {}", uri);
