@@ -114,7 +114,10 @@ public class ListingCommandServiceImpl implements ListingCommandService {
     public void modifyListingParam(User user, Long id, Map<String, Object> updates) throws AccessDeniedException {
         Listing listing = listingRepository.findById(id).orElse(null);
 
-        if (listing.getAuthor().getId() != user.getId()) {
+        logger.debug("Айди автора объявления: {}", listing.getAuthor().getId());
+        logger.debug("Айди пользователя: {}", user.getId());
+
+        if (!listing.getAuthor().getId().equals(user.getId())) {
             throw new AccessDeniedException("Это не ваше объявление!");
         }
         

@@ -1,7 +1,7 @@
 package org.workswap.core.services.command;
 
-import java.time.LocalDateTime;
-
+import org.workswap.common.dto.stat.OnlineStatSnapshotDTO;
+import org.workswap.common.dto.stat.UsersStatSnapshotDTO;
 import org.workswap.common.enums.IntervalType;
 import org.workswap.datasource.central.model.Listing;
 import org.workswap.datasource.central.model.User;
@@ -20,5 +20,6 @@ public interface StatisticCommandService {
 
     void addListingView(Long listingId, Long userId);
 
-    void saveOnlineStatSnapshot(int online, LocalDateTime timestamp);
+    void saveOnlineStatSnapshot(OnlineStatSnapshotDTO dto);
+    void saveUsersStatSnapshot(UsersStatSnapshotDTO dto);
 }

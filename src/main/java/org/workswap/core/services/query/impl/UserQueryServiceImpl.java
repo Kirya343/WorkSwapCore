@@ -8,6 +8,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.workswap.common.enums.SearchModelParamType;
+import org.workswap.common.enums.UserType;
 import org.workswap.core.services.components.ServiceUtils;
 import org.workswap.core.services.query.UserQueryService;
 import org.workswap.datasource.central.model.User;
@@ -55,5 +56,13 @@ public class UserQueryServiceImpl implements UserQueryService {
 
     public List<User> getRecentUsers(int count) {
         return userRepository.findAllByOrderByCreatedAtDesc(PageRequest.of(0, count)).getContent();
+    }
+
+    public List<User> findAllStandartUsers() {
+        return userRepository.findByType(UserType.STANDART);
+    }
+
+    public int countByType(UserType type) {
+        return userRepository.countByType(type);
     }
 }

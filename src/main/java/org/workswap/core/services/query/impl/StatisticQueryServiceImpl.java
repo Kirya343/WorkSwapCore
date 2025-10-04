@@ -1,13 +1,18 @@
 package org.workswap.core.services.query.impl;
 
 import java.text.NumberFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.IntSummaryStatistics;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
+import org.workswap.common.dto.analytic.OnlineStatsMetricsDTO;
 import org.workswap.core.services.query.StatisticQueryService;
 import org.workswap.datasource.central.model.Listing;
 import org.workswap.datasource.central.model.User;
@@ -15,7 +20,9 @@ import org.workswap.datasource.central.repository.ResumeRepository;
 import org.workswap.datasource.central.repository.UserRepository;
 import org.workswap.datasource.central.repository.listing.ListingRepository;
 import org.workswap.datasource.stats.model.ListingStatSnapshot;
+import org.workswap.datasource.stats.model.OnlineStatSnapshot;
 import org.workswap.datasource.stats.repository.ListingStatRepository;
+import org.workswap.datasource.stats.repository.OnlineStatRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,6 +35,7 @@ public class StatisticQueryServiceImpl implements StatisticQueryService {
     private final UserRepository userRepository;
     private final ListingRepository listingRepository;
     private final ResumeRepository resumeRepository;
+    private final OnlineStatRepository onlineStatRepository;
    
     public int getTotalViews(User user) {
         return user.getListings().stream()
@@ -104,5 +112,93 @@ public class StatisticQueryServiceImpl implements StatisticQueryService {
             default:
                 throw new IllegalArgumentException("Unknown metric: " + metric);
         }
+    }
+
+    public int getLastOnlineSnapshot() {
+        OnlineStatSnapshot snapshot = onlineStatRepository.findFirstByOrderByTimestampDesc();
+        return snapshot.getOnline();
+    }
+
+    public OnlineStatsMetricsDTO getMonthlyMetrics() {
+        List<OnlineStatSnapshot> snapshots = onlineStatRepository.findByTimestampAfter(LocalDateTime.now().minusMonths(1));
+
+        if (snapshots.isEmpty()) {
+            return new OnlineStatsMetricsDTO(); // или кинуть exception
+        }
+
+        // Достаём список значений онлайна
+        List<Integer> values = snapshots.stream()
+                .map(OnlineStatSnapshot::getOnline)
+                .sorted()
+                .toList();
+
+        IntSummaryStatistics stats = values.stream()
+                .mapToInt(Integer::intValue)
+                .summaryStatistics();
+
+        int min = stats.getMin();
+        int max = stats.getMax();
+        double avg = stats.getAverage();
+
+        // Медиана
+        double median;
+        int size = values.size();
+        if (size % 2 == 0) {
+            median = (values.get(size / 2 - 1) + values.get(size / 2)) / 2.0;
+        } else {
+            median = values.get(size / 2);
+        }
+
+        // p95
+        int p95Index = (int) Math.ceil(0.95 * size) - 1;
+        double p95 = values.get(Math.max(p95Index, 0));
+
+        // Стандартное отклонение
+        double variance = values.stream()
+                .mapToDouble(v -> Math.pow(v - avg, 2))
+                .sum() / size;
+        double stdDev = Math.sqrt(variance);
+
+        // Сумма человеко-часов (онлайн * время)
+        // один снапшот = 15 секунд
+        int totalUserSeconds = values.stream()
+                .mapToInt(Integer::intValue)
+                .sum() * 15;
+        int totalUserHours = totalUserSeconds / 3600;
+
+        Map<LocalDate, Double> avgByDay = snapshots.stream()
+                .collect(Collectors.groupingBy(
+                        snap -> snap.getTimestamp().toLocalDate(),
+                        Collectors.averagingInt(OnlineStatSnapshot::getOnline)
+                ));
+
+        LocalDate peakDay = avgByDay.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse(null);
+
+        // 2. Час пика (по среднему за час суток)
+        Map<Integer, Double> avgByHour = snapshots.stream()
+                .collect(Collectors.groupingBy(
+                        snap -> snap.getTimestamp().getHour(),
+                        Collectors.averagingInt(OnlineStatSnapshot::getOnline)
+                ));
+
+        Integer peakHour = avgByHour.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse(null);
+
+        return new OnlineStatsMetricsDTO(
+                min,
+                max,
+                avg,
+                median,
+                p95,
+                stdDev,
+                totalUserHours,
+                peakDay,
+                peakHour
+        );
     }
 }

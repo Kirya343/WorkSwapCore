@@ -13,6 +13,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.workswap.common.dto.stat.OnlineStatSnapshotDTO;
+import org.workswap.common.dto.stat.UsersStatSnapshotDTO;
 import org.workswap.common.enums.IntervalType;
 import org.workswap.core.services.ReviewService;
 import org.workswap.core.services.command.ListingCommandService;
@@ -27,9 +29,11 @@ import org.workswap.datasource.central.repository.listing.ListingRepository;
 import org.workswap.datasource.stats.model.ListingStatSnapshot;
 import org.workswap.datasource.stats.model.ListingView;
 import org.workswap.datasource.stats.model.OnlineStatSnapshot;
+import org.workswap.datasource.stats.model.UsersStatSnapshot;
 import org.workswap.datasource.stats.repository.ListingStatRepository;
 import org.workswap.datasource.stats.repository.ListingViewRepository;
 import org.workswap.datasource.stats.repository.OnlineStatRepository;
+import org.workswap.datasource.stats.repository.UsersStatRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -43,7 +47,8 @@ public class StatisticCommandServiceImpl implements StatisticCommandService {
     private final ReviewRepository reviewRepository;
     private final ListingViewRepository listingViewRepository;
     private final OnlineStatRepository onlineStatRepository;
-    
+    private final UsersStatRepository usersStatRepository;
+
     private final ListingQueryService listingQueryService;
     private final ListingCommandService listingCommandService;
     private final ReviewService reviewService;
@@ -198,8 +203,18 @@ public class StatisticCommandServiceImpl implements StatisticCommandService {
         }
     }
 
-    public void saveOnlineStatSnapshot(int online, LocalDateTime timestamp) {
-        OnlineStatSnapshot snapshot = new OnlineStatSnapshot(online, timestamp);
+    public void saveOnlineStatSnapshot(OnlineStatSnapshotDTO dto) {
+        OnlineStatSnapshot snapshot = new OnlineStatSnapshot(
+            dto.getOnline(), 
+            dto.getTimestamp());
         onlineStatRepository.save(snapshot);
+    }
+
+    public void saveUsersStatSnapshot(UsersStatSnapshotDTO dto) {
+        UsersStatSnapshot snapshot = new UsersStatSnapshot(
+            dto.getStandartsUsers() + dto.getTempUsers(),
+            dto.getStandartsUsers(),
+            dto.getTimestamp());
+        usersStatRepository.save(snapshot);
     }
 }
